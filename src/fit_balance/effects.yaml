@@ -1,0 +1,29 @@
+# Garment technique -> visual effects it produces. A fact about the
+# technique, independent of who wears it (NOTES.md "Core architecture").
+# Only techniques used by the 5 worked examples in NOTES.md are defined so
+# far; extend as new worked examples are added.
+
+sheath_bodycon:
+  - clings_to_waist
+  - clings_to_hip
+
+belted_natural_waist:
+  - defines_waist
+
+drop_waist:
+  - elongates_torso
+  - shortens_leg
+
+empire_waistline:
+  - elongates_leg
+  - shortens_torso
+
+vertical_detail:
+  - reduces_bulk
+
+oversized_top:
+  - adds_volume_top
+  - adds_bulk
+
+skinny_straight:
+  - reduces_bulk
