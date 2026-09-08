@@ -5,7 +5,7 @@ change silently flipping a previously-correct verdict — becomes impossible
 to reintroduce unnoticed.
 """
 
-from fit_balance.balance_points import compute_womens_balance_points
+from fit_balance.balance_points import WomensBalancePoints, compute_womens_balance_points
 from fit_balance.schemas import GarmentAttributes
 from fit_balance.scoring import score
 from tests.fixtures import (
@@ -66,3 +66,27 @@ def test_clings_to_hip_is_a_known_fact_not_yet_scored():
     garment = GarmentAttributes(techniques=["sheath_bodycon"])
     verdict = score(bp, garment)
     assert all(r.tag != "clings_to_hip" for r in verdict.reasons)
+
+
+def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
+    """adds_volume_bottom (e.g. wide-leg trousers) is weighted opposite to
+    adds_volume_top on the same bust_hip_balance axis: bottom volume helps
+    balance a top-heavy build and works against an already bottom-heavy
+    (pear) one."""
+    top_heavy = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0.2,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    bottom_heavy = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=-0.2,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    garment = GarmentAttributes(techniques=["wide_leg"])
+    assert score(top_heavy, garment).score > 0
+    assert score(bottom_heavy, garment).score < 0

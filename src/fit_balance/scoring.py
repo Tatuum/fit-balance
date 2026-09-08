@@ -47,6 +47,10 @@ AXIS_RULES: dict[str, _AxisRule] = {
     "reduces_bulk": _AxisRule(axis="frame_scale_dev", weight=1.0),
     "adds_bulk": _AxisRule(axis="frame_scale_dev", weight=-1.0),
     "adds_volume_top": _AxisRule(axis="bust_hip_balance", weight=-1.0),
+    # Mirrors adds_volume_top with the opposite sign: bottom volume (e.g.
+    # wide-leg trousers) helps balance a top-heavy build (positive
+    # bust_hip_balance) and works against an already bottom-heavy one.
+    "adds_volume_bottom": _AxisRule(axis="bust_hip_balance", weight=1.0),
 }
 
 RECOMMENDED_THRESHOLD = 0.1

@@ -1,7 +1,8 @@
 # Garment technique -> visual effects it produces. A fact about the
 # technique, independent of who wears it (NOTES.md "Core architecture").
-# Only techniques used by the 5 worked examples in NOTES.md are defined so
-# far; extend as new worked examples are added.
+# The first 7 techniques below are used by the 5 worked examples in
+# NOTES.md; techniques added after that back the manual garment catalog
+# (garments.yaml) — see NOTES.md's "Garment catalog" section.
 
 sheath_bodycon:
   - clings_to_waist
@@ -27,3 +28,16 @@ oversized_top:
 
 skinny_straight:
   - reduces_bulk
+
+high_rise:
+  - elongates_leg
+
+low_rise:
+  - elongates_torso
+  - shortens_leg
+
+wide_leg:
+  - adds_volume_bottom
+
+cropped_ankle_length:
+  - shortens_leg

@@ -26,7 +26,7 @@ def test_catalog_covers_all_four_slots():
     assert slots == {"top", "bottom", "dress", "outerwear"}
 
 
-def test_catalog_covers_all_seven_techniques():
+def test_catalog_covers_all_known_techniques():
     catalog_techniques = {t for item in list_items() for t in item.techniques}
     assert catalog_techniques == set(EFFECTS_TABLE)
 
@@ -81,3 +81,10 @@ def test_attribution_lists_both_items_when_tags_overlap():
 
 def test_catalog_has_no_empty_technique_lists():
     assert all(item.techniques for item in CATALOG.values())
+
+
+def test_wide_leg_and_rise_items_resolve_to_expected_techniques():
+    assert CATALOG["wide_leg_high_rise_trousers"].techniques == ("wide_leg", "high_rise")
+    assert CATALOG["wide_leg_low_rise_trousers"].techniques == ("wide_leg", "low_rise")
+    assert CATALOG["ankle_length_trousers"].techniques == ("cropped_ankle_length",)
+    assert CATALOG["bomber_jacket"].techniques == ("oversized_top",)

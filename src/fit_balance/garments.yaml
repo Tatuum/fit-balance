@@ -1,9 +1,7 @@
-# Manual v1 garment-item catalog: user-facing item -> slot + the existing
-# effects.yaml technique(s) it maps to. This is the layer that keeps raw
-# technique keys off the UI and out of any API response (see garments.py
-# and NOTES.md's "Garment catalog" section) — deliberately reuses only the
-# 7 techniques effects.yaml already defines; no new techniques/effects/
-# AXIS_RULES were added for this.
+# Manual garment-item catalog: user-facing item -> slot + the effects.yaml
+# technique(s) it maps to. This is the layer that keeps raw technique keys
+# off the UI and out of any API response (see garments.py and NOTES.md's
+# "Garment catalog" section).
 
 sheath_dress:
   label: Bodycon sheath dress
@@ -60,6 +58,21 @@ belted_skirt:
   slot: bottom
   techniques: [belted_natural_waist]
 
+wide_leg_high_rise_trousers:
+  label: Wide-leg trousers, high-rise
+  slot: bottom
+  techniques: [wide_leg, high_rise]
+
+wide_leg_low_rise_trousers:
+  label: Wide-leg trousers, low-rise
+  slot: bottom
+  techniques: [wide_leg, low_rise]
+
+ankle_length_trousers:
+  label: Ankle-length trousers
+  slot: bottom
+  techniques: [cropped_ankle_length]
+
 oversized_jacket:
   label: Oversized jacket
   slot: outerwear
@@ -74,3 +87,8 @@ fitted_blazer:
   label: Slim-fitted blazer
   slot: outerwear
   techniques: [skinny_straight]
+
+bomber_jacket:
+  label: Bomber jacket
+  slot: outerwear
+  techniques: [oversized_top]

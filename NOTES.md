@@ -164,9 +164,25 @@ photo attribute extraction) or stage 6 (multi-garment outfit parsing from a
 photo, below): there is no computer vision, no photo input — items are
 manually authored data, exactly like `effects.yaml`.
 
-The v1 catalog deliberately reuses only the 7 existing technique keys — no
-new techniques, effects, or `AXIS_RULES` were added. Expanding the
-technique vocabulary itself is separate, not-yet-decided future work.
+The v1 catalog started by deliberately reusing only the original 7
+technique keys; the vocabulary has since been extended (2026-09) with 4
+more, added specifically to back 4 new catalog items — `high_rise`
+(`elongates_leg`, reusing the existing tag), `low_rise` (`elongates_torso`
++ `shortens_leg`, same tags `drop_waist` already uses — a low rise sits
+below the natural waist the same way a dropped waist seam does),
+`wide_leg` (a new tag, `adds_volume_bottom` — see below), and
+`cropped_ankle_length` (`shortens_leg`). `bomber_jacket` needed no new
+technique at all — it reuses `oversized_top` verbatim, since a bomber's
+boxy, bulk-adding silhouette is the same real effect that technique already
+models (the same reuse `oversized_jacket` already relied on). `wide_leg`'s
+`adds_volume_bottom` is the one genuinely new effect tag, wired into
+`AXIS_RULES` as the mirror image of `adds_volume_top` (same axis,
+opposite-sign weight) — bottom volume helps a top-heavy build and works
+against an already bottom-heavy one, tested in
+`test_scoring.py::test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign`.
+Further vocabulary growth stays a case-by-case decision, not a batch
+exercise — each addition should be this deliberate about which existing
+tag it reuses versus genuinely needing a new one.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques
