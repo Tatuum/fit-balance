@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Avatar } from './components/Avatar'
+import { BalancePointsChart } from './components/BalancePointsChart'
 import { MeasurementGuide } from './components/MeasurementGuide'
 import { scoreGarment } from './lib/api'
 import type { Measurements, ScoreResponse } from './lib/types'
@@ -23,6 +24,9 @@ const KNOWN_TECHNIQUES = [
 // back waist length and inseam, anchored at different landmarks — they are
 // not meant to sum to height.
 const MEASUREMENT_HELP: Record<keyof Measurements, string> = {
+  shoulder:
+    'Shoulder circumference: wrap the tape around the fullest part of the shoulders/upper ' +
+    'arms — not the tailoring point-to-point shoulder width.',
   bust: 'Fullest point of the bust, measured straight around.',
   waist: 'Natural waistline (narrowest point of the torso), measured straight around.',
   hip: 'Fullest point of the hips, measured straight around.',
@@ -32,11 +36,12 @@ const MEASUREMENT_HELP: Record<keyof Measurements, string> = {
 }
 
 const DEFAULT_MEASUREMENTS: Measurements = {
+  shoulder: 92.0,
   bust: 91.4,
   waist: 68.6,
   hip: 94.0,
-  torso: 68.6,
-  leg: 68.6,
+  torso: 40.5,
+  leg: 75.0,
   height: 165.1,
 }
 
@@ -145,7 +150,10 @@ function App() {
                 {RECOMMENDATION_LABEL[result.verdict.recommendation]} (score:{' '}
                 {result.verdict.score.toFixed(3)})
               </p>
-              <p className="main-concern">Main concern: {result.main_concern}</p>
+              <BalancePointsChart
+                balancePoints={result.balance_points}
+                mainConcern={result.main_concern}
+              />
               <ul className="reasons">
                 {result.verdict.reasons.map((reason) => (
                   <li key={reason.tag} className={reason.direction === '+' ? 'helps' : 'hurts'}>

@@ -19,6 +19,7 @@ def test_score_endpoint_matches_engine_for_example_1():
     assert body["verdict"]["recommendation"] == "recommended"
     assert body["main_concern"] == "waist_definition"
     assert set(body["balance_points"]) == {
+        "shoulder_hip_balance",
         "bust_hip_balance",
         "waist_definition",
         "torso_leg_balance",

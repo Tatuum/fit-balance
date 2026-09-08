@@ -16,11 +16,20 @@ _RECOMMENDATION_STYLE = {
     "strong_avoid": "bold red",
 }
 
-_AXES = ("bust_hip_balance", "waist_definition", "torso_leg_balance", "frame_scale_dev")
+_AXES = (
+    "shoulder_hip_balance",
+    "bust_hip_balance",
+    "waist_definition",
+    "torso_leg_balance",
+    "frame_scale_dev",
+)
 
 
 @app.command()
 def score(
+    shoulder: float = typer.Option(
+        ..., help="Shoulder circumference (around fullest point of shoulders/upper arms), cm"
+    ),
     bust: float = typer.Option(..., help="Bust circumference, cm"),
     waist: float = typer.Option(..., help="Waist circumference, cm"),
     hip: float = typer.Option(..., help="Hip circumference, cm"),
@@ -36,7 +45,7 @@ def score(
 ) -> None:
     """Score a garment's techniques against a set of body measurements."""
     measurements = Measurements(
-        bust=bust, waist=waist, hip=hip, torso=torso, leg=leg, height=height
+        shoulder=shoulder, bust=bust, waist=waist, hip=hip, torso=torso, leg=leg, height=height
     )
     garment = GarmentAttributes(techniques=technique)
 

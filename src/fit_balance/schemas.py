@@ -4,8 +4,15 @@ from pydantic import BaseModel
 
 
 class Measurements(BaseModel):
-    """Women's v0 measurements, in centimeters."""
+    """Women's v0 measurements, in centimeters.
 
+    shoulder: circumference around the fullest part of the shoulders/upper
+    arms (the stylist body-shape-calculator convention) — NOT the tailoring
+    point-to-point shoulder width (~38-40cm), which is a different scale and
+    isn't comparable to bust/hip circumferences.
+    """
+
+    shoulder: float
     bust: float
     waist: float
     hip: float
@@ -15,8 +22,12 @@ class Measurements(BaseModel):
 
 
 class MenswearMeasurements(BaseModel):
-    """Menswear v0 measurements, in centimeters."""
+    """Menswear v0 measurements, in centimeters.
 
+    shoulder: same circumference convention as Measurements.shoulder.
+    """
+
+    shoulder: float
     chest: float
     waist: float
     hip: float

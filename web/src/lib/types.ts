@@ -1,4 +1,5 @@
 export interface Measurements {
+  shoulder: number
   bust: number
   waist: number
   hip: number
@@ -27,6 +28,7 @@ export interface Verdict {
 }
 
 export interface BalancePoints {
+  shoulder_hip_balance: number
   bust_hip_balance: number
   waist_definition: number
   torso_leg_balance: number

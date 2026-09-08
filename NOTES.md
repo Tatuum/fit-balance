@@ -46,11 +46,17 @@ editable data, not a trained model's opinion.
 ## Balance points — women's v0
 
 ```
+shoulder_hip_balance = (shoulder - hip) / max(shoulder, hip)  # + = broad shoulder vs hip, − = hip wider than shoulder
 bust_hip_balance   = (bust - hip) / max(bust, hip)          # + = top wider, − = bottom wider
 waist_definition   = 1 - waist / avg(bust, hip)              # + = defined waist (an asset), ~0/− = no natural cinch
-torso_leg_balance  = (torso - leg) / max(torso, leg)          # + = long torso, − = long legs
+torso_leg_balance  = (torso/height - 0.245) - (leg/height - 0.455)  # + = long torso, − = long legs (deviation from each landmark's own baseline ratio-to-height — see "known gaps")
 frame_scale_dev    = avg(bust,waist,hip)/height - baseline    # + = reads fuller relative to height, − = reads slighter
 ```
+
+`shoulder` is a **circumference** around the fullest part of the shoulders/
+upper arms (the stylist body-shape-calculator convention) — not the
+tailoring point-to-point shoulder width, which is a different scale and
+isn't comparable to bust/hip circumferences.
 
 "Main concern" = whichever balance point has the largest absolute magnitude.
 A favorable-sign value (e.g. high waist_definition) is an **asset**, not a
@@ -59,6 +65,7 @@ concern — surface it as a strength to build around, not a problem to fix.
 ## Balance points — menswear v0
 
 ```
+shoulder_hip_balance = same as women's version
 chest_waist_balance = (chest - waist) / chest       # = tailoring's "drop"; convention target ≈ 0.15 (6" drop on a 40" chest)
 chest_hip_balance    = (chest - hip) / max(chest, hip)
 torso_leg_balance    = same as women's version
@@ -73,7 +80,10 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
 ## Known gaps (calibration/design work still needed, not yet correctness bugs)
 
 - `frame_scale` baseline (both versions) is a guessed placeholder — needs
-  real anthropometric reference data, not invented cutoffs.
+  real anthropometric reference data, not invented cutoffs. Currently
+  implemented as `0.50` (women's v0) / `0.45` (menswear v0) in
+  `src/fit_balance/balance_points.py` — chosen only so the ratio lands near
+  zero for a roughly average build, not from real data.
 - Effect tags are still coarse in places — e.g. `clings_to_hip` doesn't
   distinguish hip-clinging (fine/good for most shapes) from
   waist/midsection-clinging (bad for an undefined waist). Found via a
@@ -91,20 +101,38 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   open: back waist length is harder to self-measure accurately than
   inseam (which is a well-known measurement) — self-report vs. a guided
   photo measurement is still undecided for the actual input flow.
-- Shoulder width is not in the v0 model at all. It's a real tailoring fit
-  anchor (especially menswear) and could sharpen `bust_hip_balance` — a
-  broad-shoulder/narrow-hip build isn't the same shape as a top-heavy-by-
-  bust build — but adding it means a 5th balance-point axis: a new
-  formula, new `effects.yaml` tag mappings, and recalibrating the worked
-  examples below. Deliberately deferred to an explicit v1 decision, not
-  slipped into v0.
-- Every rule change has, at least once, silently broken an earlier-correct
-  worked example (an "apple + bodycon" regression happened this way). The
-  worked examples below need to become actual automated tests before the
-  rule set grows much further — hand-verifying by re-reading is not going
-  to scale.
+  **Formula bug found and fixed (2026-09)**: the original
+  `torso_leg_balance = (torso - leg) / max(torso, leg)` looked plausible
+  but was wrong for real bodies — back waist length (~39-41cm per ASTM
+  misses sizing) and inseam (~0.45-0.46 × height) are structurally
+  different magnitudes for *everyone* (back waist length is roughly half
+  of inseam), so the raw ratio read as strongly "long legs" regardless of
+  actual proportion. The worked-example fixtures had masked this by using
+  unrealistic torso values inflated to sit near leg's magnitude. Fixed by
+  comparing each measurement's deviation from its *own* baseline
+  ratio-to-height (mirroring `frame_scale_dev`'s approach) — see the
+  formula above and `TORSO_HEIGHT_RATIO_BASELINE`/
+  `LEG_HEIGHT_RATIO_BASELINE` in `balance_points.py`. Those two baselines
+  are themselves guessed from general published ranges, not a rigorous
+  study — same caveat as the `frame_scale` baselines below.
+- Shoulder circumference is now in the v0 model as `shoulder_hip_balance`
+  (implemented 2026-09) — see the formula above. It distinguishes a
+  broad-shoulder/narrow-hip build from a top-heavy-by-bust build that
+  would otherwise look identical on `bust_hip_balance` alone. Not yet
+  wired into any `effects.yaml`/`AXIS_RULES` scoring — no v0 garment
+  technique reacts to it yet (same "known fact, not yet scored" treatment
+  as `clings_to_hip`). Which techniques should (structured shoulders,
+  halter necklines, raglan sleeves, etc.) is a separate, not-yet-made
+  decision — would need its own worked example.
 
-## Worked examples to encode as regression tests first
+## Worked examples (now automated tests)
+
+Rule changes had, at least once, silently broken an earlier-correct worked
+example (an "apple + bodycon" regression happened this way) — hand-verifying
+by re-reading doesn't scale. These 5 are now encoded as regression tests in
+`tests/test_balance_points.py` (balance-point layer) and
+`tests/test_scoring.py` (full verdict), and manually reproduced via the CLI
+(`uv run fit-balance ...`) — all 5 pass and match the verdicts below.
 
 ```
 1. shape≈hourglass, frame_scale=balanced,  garment=[sheath_bodycon, belted_natural_waist] → recommended
@@ -114,21 +142,31 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
 5. shape≈pear,      frame_scale=fuller,   garment=[oversized_top, skinny_straight]         → recommended, with a noted tension (shape wants some added volume on top; frame_scale wants less overall bulk — surface both)
 ```
 
-## Recommended build order
+Any change to `balance_points.py`, `effects.yaml`, or `scoring.py` must keep
+this suite green — that's the whole point of having it.
 
-1. Pure-function balance-point calculator + the 5 tests above as actual
-   automated tests. No UI, no images yet.
-2. `effects.yaml` + scoring function that returns `(verdict, reasons[])`.
-3. A CLI or notebook: type in measurements + a garment's attributes → get
-   verdict + reasons. This alone validates whether the rules *feel* right
-   before any image work happens.
-4. Only after (3) feels right: a parametric SVG avatar to visualize
-   recommended silhouettes generically (no photorealism needed here).
-5. Only after (4): garment-photo → attribute extraction (pose estimation +
+## Build order — status
+
+See `plan.md` for the full architecture/stack decisions and per-stage file
+layout.
+
+1. **Done.** Pure-function balance-point calculator + the 5 worked examples
+   as automated tests. `src/fit_balance/balance_points.py`,
+   `tests/test_balance_points.py`.
+2. **Done.** `effects.yaml` + scoring function returning `(verdict,
+   reasons[])`. `src/fit_balance/effects.yaml`, `src/fit_balance/scoring.py`,
+   `tests/test_scoring.py`.
+3. **Done.** CLI to type in measurements + a garment's attributes and get
+   verdict + reasons — confirmed the rules *feel* right on all 5 worked
+   examples. `src/fit_balance/cli.py` (`uv run fit-balance ...`).
+4. **Done.** FastAPI `/score` endpoint (`api/main.py`) + a React/TS parametric
+   SVG avatar (`web/`, pure geometry in `web/src/lib/avatarGeometry.ts`) —
+   no photorealism, per the original plan.
+5. **Not started.** Garment-photo → attribute extraction (pose estimation +
    segmentation) for "upload a real item, tell me if it suits me."
-6. Later: multi-garment outfit parsing for "recreate this inspo look,
-   adjusted for my proportions."
+6. **Not started.** Multi-garment outfit parsing for "recreate this inspo
+   look, adjusted for my proportions."
 
-Do not start with image processing or garment photo parsing — everything
-useful and differentiated is in steps 1–3, and they need zero computer
-vision.
+Do not start (5)/(6) casually — everything useful and differentiated so far
+needed zero computer vision; CV is the highest-uncertainty, least-validated
+part of this plan.

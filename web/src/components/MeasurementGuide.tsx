@@ -39,7 +39,11 @@ const FEET_Y = 210
 const BODYHEIGHT_X = -15
 const LABEL_X = 95
 
+// SHOULDER sits over the upper arm (between the shoulder point and armpit),
+// not literally at the shoulder-point outline coordinate — the tape wraps
+// around the fullest part of the shoulders/upper arms, not the seam.
 const BANDS = [
+  { y: 36, leftEdge: 100 - 77, label: 'SHOULDER' },
   { y: 48, leftEdge: 100 - 59, label: 'BUST' },
   { y: 72, leftEdge: 100 - 54, label: 'WAIST' },
   { y: 95, leftEdge: 100 - 61, label: 'HIP' },
@@ -130,8 +134,10 @@ export function MeasurementGuide() {
         </text>
       </svg>
       <figcaption>
-        <strong>bust/waist/hip</strong>: straight around, at the fullest (bust/hip) or narrowest
-        (waist) point. <strong>inseam</strong> (leg): crotch straight down to the floor.{' '}
+        <strong>shoulder</strong>: straight around the fullest part of the shoulders/upper arms —
+        not the seam-to-seam shoulder width tailors use. <strong>bust/waist/hip</strong>: straight
+        around, at the fullest (bust/hip) or narrowest (waist) point.{' '}
+        <strong>inseam</strong> (leg): crotch straight down to the floor.{' '}
         <strong>bodyheight</strong>: standing, barefoot.{' '}
         <strong>torso</strong> (not pictured — it's a back measurement): nape of neck (C7
         vertebra) straight down to the natural waist, along the back.

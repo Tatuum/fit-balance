@@ -22,6 +22,7 @@ const BASE_LEG_HEIGHT = 85
 // How strongly each balance point perturbs the base silhouette. Tuned for a
 // visually legible v0, not calibrated against real anthropometric data.
 const SENSITIVITY = {
+  shoulderHipBalance: 1.5,
   bustHipBalance: 1.5,
   waistDefinition: 1.0,
   torsoLegBalance: 0.6,
@@ -38,6 +39,11 @@ export interface AvatarGeometry {
 
 export function computeAvatarGeometry(bp: BalancePoints): AvatarGeometry {
   const scale = clamp(1 + SENSITIVITY.frameScaleDev * bp.frame_scale_dev, 0.6, 1.6)
+  const shoulderFactor = clamp(
+    1 + SENSITIVITY.shoulderHipBalance * bp.shoulder_hip_balance,
+    0.5,
+    1.6,
+  )
   const bustFactor = clamp(1 + SENSITIVITY.bustHipBalance * bp.bust_hip_balance, 0.5, 1.6)
   const hipFactor = clamp(1 - SENSITIVITY.bustHipBalance * bp.bust_hip_balance, 0.5, 1.6)
   const waistFactor = clamp(1 - SENSITIVITY.waistDefinition * bp.waist_definition, 0.5, 1.2)
@@ -46,7 +52,7 @@ export function computeAvatarGeometry(bp: BalancePoints): AvatarGeometry {
   return {
     widths: {
       neck: BASE_WIDTHS.neck * scale,
-      shoulder: BASE_WIDTHS.shoulder * scale,
+      shoulder: BASE_WIDTHS.shoulder * shoulderFactor * scale,
       bust: BASE_WIDTHS.bust * bustFactor * scale,
       waist: BASE_WIDTHS.waist * waistFactor * scale,
       hip: BASE_WIDTHS.hip * hipFactor * scale,

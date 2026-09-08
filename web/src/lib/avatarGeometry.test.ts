@@ -3,6 +3,7 @@ import { avatarOutline, computeAvatarGeometry, toSvgPath } from './avatarGeometr
 import type { BalancePoints } from './types'
 
 const NEUTRAL: BalancePoints = {
+  shoulder_hip_balance: 0,
   bust_hip_balance: 0,
   waist_definition: 0,
   torso_leg_balance: 0,
@@ -27,6 +28,18 @@ describe('computeAvatarGeometry', () => {
     expect(geometry.widths.hip).toBeGreaterThan(geometry.widths.bust)
   })
 
+  it('widens the shoulder when shoulder_hip_balance is positive (broad-shoulder build)', () => {
+    const geometry = computeAvatarGeometry({ ...NEUTRAL, shoulder_hip_balance: 0.15 })
+    const base = computeAvatarGeometry(NEUTRAL)
+    expect(geometry.widths.shoulder).toBeGreaterThan(base.widths.shoulder)
+  })
+
+  it('narrows the shoulder when shoulder_hip_balance is negative (pear)', () => {
+    const geometry = computeAvatarGeometry({ ...NEUTRAL, shoulder_hip_balance: -0.15 })
+    const base = computeAvatarGeometry(NEUTRAL)
+    expect(geometry.widths.shoulder).toBeLessThan(base.widths.shoulder)
+  })
+
   it('narrows the waist as waist_definition increases', () => {
     const defined = computeAvatarGeometry({ ...NEUTRAL, waist_definition: 0.26 })
     const undefined_ = computeAvatarGeometry({ ...NEUTRAL, waist_definition: 0.06 })
@@ -48,6 +61,7 @@ describe('computeAvatarGeometry', () => {
 
   it('clamps extreme balance-point values to a sane, positive range', () => {
     const geometry = computeAvatarGeometry({
+      shoulder_hip_balance: 50,
       bust_hip_balance: 50,
       waist_definition: 50,
       torso_leg_balance: 50,

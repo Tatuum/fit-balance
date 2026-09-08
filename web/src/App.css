@@ -97,10 +97,6 @@ button {
   color: #7f1010;
 }
 
-.main-concern {
-  color: #555;
-}
-
 .reasons {
   list-style: none;
   padding: 0;
@@ -126,4 +122,118 @@ button {
 
 .error {
   color: #c62828;
+}
+
+.balance-chart {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.balance-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.balance-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.balance-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.balance-swatch-positive {
+  background: #2a78d6;
+}
+
+.balance-swatch-negative {
+  background: #e34948;
+}
+
+.balance-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+}
+
+.balance-row-main-concern {
+  background: #f9f9f7;
+  box-shadow: inset 2px 0 0 #1a1a1a;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.balance-row-main-concern .balance-label {
+  font-weight: 700;
+}
+
+.balance-badge {
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #555;
+}
+
+.balance-value {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: #555;
+  text-align: right;
+}
+
+.balance-track {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 10px;
+  background: #f0efec;
+  border-radius: 5px;
+}
+
+.balance-center {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: #c3c2b7;
+}
+
+.balance-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 5px;
+}
+
+.balance-fill-positive {
+  background: #2a78d6;
+}
+
+.balance-fill-negative {
+  background: #e34948;
+}
+
+.balance-caption {
+  grid-column: 1 / -1;
+  font-size: 0.68rem;
+  color: #888;
 }
