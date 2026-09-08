@@ -1,12 +1,12 @@
 import { avatarOutline, computeAvatarGeometry, toSvgPath } from '../lib/avatarGeometry'
-import type { BalancePoints } from '../lib/types'
+import type { Measurements } from '../lib/types'
 
 interface AvatarProps {
-  balancePoints: BalancePoints
+  measurements: Measurements
 }
 
-export function Avatar({ balancePoints }: AvatarProps) {
-  const geometry = computeAvatarGeometry(balancePoints)
+export function Avatar({ measurements }: AvatarProps) {
+  const geometry = computeAvatarGeometry(measurements)
   const path = toSvgPath(avatarOutline(geometry))
   const height = 10 + geometry.torsoHeight + geometry.legHeight + 5
 
@@ -16,7 +16,7 @@ export function Avatar({ balancePoints }: AvatarProps) {
       width={160}
       height={160 * (height / 100)}
       role="img"
-      aria-label="Parametric silhouette reflecting the entered measurements"
+      aria-label="To-scale silhouette drawn from your measurements"
     >
       <path d={path} fill="#c9b8ff" stroke="#5a4a99" strokeWidth={1} strokeLinejoin="round" />
     </svg>

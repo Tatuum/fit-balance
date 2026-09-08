@@ -200,6 +200,20 @@ back to which selected item(s) produced it (`attribute_reasons()` in
 only, not a substitution suggestion; recommending a specific replacement
 item is explicitly deferred, a further scoped-down step beyond this v1.
 
+## Avatar: to-scale, not balance-point-driven (2026-09)
+
+`web/src/lib/avatarGeometry.ts` now draws the silhouette directly from real
+`Measurements` (one shared cm-to-SVG scale for every width and length),
+not from balance-point ratios — two people with the same proportions but
+different absolute sizes used to render identically; now the avatar is a
+true-to-scale drawing of the actual entered numbers. Circumferences convert
+to a front-view width via the standard anthropometric ellipse
+approximation (~10:7 circumference-to-width ratio) — an approximation, not
+exact, same caveat class as `frame_scale`'s baseline. Neck/ankle aren't
+measured inputs; they're drawn as a fixed proportion of shoulder/hip width
+for visual completeness only. This is purely a rendering change —
+`balance_points.py`, `scoring.py`, and `effects.yaml` are untouched.
+
 ## Build order — status
 
 See `plan.md` for the full architecture/stack decisions and per-stage file

@@ -165,7 +165,7 @@ function App() {
 
           {result && (
             <>
-              <Avatar balancePoints={result.balance_points} />
+              <Avatar measurements={measurements} />
               <p className={`verdict verdict-${result.verdict.recommendation}`}>
                 {RECOMMENDATION_LABEL[result.verdict.recommendation]} (score:{' '}
                 {result.verdict.score.toFixed(3)})

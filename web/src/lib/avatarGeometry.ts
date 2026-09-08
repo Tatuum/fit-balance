@@ -1,65 +1,66 @@
-import type { BalancePoints } from './types'
+import type { Measurements } from './types'
 
 /**
- * Turns balance-point values into a generic, proportion-accurate silhouette
- * — no photorealism, per NOTES.md. Every function here is pure (no DOM, no
- * React) so the mapping from balance points to shape is unit-testable on
- * its own, independent of how it's eventually rendered.
+ * Turns real measurements into a to-scale silhouette — every width and
+ * length is derived directly from the entered cm values (via one shared
+ * scale factor), not from balance-point ratios. No photorealism, per
+ * NOTES.md, but the proportions are the user's actual proportions, not an
+ * exaggerated schematic. Every function here is pure (no DOM, no React) so
+ * the mapping from measurements to shape is unit-testable on its own,
+ * independent of how it's eventually rendered.
  */
 
-const BASE_WIDTHS = {
-  neck: 10,
-  shoulder: 20,
-  bust: 18,
-  waist: 15,
-  hip: 18,
-  ankle: 6,
-}
+// Front-view width from a circumference, via the classic anthropometric
+// ellipse approximation: a body cross-section is wider than it is deep, so
+// circumference isn't width * pi. A commonly cited approximation is a
+// ~10:7 circumference-to-width ratio (width ≈ circumference * 7/10) —
+// real depth varies by build, so this is an approximation, not exact.
+const WIDTH_FROM_CIRCUMFERENCE = 0.7
 
-const BASE_TORSO_HEIGHT = 55
-const BASE_LEG_HEIGHT = 85
+// Target total rendered height (SVG units). Every user's figure scales to
+// roughly this size regardless of their actual height, so the avatar stays
+// a consistent on-screen size while every internal proportion (widths vs.
+// torso vs. leg) stays true-to-scale relative to each other.
+const TARGET_FIGURE_HEIGHT = 200
 
-// How strongly each balance point perturbs the base silhouette. Tuned for a
-// visually legible v0, not calibrated against real anthropometric data.
-const SENSITIVITY = {
-  shoulderHipBalance: 1.5,
-  bustHipBalance: 1.5,
-  waistDefinition: 1.0,
-  torsoLegBalance: 0.6,
-  frameScaleDev: 1.5,
-}
-
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+// Neck and ankle aren't measured inputs (Measurements has no neck/ankle
+// circumference) — drawn as a simple fixed proportion of a nearby measured
+// width, for visual completeness only. Not scored, not meant to be
+// anthropometrically accurate.
+const NECK_TO_SHOULDER_RATIO = 0.45
+const ANKLE_TO_HIP_RATIO = 0.3
 
 export interface AvatarGeometry {
-  widths: typeof BASE_WIDTHS
+  widths: {
+    neck: number
+    shoulder: number
+    bust: number
+    waist: number
+    hip: number
+    ankle: number
+  }
   torsoHeight: number
   legHeight: number
 }
 
-export function computeAvatarGeometry(bp: BalancePoints): AvatarGeometry {
-  const scale = clamp(1 + SENSITIVITY.frameScaleDev * bp.frame_scale_dev, 0.6, 1.6)
-  const shoulderFactor = clamp(
-    1 + SENSITIVITY.shoulderHipBalance * bp.shoulder_hip_balance,
-    0.5,
-    1.6,
-  )
-  const bustFactor = clamp(1 + SENSITIVITY.bustHipBalance * bp.bust_hip_balance, 0.5, 1.6)
-  const hipFactor = clamp(1 - SENSITIVITY.bustHipBalance * bp.bust_hip_balance, 0.5, 1.6)
-  const waistFactor = clamp(1 - SENSITIVITY.waistDefinition * bp.waist_definition, 0.5, 1.2)
-  const torsoLegFactor = clamp(SENSITIVITY.torsoLegBalance * bp.torso_leg_balance, -0.5, 0.5)
+export function computeAvatarGeometry(m: Measurements): AvatarGeometry {
+  const scale = TARGET_FIGURE_HEIGHT / m.height
+  const widthOf = (circumference: number) => circumference * WIDTH_FROM_CIRCUMFERENCE * scale
+
+  const shoulder = widthOf(m.shoulder)
+  const hip = widthOf(m.hip)
 
   return {
     widths: {
-      neck: BASE_WIDTHS.neck * scale,
-      shoulder: BASE_WIDTHS.shoulder * shoulderFactor * scale,
-      bust: BASE_WIDTHS.bust * bustFactor * scale,
-      waist: BASE_WIDTHS.waist * waistFactor * scale,
-      hip: BASE_WIDTHS.hip * hipFactor * scale,
-      ankle: BASE_WIDTHS.ankle * scale,
+      neck: shoulder * NECK_TO_SHOULDER_RATIO,
+      shoulder,
+      bust: widthOf(m.bust),
+      waist: widthOf(m.waist),
+      hip,
+      ankle: hip * ANKLE_TO_HIP_RATIO,
     },
-    torsoHeight: BASE_TORSO_HEIGHT * (1 + torsoLegFactor),
-    legHeight: BASE_LEG_HEIGHT * (1 - torsoLegFactor),
+    torsoHeight: m.torso * scale,
+    legHeight: m.leg * scale,
   }
 }
 

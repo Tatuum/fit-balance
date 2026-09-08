@@ -1,72 +1,62 @@
 import { describe, expect, it } from 'vitest'
 import { avatarOutline, computeAvatarGeometry, toSvgPath } from './avatarGeometry'
-import type { BalancePoints } from './types'
+import type { Measurements } from './types'
 
-const NEUTRAL: BalancePoints = {
-  shoulder_hip_balance: 0,
-  bust_hip_balance: 0,
-  waist_definition: 0,
-  torso_leg_balance: 0,
-  frame_scale_dev: 0,
+const BASE: Measurements = {
+  shoulder: 92.0,
+  bust: 91.4,
+  waist: 68.6,
+  hip: 94.0,
+  torso: 40.5,
+  leg: 75.0,
+  height: 165.1,
 }
 
 describe('computeAvatarGeometry', () => {
-  it('returns the base silhouette when all balance points are neutral', () => {
-    const geometry = computeAvatarGeometry(NEUTRAL)
-    expect(geometry.widths.bust).toBe(geometry.widths.hip)
-    expect(geometry.torsoHeight).toBeCloseTo(55)
-    expect(geometry.legHeight).toBeCloseTo(85)
+  it('is invariant under uniformly scaling every measurement (proportions, not absolute size, drive geometry)', () => {
+    const base = computeAvatarGeometry(BASE)
+    const scaledUp: Measurements = Object.fromEntries(
+      Object.entries(BASE).map(([key, value]) => [key, value * 1.5]),
+    ) as unknown as Measurements
+    const scaled = computeAvatarGeometry(scaledUp)
+
+    expect(scaled.widths.bust).toBeCloseTo(base.widths.bust)
+    expect(scaled.torsoHeight).toBeCloseTo(base.torsoHeight)
+    expect(scaled.legHeight).toBeCloseTo(base.legHeight)
   })
 
-  it('widens the bust relative to the hip when bust_hip_balance is positive', () => {
-    const geometry = computeAvatarGeometry({ ...NEUTRAL, bust_hip_balance: 0.15 })
-    expect(geometry.widths.bust).toBeGreaterThan(geometry.widths.hip)
+  it('gives a larger bust measurement a wider drawn bust, all else equal', () => {
+    const smaller = computeAvatarGeometry(BASE)
+    const larger = computeAvatarGeometry({ ...BASE, bust: BASE.bust + 20 })
+    expect(larger.widths.bust).toBeGreaterThan(smaller.widths.bust)
   })
 
-  it('widens the hip relative to the bust when bust_hip_balance is negative (pear)', () => {
-    const geometry = computeAvatarGeometry({ ...NEUTRAL, bust_hip_balance: -0.15 })
-    expect(geometry.widths.hip).toBeGreaterThan(geometry.widths.bust)
+  it('gives a larger hip measurement a wider drawn hip, all else equal', () => {
+    const smaller = computeAvatarGeometry(BASE)
+    const larger = computeAvatarGeometry({ ...BASE, hip: BASE.hip + 20 })
+    expect(larger.widths.hip).toBeGreaterThan(smaller.widths.hip)
   })
 
-  it('widens the shoulder when shoulder_hip_balance is positive (broad-shoulder build)', () => {
-    const geometry = computeAvatarGeometry({ ...NEUTRAL, shoulder_hip_balance: 0.15 })
-    const base = computeAvatarGeometry(NEUTRAL)
-    expect(geometry.widths.shoulder).toBeGreaterThan(base.widths.shoulder)
+  it('draws a longer torso measurement as a taller torso', () => {
+    const shorter = computeAvatarGeometry(BASE)
+    const longer = computeAvatarGeometry({ ...BASE, torso: BASE.torso + 10 })
+    expect(longer.torsoHeight).toBeGreaterThan(shorter.torsoHeight)
   })
 
-  it('narrows the shoulder when shoulder_hip_balance is negative (pear)', () => {
-    const geometry = computeAvatarGeometry({ ...NEUTRAL, shoulder_hip_balance: -0.15 })
-    const base = computeAvatarGeometry(NEUTRAL)
-    expect(geometry.widths.shoulder).toBeLessThan(base.widths.shoulder)
+  it('draws a longer leg measurement as a taller leg', () => {
+    const shorter = computeAvatarGeometry(BASE)
+    const longer = computeAvatarGeometry({ ...BASE, leg: BASE.leg + 10 })
+    expect(longer.legHeight).toBeGreaterThan(shorter.legHeight)
   })
 
-  it('narrows the waist as waist_definition increases', () => {
-    const defined = computeAvatarGeometry({ ...NEUTRAL, waist_definition: 0.26 })
-    const undefined_ = computeAvatarGeometry({ ...NEUTRAL, waist_definition: 0.06 })
-    expect(defined.widths.waist).toBeLessThan(undefined_.widths.waist)
+  it('derives neck from shoulder and ankle from hip (unmeasured, proportional only)', () => {
+    const geometry = computeAvatarGeometry(BASE)
+    expect(geometry.widths.neck).toBeLessThan(geometry.widths.shoulder)
+    expect(geometry.widths.ankle).toBeLessThan(geometry.widths.hip)
   })
 
-  it('grows the torso relative to the legs as torso_leg_balance increases', () => {
-    const geometry = computeAvatarGeometry({ ...NEUTRAL, torso_leg_balance: 0.2 })
-    expect(geometry.torsoHeight).toBeGreaterThan(55)
-    expect(geometry.legHeight).toBeLessThan(85)
-  })
-
-  it('scales every width up as frame_scale_dev increases', () => {
-    const fuller = computeAvatarGeometry({ ...NEUTRAL, frame_scale_dev: 0.1 })
-    const base = computeAvatarGeometry(NEUTRAL)
-    expect(fuller.widths.shoulder).toBeGreaterThan(base.widths.shoulder)
-    expect(fuller.widths.hip).toBeGreaterThan(base.widths.hip)
-  })
-
-  it('clamps extreme balance-point values to a sane, positive range', () => {
-    const geometry = computeAvatarGeometry({
-      shoulder_hip_balance: 50,
-      bust_hip_balance: 50,
-      waist_definition: 50,
-      torso_leg_balance: 50,
-      frame_scale_dev: 50,
-    })
+  it('produces only positive widths and lengths for realistic inputs', () => {
+    const geometry = computeAvatarGeometry(BASE)
     for (const width of Object.values(geometry.widths)) {
       expect(width).toBeGreaterThan(0)
     }
@@ -77,7 +67,7 @@ describe('computeAvatarGeometry', () => {
 
 describe('avatarOutline + toSvgPath', () => {
   it('produces a symmetric, closed outline', () => {
-    const geometry = computeAvatarGeometry(NEUTRAL)
+    const geometry = computeAvatarGeometry(BASE)
     const points = avatarOutline(geometry)
     expect(points.length).toBe(14)
     // First point (right neck) and last point (left neck) should mirror around x=50.
@@ -88,7 +78,7 @@ describe('avatarOutline + toSvgPath', () => {
   })
 
   it('renders a valid closed SVG path string', () => {
-    const geometry = computeAvatarGeometry(NEUTRAL)
+    const geometry = computeAvatarGeometry(BASE)
     const path = toSvgPath(avatarOutline(geometry))
     expect(path.startsWith('M ')).toBe(true)
     expect(path.endsWith('Z')).toBe(true)
