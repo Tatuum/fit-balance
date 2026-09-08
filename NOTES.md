@@ -79,8 +79,25 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   waist/midsection-clinging (bad for an undefined waist). Found via a
   worked example, not chased further by hand — better to let real user
   disagreement drive which tags need splitting next.
-- `torso_leg` has no defined input-collection method yet (self-report? a
-  guided photo measurement?).
+- `torso_leg` measurement convention (decided, researched via web search
+  against ISO 8559 — the international garment-measurement standard — and
+  tailoring practice): `torso` = **back waist length** (nape of neck / C7
+  vertebra down to the natural waist); `leg` = **inseam** (crotch seam down
+  to the floor, standing barefoot). These are two independent, standard, self-measurable
+  numbers anchored at different landmarks (waist vs. crotch) — they are
+  *not* expected to sum to height (a clinical pair that does, sitting
+  height + subischial leg length, bakes the head into "torso" and needs a
+  stadiometer, so it doesn't fit a self-measured consumer flow). Still
+  open: back waist length is harder to self-measure accurately than
+  inseam (which is a well-known measurement) — self-report vs. a guided
+  photo measurement is still undecided for the actual input flow.
+- Shoulder width is not in the v0 model at all. It's a real tailoring fit
+  anchor (especially menswear) and could sharpen `bust_hip_balance` — a
+  broad-shoulder/narrow-hip build isn't the same shape as a top-heavy-by-
+  bust build — but adding it means a 5th balance-point axis: a new
+  formula, new `effects.yaml` tag mappings, and recalibrating the worked
+  examples below. Deliberately deferred to an explicit v1 decision, not
+  slipped into v0.
 - Every rule change has, at least once, silently broken an earlier-correct
   worked example (an "apple + bodycon" regression happened this way). The
   worked examples below need to become actual automated tests before the
