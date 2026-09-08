@@ -120,6 +120,11 @@ button {
   color: #c62828;
 }
 
+.reason-source {
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
 .error {
   color: #c62828;
 }

@@ -1,23 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Avatar } from './components/Avatar'
 import { BalancePointsChart } from './components/BalancePointsChart'
 import { MeasurementGuide } from './components/MeasurementGuide'
-import { scoreGarment } from './lib/api'
-import type { Measurements, ScoreResponse } from './lib/types'
+import { getGarments, scoreOutfit } from './lib/api'
+import { groupBySlot, SLOTS } from './lib/garments'
+import type { GarmentSummary, Measurements, ScoreOutfitResponse, Slot } from './lib/types'
 import './App.css'
 
-// Keep in sync with src/fit_balance/effects.yaml — there's no endpoint to
-// list known techniques yet, so this v0 duplicates the technique names by
-// hand.
-const KNOWN_TECHNIQUES = [
-  'sheath_bodycon',
-  'belted_natural_waist',
-  'drop_waist',
-  'empire_waistline',
-  'vertical_detail',
-  'oversized_top',
-  'skinny_straight',
-]
+const SLOT_LABELS: Record<Slot, string> = {
+  dress: 'Dress',
+  top: 'Top',
+  bottom: 'Bottom',
+  outerwear: 'Outerwear',
+}
 
 // Measurement method for each field. torso/leg follow the convention
 // documented in NOTES.md's "known gaps" (ISO 8559 / tailoring practice):
@@ -45,6 +40,13 @@ const DEFAULT_MEASUREMENTS: Measurements = {
   height: 165.1,
 }
 
+const DEFAULT_SELECTION: Record<Slot, string | null> = {
+  dress: 'belted_sheath_dress',
+  top: null,
+  bottom: null,
+  outerwear: null,
+}
+
 const RECOMMENDATION_LABEL: Record<string, string> = {
   recommended: 'Recommended',
   neutral: 'Neutral',
@@ -54,36 +56,40 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
 
 function App() {
   const [measurements, setMeasurements] = useState<Measurements>(DEFAULT_MEASUREMENTS)
-  const [techniques, setTechniques] = useState<Set<string>>(
-    new Set(['sheath_bodycon', 'belted_natural_waist']),
+  const [garments, setGarments] = useState<GarmentSummary[]>([])
+  const [garmentsError, setGarmentsError] = useState<string | null>(null)
+  const [selectedItemIds, setSelectedItemIds] = useState<Record<Slot, string | null>>(
+    DEFAULT_SELECTION,
   )
-  const [result, setResult] = useState<ScoreResponse | null>(null)
+  const [result, setResult] = useState<ScoreOutfitResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    getGarments()
+      .then(setGarments)
+      .catch((err) => setGarmentsError(err instanceof Error ? err.message : String(err)))
+  }, [])
 
   const updateMeasurement = (key: keyof Measurements) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value)
     setMeasurements((prev) => ({ ...prev, [key]: value }))
   }
 
-  const toggleTechnique = (technique: string) => {
-    setTechniques((prev) => {
-      const next = new Set(prev)
-      if (next.has(technique)) {
-        next.delete(technique)
-      } else {
-        next.add(technique)
-      }
-      return next
-    })
+  const selectItem = (slot: Slot, itemId: string | null) => {
+    setSelectedItemIds((prev) => ({ ...prev, [slot]: itemId }))
   }
+
+  const itemIds = Object.values(selectedItemIds).filter((id): id is string => id !== null)
+  const labelById = Object.fromEntries(garments.map((g) => [g.id, g.label]))
+  const groupedGarments = groupBySlot(garments)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     try {
-      const response = await scoreGarment(measurements, { techniques: [...techniques] })
+      const response = await scoreOutfit(measurements, itemIds)
       setResult(response)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
@@ -97,8 +103,8 @@ function App() {
     <div className="app">
       <h1>fit-balance</h1>
       <p className="subtitle">
-        Enter measurements (cm) and garment techniques to see the verdict, the reasons behind it,
-        and a parametric silhouette — no photorealism, just proportions.
+        Enter measurements (cm) and build an outfit (one item per slot) to see the verdict, the
+        reasons behind it, and a parametric silhouette — no photorealism, just proportions.
       </p>
 
       <div className="layout">
@@ -121,22 +127,36 @@ function App() {
             ))}
           </fieldset>
 
-          <fieldset>
-            <legend>Garment techniques</legend>
-            {KNOWN_TECHNIQUES.map((technique) => (
-              <label key={technique} className="checkbox">
-                <input
-                  type="checkbox"
-                  checked={techniques.has(technique)}
-                  onChange={() => toggleTechnique(technique)}
-                />
-                {technique}
-              </label>
-            ))}
-          </fieldset>
+          {garmentsError && <p className="error">Couldn't load garment catalog: {garmentsError}</p>}
 
-          <button type="submit" disabled={loading || techniques.size === 0}>
-            {loading ? 'Scoring…' : 'Score'}
+          {SLOTS.map((slot) => (
+            <fieldset key={slot}>
+              <legend>{SLOT_LABELS[slot]}</legend>
+              <label className="checkbox">
+                <input
+                  type="radio"
+                  name={`slot-${slot}`}
+                  checked={selectedItemIds[slot] === null}
+                  onChange={() => selectItem(slot, null)}
+                />
+                None
+              </label>
+              {groupedGarments[slot].map((item) => (
+                <label key={item.id} className="checkbox">
+                  <input
+                    type="radio"
+                    name={`slot-${slot}`}
+                    checked={selectedItemIds[slot] === item.id}
+                    onChange={() => selectItem(slot, item.id)}
+                  />
+                  {item.label}
+                </label>
+              ))}
+            </fieldset>
+          ))}
+
+          <button type="submit" disabled={loading || itemIds.length === 0}>
+            {loading ? 'Scoring…' : 'Score outfit'}
           </button>
         </form>
 
@@ -155,9 +175,18 @@ function App() {
                 mainConcern={result.main_concern}
               />
               <ul className="reasons">
-                {result.verdict.reasons.map((reason) => (
-                  <li key={reason.tag} className={reason.direction === '+' ? 'helps' : 'hurts'}>
+                {result.verdict.reasons.map((reason, index) => (
+                  <li
+                    key={`${reason.tag}-${index}`}
+                    className={reason.direction === '+' ? 'helps' : 'hurts'}
+                  >
                     {reason.direction} {reason.tag} ({reason.axis}, {reason.contribution.toFixed(3)})
+                    {reason.item_ids.length > 0 && (
+                      <span className="reason-source">
+                        {' '}
+                        — from: {reason.item_ids.map((id) => labelById[id] ?? id).join(', ')}
+                      </span>
+                    )}
                   </li>
                 ))}
                 {result.verdict.reasons.length === 0 && <li>No scored effects fired.</li>}

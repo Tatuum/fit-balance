@@ -145,6 +145,45 @@ by re-reading doesn't scale. These 5 are now encoded as regression tests in
 Any change to `balance_points.py`, `effects.yaml`, or `scoring.py` must keep
 this suite green — that's the whole point of having it.
 
+## Garment catalog (manual, v1 — explicitly not stage 5/6)
+
+`src/fit_balance/garments.yaml` + `garments.py` add a small, hand-curated
+catalog of named items (id/label/slot/techniques) so the web UI shows real
+item names ("Slim-fitted top", "Oversized jacket") instead of raw
+`effects.yaml` technique keys, and so users can select one item per slot
+(top/bottom/dress/outerwear) as an outfit and get one combined verdict for
+how it works together — `GET /garments` (never returns `techniques`, so the
+vocabulary never reaches the wire either) and `POST /score-outfit`
+(`api/main.py`).
+
+This is presentation-layer work sitting on top of the untouched scoring
+engine — outfit scoring resolves the selected items' techniques into one
+`GarmentAttributes` (de-duplicated by exact technique key) and calls
+`scoring.score()` unchanged. It is deliberately **not** stage 5 (garment-
+photo attribute extraction) or stage 6 (multi-garment outfit parsing from a
+photo, below): there is no computer vision, no photo input — items are
+manually authored data, exactly like `effects.yaml`.
+
+The v1 catalog deliberately reuses only the 7 existing technique keys — no
+new techniques, effects, or `AXIS_RULES` were added. Expanding the
+technique vocabulary itself is separate, not-yet-decided future work.
+
+**Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
+reasons by tag, so an outfit whose items use two *different* techniques
+that happen to produce the same effect tag (e.g. a top with
+`vertical_detail` and trousers with `skinny_straight`, both → `reduces_bulk`)
+contributes that tag's axis weight twice, additively. Treated as
+intentional stacking for v1 (two independent slimming design choices
+compounding), pinned by
+`tests/test_garments.py::test_attribution_lists_both_items_when_tags_overlap`
+— revisit only if real usage shows it produces surprising totals.
+
+When a verdict has negative reasons, `/score-outfit` attributes each reason
+back to which selected item(s) produced it (`attribute_reasons()` in
+`garments.py`) — "here's what's working against you." This is attribution
+only, not a substitution suggestion; recommending a specific replacement
+item is explicitly deferred, a further scoped-down step beyond this v1.
+
 ## Build order — status
 
 See `plan.md` for the full architecture/stack decisions and per-stage file

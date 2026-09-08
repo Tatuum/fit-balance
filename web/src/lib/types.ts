@@ -40,3 +40,27 @@ export interface ScoreResponse {
   main_concern: string
   verdict: Verdict
 }
+
+export type Slot = 'top' | 'bottom' | 'dress' | 'outerwear'
+
+export interface GarmentSummary {
+  id: string
+  label: string
+  slot: Slot
+}
+
+export interface AttributedReason extends Reason {
+  item_ids: string[]
+}
+
+export interface OutfitVerdict {
+  recommendation: Recommendation
+  score: number
+  reasons: AttributedReason[]
+}
+
+export interface ScoreOutfitResponse {
+  balance_points: BalancePoints
+  main_concern: string
+  verdict: OutfitVerdict
+}

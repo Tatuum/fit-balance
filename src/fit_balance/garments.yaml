@@ -1,0 +1,76 @@
+# Manual v1 garment-item catalog: user-facing item -> slot + the existing
+# effects.yaml technique(s) it maps to. This is the layer that keeps raw
+# technique keys off the UI and out of any API response (see garments.py
+# and NOTES.md's "Garment catalog" section) — deliberately reuses only the
+# 7 techniques effects.yaml already defines; no new techniques/effects/
+# AXIS_RULES were added for this.
+
+sheath_dress:
+  label: Bodycon sheath dress
+  slot: dress
+  techniques: [sheath_bodycon]
+
+belted_sheath_dress:
+  label: Belted sheath dress
+  slot: dress
+  techniques: [sheath_bodycon, belted_natural_waist]
+
+empire_dress:
+  label: Empire-waist dress
+  slot: dress
+  techniques: [empire_waistline]
+
+drop_waist_dress:
+  label: Drop-waist dress
+  slot: dress
+  techniques: [drop_waist]
+
+oversized_top:
+  label: Oversized top
+  slot: top
+  techniques: [oversized_top]
+
+fitted_top:
+  label: Slim-fitted top
+  slot: top
+  techniques: [skinny_straight]
+
+belted_blouse:
+  label: Belted blouse
+  slot: top
+  techniques: [belted_natural_waist]
+
+seamed_top:
+  label: Top with vertical seam detail
+  slot: top
+  techniques: [vertical_detail]
+
+slim_trousers:
+  label: Slim straight-leg trousers
+  slot: bottom
+  techniques: [skinny_straight]
+
+seamed_trousers:
+  label: Trousers with vertical seam detail
+  slot: bottom
+  techniques: [vertical_detail]
+
+belted_skirt:
+  label: Belted skirt
+  slot: bottom
+  techniques: [belted_natural_waist]
+
+oversized_jacket:
+  label: Oversized jacket
+  slot: outerwear
+  techniques: [oversized_top]
+
+belted_coat:
+  label: Belted coat
+  slot: outerwear
+  techniques: [belted_natural_waist]
+
+fitted_blazer:
+  label: Slim-fitted blazer
+  slot: outerwear
+  techniques: [skinny_straight]
