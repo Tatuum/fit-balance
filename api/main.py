@@ -34,7 +34,7 @@ class ScoreRequest(BaseModel):
 
 class ScoreResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str
+    main_concern: str | None
     verdict: Verdict
 
 
@@ -76,7 +76,7 @@ class OutfitVerdict(BaseModel):
 
 class ScoreOutfitResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str
+    main_concern: str | None
     verdict: OutfitVerdict
 
 

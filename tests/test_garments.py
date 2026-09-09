@@ -18,7 +18,7 @@ from fit_balance.garments import (
     resolve_outfit,
 )
 from fit_balance.scoring import EFFECTS_TABLE, score
-from tests.fixtures import HOURGLASS_BALANCED, PEAR_FULLER
+from tests.fixtures import PEAR_FULLER
 
 
 def test_catalog_covers_all_four_slots():
@@ -66,11 +66,15 @@ def test_attribution_lists_both_items_when_tags_overlap():
     """seamed_top (vertical_detail) and slim_trousers (skinny_straight) are
     different techniques that both produce reduces_bulk. score() doesn't
     dedupe reasons by tag, so this deliberately produces TWO reduces_bulk
-    reasons, each attributing to both items — see NOTES.md."""
+    reasons, each attributing to both items — see NOTES.md.
+
+    Uses PEAR_FULLER rather than HOURGLASS_BALANCED: frame_scale_dev needs
+    to actually clear the 0.05 imbalance deadzone for reduces_bulk to score
+    at all (HOURGLASS_BALANCED's frame_scale_dev ≈ 0.013 sits inside it)."""
     items, garment = resolve_outfit(["seamed_top", "slim_trousers"])
     assert garment.techniques == ["vertical_detail", "skinny_straight"]
 
-    bp = compute_womens_balance_points(HOURGLASS_BALANCED)
+    bp = compute_womens_balance_points(PEAR_FULLER)
     verdict = score(bp, garment)
     reduces_bulk_reasons = [r for r in verdict.reasons if r.tag == "reduces_bulk"]
     assert len(reduces_bulk_reasons) == 2

@@ -27,6 +27,19 @@ MEN_FRAME_SCALE_BASELINE = 0.45
 TORSO_HEIGHT_RATIO_BASELINE = 0.245
 LEG_HEIGHT_RATIO_BASELINE = 0.455
 
+# Below this magnitude, a deviation from 0 is measurement noise, not a real
+# proportion difference worth treating as an imbalance — matches the
+# "near-balanced" threshold test_balance_points.py's worked-example
+# assertions already use (e.g. "abs(...) < 0.05"). Applies only to the four
+# axes below where 0 is neutral in both directions; waist_definition has its
+# own asymmetric threshold instead (scoring.py's AXIS_RULES reference=0.15)
+# and is deliberately left out here — the two aren't the same kind of thing
+# (see NOTES.md).
+IMBALANCE_DEADZONE = 0.05
+DEADZONE_AXES = frozenset(
+    {"shoulder_hip_balance", "bust_hip_balance", "torso_leg_balance", "frame_scale_dev"}
+)
+
 
 @dataclass(frozen=True)
 class WomensBalancePoints:
@@ -42,14 +55,23 @@ class WomensBalancePoints:
     torso_leg_balance: float
     frame_scale_dev: float
 
-    def main_concern(self) -> str:
-        """Name of the balance point with the largest absolute magnitude.
+    def _magnitude(self, name: str) -> float:
+        value = abs(getattr(self, name))
+        if name in DEADZONE_AXES and value < IMBALANCE_DEADZONE:
+            return 0.0
+        return value
+
+    def main_concern(self) -> str | None:
+        """Name of the balance point with the largest absolute magnitude, or
+        None if nothing clears the deadzone — a body with no axis reading as
+        a real imbalance and no natural waist definition either.
 
         A favorable-sign value (e.g. high waist_definition) is an asset, not
         a concern — callers should check the sign before treating this as a
         problem to fix.
         """
-        return max((f.name for f in fields(self)), key=lambda name: abs(getattr(self, name)))
+        name = max((f.name for f in fields(self)), key=self._magnitude)
+        return name if self._magnitude(name) > 0 else None
 
 
 @dataclass(frozen=True)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from .balance_points import WomensBalancePoints
+from .balance_points import DEADZONE_AXES, IMBALANCE_DEADZONE, WomensBalancePoints
 from .schemas import GarmentAttributes, Reason, Verdict
 
 _EFFECTS_PATH = Path(__file__).parent / "effects.yaml"
@@ -73,6 +73,11 @@ def score(balance_points: WomensBalancePoints, garment: GarmentAttributes) -> Ve
             if rule is None:
                 continue
             value = getattr(balance_points, rule.axis)
+            # Same deadzone WomensBalancePoints.main_concern() uses: below
+            # it, this axis isn't a real imbalance, so no technique should
+            # get credit or blame against it.
+            if rule.axis in DEADZONE_AXES and abs(value) < IMBALANCE_DEADZONE:
+                continue
             contribution = rule.weight * (value - rule.reference)
             if contribution == 0:
                 continue

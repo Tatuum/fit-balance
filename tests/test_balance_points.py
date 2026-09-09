@@ -6,7 +6,7 @@ test_scoring.py; this file covers only the balance-point layer.
 
 import pytest
 
-from fit_balance.balance_points import compute_womens_balance_points
+from fit_balance.balance_points import WomensBalancePoints, compute_womens_balance_points
 from tests.fixtures import (
     APPLE_LONG_TORSO,
     HOURGLASS_BALANCED,
@@ -60,3 +60,55 @@ def test_main_concern_is_one_of_the_five_axes(measurements):
         "torso_leg_balance",
         "frame_scale_dev",
     )
+
+
+def test_main_concern_is_none_for_a_genuinely_balanced_body():
+    """All four zero-neutral axes sit inside the 0.05 deadzone, and
+    waist_definition is exactly 0 too — nothing here reads as a real
+    imbalance or asset."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.02,
+        bust_hip_balance=-0.03,
+        waist_definition=0.0,
+        torso_leg_balance=0.01,
+        frame_scale_dev=-0.02,
+    )
+    assert bp.main_concern() is None
+
+
+def test_main_concern_ignores_small_deviations_on_the_four_zero_neutral_axes():
+    """A deviation just under the deadzone doesn't count as the main
+    concern, even if it's the largest magnitude present."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.04,
+        bust_hip_balance=0.0,
+        waist_definition=0.0,
+        torso_leg_balance=0.0,
+        frame_scale_dev=0.0,
+    )
+    assert bp.main_concern() is None
+
+
+def test_main_concern_still_fires_once_a_deviation_clears_the_deadzone():
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.06,
+        bust_hip_balance=0.0,
+        waist_definition=0.0,
+        torso_leg_balance=0.0,
+        frame_scale_dev=0.0,
+    )
+    assert bp.main_concern() == "shoulder_hip_balance"
+
+
+def test_main_concern_leaves_waist_definition_without_a_deadzone():
+    """waist_definition has its own asymmetric threshold (scoring.py's
+    AXIS_RULES reference=0.15), not this deadzone — even a small nonzero
+    value here should still win over axes zeroed out by the deadzone."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.02,
+        bust_hip_balance=0.0,
+        waist_definition=0.01,
+        torso_leg_balance=0.0,
+        frame_scale_dev=0.0,
+    )
+    assert bp.main_concern() == "waist_definition"

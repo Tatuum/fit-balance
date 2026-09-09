@@ -62,6 +62,18 @@ isn't comparable to bust/hip circumferences.
 A favorable-sign value (e.g. high waist_definition) is an **asset**, not a
 concern — surface it as a strength to build around, not a problem to fix.
 
+**Imbalance deadzone (2026-09)**: `shoulder_hip_balance`, `bust_hip_balance`,
+`torso_leg_balance`, and `frame_scale_dev` are neutral at 0 in both
+directions, so a value under 0.05 (`balance_points.IMBALANCE_DEADZONE`) is
+measurement noise, not a real proportion difference — `main_concern()`
+won't name one of these as the concern below that line (returning `None` if
+nothing on any axis clears it), and `scoring.score()` won't generate a
+reason against that axis either. `waist_definition` is deliberately left
+out: it already has its own asymmetric threshold (0.15, in scoring.py's
+`AXIS_RULES`) for a different reason — one direction is favorable, not "0 is
+neutral both ways" — so stacking a second deadzone on top isn't the same
+kind of fix.
+
 ## Balance points — menswear v0
 
 ```

@@ -71,6 +71,22 @@ def test_clings_to_hip_is_a_known_fact_not_yet_scored():
     assert all(r.tag != "clings_to_hip" for r in verdict.reasons)
 
 
+def test_small_bust_hip_imbalance_is_not_scored_as_an_imbalance():
+    """Below the 0.05 deadzone, bust_hip_balance isn't a real imbalance —
+    wide_leg (adds_volume_bottom) shouldn't score against or for it."""
+    barely_off = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0.03,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    garment = GarmentAttributes(techniques=["wide_leg"])
+    verdict = score(barely_off, garment)
+    assert verdict.reasons == []
+    assert verdict.score == 0
+
+
 def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
     """adds_volume_bottom (e.g. wide-leg trousers) is weighted opposite to
     adds_volume_top on the same bust_hip_balance axis: bottom volume helps

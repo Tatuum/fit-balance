@@ -67,7 +67,7 @@ const formatValue = (value: number) => (value >= 0 ? `+${value.toFixed(3)}` : va
 
 interface BalancePointsChartProps {
   balancePoints: BalancePoints
-  mainConcern: string
+  mainConcern: string | null
 }
 
 export function BalancePointsChart({ balancePoints, mainConcern }: BalancePointsChartProps) {

@@ -37,7 +37,7 @@ export interface BalancePoints {
 
 export interface ScoreResponse {
   balance_points: BalancePoints
-  main_concern: string
+  main_concern: string | null
   verdict: Verdict
 }
 
@@ -61,6 +61,6 @@ export interface OutfitVerdict {
 
 export interface ScoreOutfitResponse {
   balance_points: BalancePoints
-  main_concern: string
+  main_concern: string | null
   verdict: OutfitVerdict
 }
