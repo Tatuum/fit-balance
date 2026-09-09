@@ -38,3 +38,21 @@ Commands: `uv run pytest` / `uv run ruff check .` (Python), `npm run build`
   case in NOTES.md). Any change to `balance_points.py`, `effects.yaml`, or
   `scoring.py` must keep `tests/test_balance_points.py` and
   `tests/test_scoring.py` green — that suite encodes all 5 worked examples.
+
+## Workflow
+
+- **Decide in `NOTES.md` first, for anything touching the engine.** A new
+  formula, axis, or scoring rule gets its rationale written into `NOTES.md`
+  as part of the same change that implements it — not left to only exist in
+  chat history. If a change to `balance_points.py`/`scoring.py`/`effects.yaml`
+  alters a documented worked example's outcome, update that example's line in
+  `NOTES.md` too, deliberately — see the "hides_waist" and `top_hip_balance`
+  changes for the pattern.
+- **New scoring behavior needs a worked example, not just a unit test.**
+  Before wiring up a new axis interaction or effect tag, state the concrete
+  case in NOTES.md-worked-example form ("body X + garment Y → verdict Z") and
+  the reasoning, then implement to match it.
+- **One commit per decision, made when it's agreed**, not batched up and
+  split apart later. Keeps `git log` a legible record of the conversation.
+- **Run `./check.sh` before calling any change done.** One gate: `pytest`,
+  `ruff check`, the frontend's `tsc --noEmit`, and `vitest run`.
