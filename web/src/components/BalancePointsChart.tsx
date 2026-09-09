@@ -21,31 +21,40 @@ const AXIS_ORDER: Axis[] = [
   'frame_scale_dev',
 ]
 
-const AXIS_META: Record<Axis, { label: string; positive: string; negative: string }> = {
+const AXIS_META: Record<Axis, { label: string; positive: string; negative: string; neutral: number }> = {
   shoulder_hip_balance: {
     label: 'Shoulder vs hip',
     positive: '+ shoulder wider than hip',
     negative: '− hip wider than shoulder',
+    neutral: 0,
   },
   bust_hip_balance: {
     label: 'Bust vs hip',
     positive: '+ bust wider than hip',
     negative: '− hip wider than bust',
+    neutral: 0,
   },
   waist_definition: {
     label: 'Waist definition',
     positive: '+ defined waist (an asset)',
     negative: '− little to no natural cinch',
+    // NOTES.md documents this axis's own zero point loosely — "~0/− = no
+    // natural cinch" — so literal 0 isn't the practically meaningful
+    // threshold. Matches scoring.py's AXIS_RULES reference for
+    // defines_waist/clings_to_waist: keep these two in sync.
+    neutral: 0.15,
   },
   torso_leg_balance: {
     label: 'Torso vs leg',
     positive: '+ long torso',
     negative: '− long legs',
+    neutral: 0,
   },
   frame_scale_dev: {
     label: 'Frame scale',
     positive: '+ reads fuller for height',
     negative: '− reads slighter for height',
+    neutral: 0,
   },
 }
 
@@ -78,7 +87,9 @@ export function BalancePointsChart({ balancePoints, mainConcern }: BalancePoints
         const value = balancePoints[axis]
         const meta = AXIS_META[axis]
         const isMainConcern = axis === mainConcern
-        const magnitudePct = (Math.abs(value) / domain) * 50
+        const isFavorable = value >= meta.neutral
+        const neutralPct = 50 + (meta.neutral / domain) * 50
+        const magnitudePct = (Math.abs(value - meta.neutral) / domain) * 50
         return (
           <div
             key={axis}
@@ -90,15 +101,15 @@ export function BalancePointsChart({ balancePoints, mainConcern }: BalancePoints
             </div>
             <div
               className="balance-track"
-              title={`${meta.label}: ${formatValue(value)} — ${value >= 0 ? meta.positive : meta.negative}`}
+              title={`${meta.label}: ${formatValue(value)} — ${isFavorable ? meta.positive : meta.negative}`}
             >
-              <div className="balance-center" />
+              <div className="balance-center" style={{ left: `${neutralPct}%` }} />
               <div
-                className={`balance-fill balance-fill-${value >= 0 ? 'positive' : 'negative'}`}
+                className={`balance-fill balance-fill-${isFavorable ? 'positive' : 'negative'}`}
                 style={
-                  value >= 0
-                    ? { left: '50%', width: `${magnitudePct}%` }
-                    : { right: '50%', width: `${magnitudePct}%` }
+                  isFavorable
+                    ? { left: `${neutralPct}%`, width: `${magnitudePct}%` }
+                    : { right: `${100 - neutralPct}%`, width: `${magnitudePct}%` }
                 }
               />
             </div>
