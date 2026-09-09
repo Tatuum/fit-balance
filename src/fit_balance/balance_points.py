@@ -97,7 +97,14 @@ def compute_womens_balance_points(
             (m.torso / m.height - TORSO_HEIGHT_RATIO_BASELINE)
             - (m.leg / m.height - LEG_HEIGHT_RATIO_BASELINE)
         ),
-        frame_scale_dev=(m.bust + m.waist + m.hip) / 3 / m.height - frame_scale_baseline,
+        # max(shoulder, bust), not bust alone: bust size is confounded by
+        # breast tissue independent of actual frame/width, so it can
+        # undercount a broad-shouldered, less-busty build. Whichever of the
+        # two is actually wider drives the "how fuller does the top read"
+        # signal; falls back to bust only when bust genuinely exceeds
+        # shoulder (see NOTES.md).
+        frame_scale_dev=(max(m.shoulder, m.bust) + m.waist + m.hip) / 3 / m.height
+        - frame_scale_baseline,
     )
 
 

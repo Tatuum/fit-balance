@@ -7,6 +7,7 @@ test_scoring.py; this file covers only the balance-point layer.
 import pytest
 
 from fit_balance.balance_points import WomensBalancePoints, compute_womens_balance_points
+from fit_balance.schemas import Measurements
 from tests.fixtures import (
     APPLE_LONG_TORSO,
     HOURGLASS_BALANCED,
@@ -23,6 +24,23 @@ def test_hourglass_balanced_frame():
     assert abs(bp.torso_leg_balance) < 0.05, "hourglass: torso/leg at baseline, no long/short trait"
     assert abs(bp.frame_scale_dev) < 0.05, "frame_scale=balanced"
     assert bp.main_concern() == "waist_definition"
+
+
+def test_frame_scale_dev_uses_the_wider_of_shoulder_or_bust():
+    """A broad-shouldered, less-busty build should read at least as full as
+    an equally-broad-busted one with a narrow shoulder — bust alone would
+    undercount the former."""
+    base = Measurements(
+        shoulder=90.0, bust=90.0, waist=70.0, hip=95.0, torso=40.0, leg=75.0, height=165.0
+    )
+    baseline = compute_womens_balance_points(base)
+    broad_shoulder = compute_womens_balance_points(base.model_copy(update={"shoulder": 110.0}))
+    narrow_shoulder = compute_womens_balance_points(base.model_copy(update={"shoulder": 70.0}))
+
+    assert broad_shoulder.frame_scale_dev > baseline.frame_scale_dev
+    # Shrinking the shoulder below bust shouldn't change anything — bust
+    # (still 90.0) is the wider of the two either way.
+    assert narrow_shoulder.frame_scale_dev == baseline.frame_scale_dev
 
 
 def test_apple_long_torso():

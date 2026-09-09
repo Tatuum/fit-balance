@@ -50,13 +50,25 @@ shoulder_hip_balance = (shoulder - hip) / max(shoulder, hip)  # + = broad should
 bust_hip_balance   = (bust - hip) / max(bust, hip)          # + = top wider, − = bottom wider
 waist_definition   = 1 - waist / avg(bust, hip)              # + = defined waist (an asset), ~0/− = no natural cinch
 torso_leg_balance  = (torso/height - 0.245) - (leg/height - 0.455)  # + = long torso, − = long legs (deviation from each landmark's own baseline ratio-to-height — see "known gaps")
-frame_scale_dev    = avg(bust,waist,hip)/height - baseline    # + = reads fuller relative to height, − = reads slighter
+frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + = reads fuller relative to height, − = reads slighter
 ```
 
 `shoulder` is a **circumference** around the fullest part of the shoulders/
 upper arms (the stylist body-shape-calculator convention) — not the
 tailoring point-to-point shoulder width, which is a different scale and
 isn't comparable to bust/hip circumferences.
+
+`frame_scale_dev` uses `max(shoulder, bust)`, not bust alone (2026-09): bust
+size is confounded by breast tissue independent of actual frame/width, so
+using it alone can undercount a broad-shouldered, less-busty build and
+overcount a fuller-busted, narrow-shouldered one. Whichever of the two
+measurements is actually wider drives the "how fuller does the top read"
+signal. `WOMEN_FRAME_SCALE_BASELINE` (0.50) was left unchanged — across the
+5 worked-example fixtures, shoulder exceeds bust by only ~0.5-0.6cm where it
+exceeds it at all (`PEAR_FULLER` has bust > shoulder, so it's unaffected),
+too small a shift to justify a new guessed number on top of an already-
+guessed baseline (see "known gaps" below). Revisit alongside that baseline
+once real anthropometric data is in.
 
 "Main concern" = whichever balance point has the largest absolute magnitude.
 A favorable-sign value (e.g. high waist_definition) is an **asset**, not a
