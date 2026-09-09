@@ -142,12 +142,25 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
 - Shoulder circumference is now in the v0 model as `shoulder_hip_balance`
   (implemented 2026-09) — see the formula above. It distinguishes a
   broad-shoulder/narrow-hip build from a top-heavy-by-bust build that
-  would otherwise look identical on `bust_hip_balance` alone. Not yet
-  wired into any `effects.yaml`/`AXIS_RULES` scoring — no v0 garment
-  technique reacts to it yet (same "known fact, not yet scored" treatment
-  as `clings_to_hip`). Which techniques should (structured shoulders,
-  halter necklines, raglan sleeves, etc.) is a separate, not-yet-made
-  decision — would need its own worked example.
+  would otherwise look identical on `bust_hip_balance` alone. Still not
+  wired into a dedicated `effects.yaml`/`AXIS_RULES` entry of its own — no
+  v0 garment technique (structured shoulders, halter necklines, raglan
+  sleeves) reacts specifically to shoulder width yet; that's a separate,
+  not-yet-made decision needing its own worked example.
+
+  It does now feed `adds_volume_top`/`adds_volume_bottom` (2026-09),
+  though: those were scored against `bust_hip_balance` alone, which meant
+  the engine had no way to know the shoulder line was already broad — it
+  would recommend adding *more* top volume onto an already-broad-shouldered
+  body, and would completely miss recommending bottom volume to balance a
+  broad-shouldered build with an otherwise-balanced bust. Both rules now key
+  off `top_hip_balance = max(shoulder_hip_balance, bust_hip_balance)`
+  (`scoring.py`'s `_axis_value`) — a derived value, not a stored
+  `WomensBalancePoints` field, so it doesn't compete with the two real axes
+  for `main_concern()`. Same deadzone treatment as the four zero-neutral
+  axes. Pinned by
+  `test_scoring.py::test_adds_volume_top_works_against_an_already_broad_shoulder`
+  and `test_adds_volume_bottom_fires_for_broad_shoulders_even_with_balanced_bust`.
 
 ## Worked examples (now automated tests)
 

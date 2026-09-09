@@ -89,9 +89,16 @@ def test_small_bust_hip_imbalance_is_not_scored_as_an_imbalance():
 
 def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
     """adds_volume_bottom (e.g. wide-leg trousers) is weighted opposite to
-    adds_volume_top on the same bust_hip_balance axis: bottom volume helps
-    balance a top-heavy build and works against an already bottom-heavy
-    (pear) one."""
+    adds_volume_top on the same top_hip_balance axis (max of
+    shoulder_hip_balance and bust_hip_balance — see scoring.py): bottom
+    volume helps balance a top-heavy build and works against an already
+    bottom-heavy (pear) one.
+
+    bottom_heavy sets shoulder_hip_balance to -0.2 too, not just
+    bust_hip_balance: a neutral shoulder_hip_balance=0 would win the max()
+    and mask a hip-heavy bust_hip_balance as "balanced", since a shoulder
+    line that already matches hip means the top doesn't uniformly read
+    narrow even if the bust alone is smaller than hip."""
     top_heavy = WomensBalancePoints(
         shoulder_hip_balance=0,
         bust_hip_balance=0.2,
@@ -100,7 +107,7 @@ def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
         frame_scale_dev=0,
     )
     bottom_heavy = WomensBalancePoints(
-        shoulder_hip_balance=0,
+        shoulder_hip_balance=-0.2,
         bust_hip_balance=-0.2,
         waist_definition=0,
         torso_leg_balance=0,
@@ -109,3 +116,39 @@ def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
     garment = GarmentAttributes(techniques=["wide_leg"])
     assert score(top_heavy, garment).score > 0
     assert score(bottom_heavy, garment).score < 0
+
+
+def test_adds_volume_top_works_against_an_already_broad_shoulder():
+    """Broad shoulders should flip adds_volume_top negative even though
+    bust_hip_balance alone reads as needing top volume: top_hip_balance is
+    max(shoulder_hip_balance, bust_hip_balance), so the already-wide
+    shoulder — not the narrower bust — decides it. It doesn't just fail to
+    recommend oversized_top, it actively counts against it: the shoulder
+    line already reads wide, so adding more volume there works against this
+    body rather than doing nothing."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.2,
+        bust_hip_balance=-0.2,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    garment = GarmentAttributes(techniques=["oversized_top"])
+    verdict = score(bp, garment)
+    assert any(r.tag == "adds_volume_top" and r.direction == "-" for r in verdict.reasons)
+
+
+def test_adds_volume_bottom_fires_for_broad_shoulders_even_with_balanced_bust():
+    """A broad-shouldered build whose bust happens to match hip still
+    benefits from bottom volume — bust_hip_balance alone would miss this
+    entirely, since it reads as balanced on its own."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.2,
+        bust_hip_balance=0.0,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    garment = GarmentAttributes(techniques=["wide_leg"])
+    verdict = score(bp, garment)
+    assert any(r.tag == "adds_volume_bottom" and r.direction == "+" for r in verdict.reasons)
