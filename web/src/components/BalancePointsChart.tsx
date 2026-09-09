@@ -1,69 +1,98 @@
 import type { BalancePoints } from '../lib/types'
 
 /**
- * Diverging-bar view of every balance point: how far this body reads from
- * neutral (0) on each axis, and which direction. Geometry (which side of
- * center a bar extends) carries the polarity; color reinforces it — it
- * never stands in for the sign alone, every value also has a signed text
- * label. No shape label, no good/bad judgment baked into color: most axes
- * are purely descriptive (which side is bigger), not a problem to fix — see
- * NOTES.md. The one axis with a favorable direction (waist_definition) is
- * still drawn the same way; its caption says so in words, not in color.
+ * Plain-language read of every balance point — no numeric scale, just
+ * "Axis: status" with a colored dot. Green means nothing notable here
+ * (balanced, or waist_definition reading as a defined asset); the muted dot
+ * means this axis has a descriptive trait, which per NOTES.md is not a
+ * problem to fix for any axis but waist_definition — no good/bad judgment
+ * is baked into the color itself, only "notable vs not."
+ *
+ * shoulder_hip_balance and bust_hip_balance are combined into one "Top vs
+ * hip" row rather than shown separately: NOTES.md documents them as
+ * deliberately distinct balance points (a broad-shoulder/narrow-hip build
+ * reads differently from a top-heavy-by-bust one, and bust_hip_balance
+ * alone would conflate them), but showing "shoulder wider than hip" right
+ * next to "hip wider than bust" as two independent lines reads as a
+ * contradiction to anyone who doesn't already know shoulder and bust are
+ * different measurements. Combining them into one sentence keeps both
+ * signals (still two separate numbers underneath, still scored separately)
+ * without the apparent self-contradiction.
  */
 
 type Axis = keyof BalancePoints
+type SingleAxis = Exclude<Axis, 'shoulder_hip_balance' | 'bust_hip_balance'>
 
-const AXIS_ORDER: Axis[] = [
-  'shoulder_hip_balance',
-  'bust_hip_balance',
-  'waist_definition',
-  'torso_leg_balance',
-  'frame_scale_dev',
-]
+const SINGLE_AXIS_ORDER: SingleAxis[] = ['waist_definition', 'torso_leg_balance', 'frame_scale_dev']
 
-const AXIS_META: Record<Axis, { label: string; positive: string; negative: string; neutral: number }> = {
-  shoulder_hip_balance: {
-    label: 'Shoulder vs hip',
-    positive: '+ shoulder wider than hip',
-    negative: '− hip wider than shoulder',
-    neutral: 0,
-  },
-  bust_hip_balance: {
-    label: 'Bust vs hip',
-    positive: '+ bust wider than hip',
-    negative: '− hip wider than bust',
-    neutral: 0,
-  },
+// Mirrors balance_points.IMBALANCE_DEADZONE (Python) — keep these two in
+// sync. Below this magnitude, a deviation from 0 is measurement noise, not
+// a real proportion difference, for the four axes where 0 is neutral in
+// both directions.
+const IMBALANCE_DEADZONE = 0.05
+
+const isBalanced = (value: number) => Math.abs(value) < IMBALANCE_DEADZONE
+const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(3)}`
+
+type Lean = 'balanced' | 'wider' | 'narrower'
+
+const leanOf = (value: number): Lean => (isBalanced(value) ? 'balanced' : value >= 0 ? 'wider' : 'narrower')
+
+function describeTopVsHip(shoulderHip: number, bustHip: number): string {
+  const shoulderLean = leanOf(shoulderHip)
+  const bustLean = leanOf(bustHip)
+
+  if (shoulderLean === 'balanced' && bustLean === 'balanced') return 'balanced'
+  if (shoulderLean === 'balanced') {
+    return bustLean === 'wider' ? 'bust wider than hip' : 'hip wider than bust'
+  }
+  if (bustLean === 'balanced') {
+    return shoulderLean === 'wider' ? 'shoulder wider than hip' : 'hip wider than shoulder'
+  }
+  if (shoulderLean === bustLean) {
+    return shoulderLean === 'wider' ? 'shoulder and bust wider than hip' : 'hip wider than shoulder and bust'
+  }
+  // Diverge: one wider than hip, the other narrower.
+  return shoulderLean === 'wider'
+    ? 'broader shoulders, but hip fuller than bust'
+    : 'narrower shoulders, but bust fuller than hip'
+}
+
+interface AxisMeta {
+  label: string
+  isBalanced: (value: number) => boolean
+  // Status text for the two states. "Not balanced" still splits by sign
+  // (two distinct, equally-real traits, e.g. long-torso vs. long-legs).
+  // waist_definition's favorable/unfavorable split is already fully
+  // captured by isBalanced, so it ignores sign.
+  describe: (value: number, balanced: boolean) => string
+}
+
+const describeBySign = (positive: string, negative: string) => (value: number, balanced: boolean) =>
+  balanced ? 'balanced' : value >= 0 ? positive : negative
+
+const AXIS_META: Record<SingleAxis, AxisMeta> = {
   waist_definition: {
     label: 'Waist definition',
-    positive: '+ defined waist (an asset)',
-    negative: '− little to no natural cinch',
     // NOTES.md documents this axis's own zero point loosely — "~0/− = no
     // natural cinch" — so literal 0 isn't the practically meaningful
-    // threshold. Matches scoring.py's AXIS_RULES reference for
+    // threshold, and it isn't a symmetric deadzone either (favorable is
+    // one-directional). Matches scoring.py's AXIS_RULES reference for
     // defines_waist/clings_to_waist: keep these two in sync.
-    neutral: 0.15,
+    isBalanced: (value) => value >= 0.15,
+    describe: (_value, balanced) => (balanced ? 'defined waist (an asset)' : 'little to no natural cinch'),
   },
   torso_leg_balance: {
     label: 'Torso vs leg',
-    positive: '+ long torso',
-    negative: '− long legs',
-    neutral: 0,
+    isBalanced,
+    describe: describeBySign('long torso', 'long legs'),
   },
   frame_scale_dev: {
     label: 'Frame scale',
-    positive: '+ reads fuller for height',
-    negative: '− reads slighter for height',
-    neutral: 0,
+    isBalanced,
+    describe: describeBySign('reads fuller for height', 'reads slighter for height'),
   },
 }
-
-// Typical human range for these ratios (seen across the worked examples:
-// roughly ±0.15-0.26) plus headroom — a fixed domain so bars are
-// comparable at a glance instead of rescaling every render.
-const DOMAIN = 0.4
-
-const formatValue = (value: number) => (value >= 0 ? `+${value.toFixed(3)}` : value.toFixed(3))
 
 interface BalancePointsChartProps {
   balancePoints: BalancePoints
@@ -71,52 +100,41 @@ interface BalancePointsChartProps {
 }
 
 export function BalancePointsChart({ balancePoints, mainConcern }: BalancePointsChartProps) {
-  const domain = Math.max(DOMAIN, ...AXIS_ORDER.map((axis) => Math.abs(balancePoints[axis])))
+  const shoulderHip = balancePoints.shoulder_hip_balance
+  const bustHip = balancePoints.bust_hip_balance
+  const topVsHipBalanced = isBalanced(shoulderHip) && isBalanced(bustHip)
+  const topVsHipIsMainConcern = mainConcern === 'shoulder_hip_balance' || mainConcern === 'bust_hip_balance'
 
   return (
     <div className="balance-chart">
-      <div className="balance-legend">
-        <span className="balance-legend-item">
-          <span className="balance-swatch balance-swatch-positive" /> above neutral
+      <div
+        className={`balance-row${topVsHipIsMainConcern ? ' balance-row-main-concern' : ''}`}
+        title={`Shoulder vs hip: ${formatSigned(shoulderHip)}, Bust vs hip: ${formatSigned(bustHip)}`}
+      >
+        <span className={`balance-dot balance-dot-${topVsHipBalanced ? 'balanced' : 'notable'}`} />
+        <span className="balance-text">
+          <span className="balance-label">Top vs hip:</span> {describeTopVsHip(shoulderHip, bustHip)}
         </span>
-        <span className="balance-legend-item">
-          <span className="balance-swatch balance-swatch-negative" /> below neutral
-        </span>
+        {topVsHipIsMainConcern && <span className="balance-badge">main concern</span>}
       </div>
-      {AXIS_ORDER.map((axis) => {
+      {SINGLE_AXIS_ORDER.map((axis) => {
         const value = balancePoints[axis]
         const meta = AXIS_META[axis]
         const isMainConcern = axis === mainConcern
-        const isFavorable = value >= meta.neutral
-        const neutralPct = 50 + (meta.neutral / domain) * 50
-        const magnitudePct = (Math.abs(value - meta.neutral) / domain) * 50
+        const balanced = meta.isBalanced(value)
+        const statusText = meta.describe(value, balanced)
+
         return (
           <div
             key={axis}
             className={`balance-row${isMainConcern ? ' balance-row-main-concern' : ''}`}
+            title={`${meta.label}: ${formatSigned(value)}`}
           >
-            <div className="balance-label">
-              {meta.label}
-              {isMainConcern && <span className="balance-badge">main concern</span>}
-            </div>
-            <div
-              className="balance-track"
-              title={`${meta.label}: ${formatValue(value)} — ${isFavorable ? meta.positive : meta.negative}`}
-            >
-              <div className="balance-center" style={{ left: `${neutralPct}%` }} />
-              <div
-                className={`balance-fill balance-fill-${isFavorable ? 'positive' : 'negative'}`}
-                style={
-                  isFavorable
-                    ? { left: `${neutralPct}%`, width: `${magnitudePct}%` }
-                    : { right: `${100 - neutralPct}%`, width: `${magnitudePct}%` }
-                }
-              />
-            </div>
-            <div className="balance-value">{formatValue(value)}</div>
-            <div className="balance-caption">
-              {meta.positive} · {meta.negative}
-            </div>
+            <span className={`balance-dot balance-dot-${balanced ? 'balanced' : 'notable'}`} />
+            <span className="balance-text">
+              <span className="balance-label">{meta.label}:</span> {statusText}
+            </span>
+            {isMainConcern && <span className="balance-badge">main concern</span>}
           </div>
         )
       })}
