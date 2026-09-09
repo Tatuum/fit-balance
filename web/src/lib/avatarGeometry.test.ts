@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { avatarOutline, computeAvatarGeometry, toSvgPath } from './avatarGeometry'
+import { avatarOutline, computeAvatarGeometry, headEllipse, toSvgPath } from './avatarGeometry'
 import type { Measurements } from './types'
 
 const BASE: Measurements = {
@@ -65,6 +65,30 @@ describe('computeAvatarGeometry', () => {
   })
 })
 
+describe('headEllipse', () => {
+  it('sits centered, directly above the neck keypoint', () => {
+    const geometry = computeAvatarGeometry(BASE)
+    const head = headEllipse(geometry)
+    expect(head.cx).toBe(50)
+    expect(head.rx).toBeGreaterThan(0)
+    expect(head.ry).toBeGreaterThan(0)
+    // Chin (bottom of the ellipse) should land at or above the neck keypoint's y.
+    const [neckPoint] = avatarOutline(geometry)
+    expect(head.cy + head.ry).toBeLessThanOrEqual(neckPoint.y)
+  })
+
+  it('is invariant under uniformly scaling every measurement', () => {
+    const base = headEllipse(computeAvatarGeometry(BASE))
+    const scaledUp: Measurements = Object.fromEntries(
+      Object.entries(BASE).map(([key, value]) => [key, value * 1.5]),
+    ) as unknown as Measurements
+    const scaled = headEllipse(computeAvatarGeometry(scaledUp))
+
+    expect(scaled.rx).toBeCloseTo(base.rx)
+    expect(scaled.ry).toBeCloseTo(base.ry)
+  })
+})
+
 describe('avatarOutline + toSvgPath', () => {
   it('produces a symmetric, closed outline', () => {
     const geometry = computeAvatarGeometry(BASE)
@@ -77,12 +101,13 @@ describe('avatarOutline + toSvgPath', () => {
     expect(first.x - 50).toBeCloseTo(50 - last.x)
   })
 
-  it('renders a valid closed SVG path string', () => {
+  it('renders a valid closed SVG path string made of smooth curves', () => {
     const geometry = computeAvatarGeometry(BASE)
     const path = toSvgPath(avatarOutline(geometry))
     expect(path.startsWith('M ')).toBe(true)
     expect(path.endsWith('Z')).toBe(true)
-    expect(path).toContain('L ')
+    expect(path).toContain('C ')
+    expect(path).not.toContain('L ')
   })
 
   it('returns an empty string for an empty outline', () => {

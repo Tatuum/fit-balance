@@ -10,12 +10,14 @@ import type { Measurements } from './types'
  * independent of how it's eventually rendered.
  */
 
-// Front-view width from a circumference, via the classic anthropometric
-// ellipse approximation: a body cross-section is wider than it is deep, so
-// circumference isn't width * pi. A commonly cited approximation is a
-// ~10:7 circumference-to-width ratio (width ≈ circumference * 7/10) —
-// real depth varies by build, so this is an approximation, not exact.
-const WIDTH_FROM_CIRCUMFERENCE = 0.7
+// Front-view width from a circumference. Treating the cross-section as a
+// circle gives width = circumference / pi ≈ circumference * 0.318; a real
+// torso is wider than it is deep (an ellipse, not a circle), which pushes
+// the width up a bit from that circular baseline, but nowhere near
+// circumference * 0.7 — that would mean the body is barely deeper than a
+// flat plane. 0.32 keeps the ellipse correction modest and real depth still
+// varies by build, so this stays an approximation, not exact.
+const WIDTH_FROM_CIRCUMFERENCE = 0.32
 
 // Target total rendered height (SVG units). Every user's figure scales to
 // roughly this size regardless of their actual height, so the avatar stays
@@ -30,6 +32,14 @@ const TARGET_FIGURE_HEIGHT = 200
 const NECK_TO_SHOULDER_RATIO = 0.45
 const ANKLE_TO_HIP_RATIO = 0.3
 
+// Head isn't a measured input either. Rather than size it off the
+// (circumference-derived, and so already-inflated) shoulder width, it's
+// sized off total figure height using the classic figure-drawing convention
+// of a body being ~7.5 head-heights tall — that stays proportionate however
+// wide or narrow the rest of the figure is drawn.
+const HEAD_HEIGHTS_PER_FIGURE = 7.5
+const HEAD_ASPECT_RATIO = 1.3 // head height ≈ 1.3x head width (egg-shaped, taller than wide)
+
 export interface AvatarGeometry {
   widths: {
     neck: number
@@ -38,6 +48,10 @@ export interface AvatarGeometry {
     waist: number
     hip: number
     ankle: number
+  }
+  head: {
+    width: number
+    height: number
   }
   torsoHeight: number
   legHeight: number
@@ -49,6 +63,7 @@ export function computeAvatarGeometry(m: Measurements): AvatarGeometry {
 
   const shoulder = widthOf(m.shoulder)
   const hip = widthOf(m.hip)
+  const headHeight = TARGET_FIGURE_HEIGHT / HEAD_HEIGHTS_PER_FIGURE
 
   return {
     widths: {
@@ -58,6 +73,10 @@ export function computeAvatarGeometry(m: Measurements): AvatarGeometry {
       waist: widthOf(m.waist),
       hip,
       ankle: hip * ANKLE_TO_HIP_RATIO,
+    },
+    head: {
+      width: headHeight / HEAD_ASPECT_RATIO,
+      height: headHeight,
     },
     torsoHeight: m.torso * scale,
     legHeight: m.leg * scale,
@@ -72,6 +91,20 @@ export interface Keypoint {
 const CENTER_X = 50
 const Y_NECK = 5
 const Y_SHOULDER = 10
+
+export interface Ellipse {
+  cx: number
+  cy: number
+  rx: number
+  ry: number
+}
+
+/** Head ellipse, resting with its chin at the neck keypoint. */
+export function headEllipse(geometry: AvatarGeometry): Ellipse {
+  const rx = geometry.head.width / 2
+  const ry = geometry.head.height / 2
+  return { cx: CENTER_X, cy: Y_NECK - ry, rx, ry }
+}
 
 /** Right-half keypoints, top to bottom, mirrored to build the full outline. */
 export function avatarOutline(geometry: AvatarGeometry): Keypoint[] {
@@ -95,9 +128,28 @@ export function avatarOutline(geometry: AvatarGeometry): Keypoint[] {
   return [...right, ...left]
 }
 
+/**
+ * Renders the outline as a smooth closed curve rather than a straight-edged
+ * polygon, so the silhouette reads as a body rather than a faceted schematic.
+ * Each segment is a Catmull-Rom spline (through the point and its neighbors)
+ * converted to an equivalent cubic Bezier — a standard way to get a curve
+ * that actually passes through every keypoint, not just approaches it.
+ */
 export function toSvgPath(points: Keypoint[]): string {
   if (points.length === 0) return ''
-  const [first, ...rest] = points
-  const commands = rest.map((p) => `L ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+  const n = points.length
+  const at = (i: number) => points[((i % n) + n) % n]
+
+  const commands = points.map((_, i) => {
+    const p0 = at(i - 1)
+    const p1 = at(i)
+    const p2 = at(i + 1)
+    const p3 = at(i + 2)
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 }
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 }
+    return `C ${c1.x.toFixed(2)} ${c1.y.toFixed(2)} ${c2.x.toFixed(2)} ${c2.y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+  })
+
+  const first = points[0]
   return `M ${first.x.toFixed(2)} ${first.y.toFixed(2)} ${commands.join(' ')} Z`
 }
