@@ -40,6 +40,13 @@ class _AxisRule:
 AXIS_RULES: dict[str, _AxisRule] = {
     "defines_waist": _AxisRule(axis="waist_definition", weight=1.0, reference=0.15),
     "clings_to_waist": _AxisRule(axis="waist_definition", weight=1.0, reference=0.15),
+    # Mirrors defines_waist/clings_to_waist with the opposite sign: a boxy,
+    # unshaped silhouette (oversized_top) doesn't just fail to define the
+    # waist, it obscures whatever natural definition is already there. Only
+    # a real cost once waist_definition clears the same 0.15 "there's
+    # something worth showing" threshold those two use — hiding a waist
+    # that was never defined to begin with isn't a loss.
+    "hides_waist": _AxisRule(axis="waist_definition", weight=-1.0, reference=0.15),
     "elongates_leg": _AxisRule(axis="torso_leg_balance", weight=1.0),
     "shortens_torso": _AxisRule(axis="torso_leg_balance", weight=1.0),
     "elongates_torso": _AxisRule(axis="torso_leg_balance", weight=-1.0),

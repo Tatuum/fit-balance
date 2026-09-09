@@ -44,20 +44,22 @@ def test_resolve_outfit_raises_for_unknown_item_id():
 
 def test_attribution_reuses_worked_example_5():
     """NOTES.md worked example 5: pear + fuller frame, oversized top +
-    skinny/straight bottom -> recommended, with both a helping and a
-    hurting reason. Same body, same techniques (via catalog items instead
-    of raw technique strings), plus attribution pinned to the right item."""
+    skinny/straight bottom -> neutral, with both a helping and a hurting
+    reason (including oversized_top hiding this body's defined waist). Same
+    body, same techniques (via catalog items instead of raw technique
+    strings), plus attribution pinned to the right item."""
     items, garment = resolve_outfit(["oversized_top", "slim_trousers"])
     assert garment.techniques == ["oversized_top", "skinny_straight"]
 
     bp = compute_womens_balance_points(PEAR_FULLER)
     verdict = score(bp, garment)
-    assert verdict.recommendation == "recommended"
+    assert verdict.recommendation == "neutral"
 
     attributed = attribute_reasons(verdict.reasons, items)
     by_tag = {r.tag: r.item_ids for r in attributed}
     assert by_tag["adds_bulk"] == ["oversized_top"]
     assert by_tag["reduces_bulk"] == ["slim_trousers"]
+    assert by_tag["hides_waist"] == ["oversized_top"]
 
 
 def test_attribution_lists_both_items_when_tags_overlap():

@@ -139,7 +139,7 @@ by re-reading doesn't scale. These 5 are now encoded as regression tests in
 2. shape≈apple,     torso_leg=long_torso,  garment=[sheath_bodycon, belted_natural_waist] → avoid
 3. shape≈rectangle, torso_leg=long_torso, height=petite, garment=[drop_waist]              → strong avoid
 4. shape≈rectangle, torso_leg=long_torso, height=petite, garment=[empire_waistline, vertical_detail] → recommended
-5. shape≈pear,      frame_scale=fuller,   garment=[oversized_top, skinny_straight]         → recommended, with a noted tension (shape wants some added volume on top; frame_scale wants less overall bulk — surface both)
+5. shape≈pear,      frame_scale=fuller,   garment=[oversized_top, skinny_straight]         → neutral, with a noted tension (shape wants some added volume on top, frame_scale wants less overall bulk, but oversized_top also hides this body's defined waist — a real asset — so the net doesn't clear "recommended")
 ```
 
 Any change to `balance_points.py`, `effects.yaml`, or `scoring.py` must keep
@@ -183,6 +183,17 @@ against an already bottom-heavy one, tested in
 Further vocabulary growth stays a case-by-case decision, not a batch
 exercise — each addition should be this deliberate about which existing
 tag it reuses versus genuinely needing a new one.
+
+`oversized_top` also carries `hides_waist` (2026-09) — a boxy, unshaped
+silhouette is a genuine, wearer-independent fact about the technique, not
+just "adds volume/bulk": it obscures whatever natural waist definition is
+already there. Wired into `AXIS_RULES` as the mirror of
+`defines_waist`/`clings_to_waist` (same axis and reference, opposite-sign
+weight), so it only costs anything once `waist_definition` clears the same
+0.15 threshold those two use — see worked example 5 above, which this
+changed from `recommended` to `neutral`: the correction it makes to
+`bust_hip_balance` is real, but no longer enough on its own to outweigh
+hiding an already-defined waist.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques

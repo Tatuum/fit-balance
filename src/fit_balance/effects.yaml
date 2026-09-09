@@ -25,6 +25,7 @@ vertical_detail:
 oversized_top:
   - adds_volume_top
   - adds_bulk
+  - hides_waist
 
 skinny_straight:
   - reduces_bulk
