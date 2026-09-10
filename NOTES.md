@@ -1,5 +1,11 @@
 # fit-balance
 
+This is the current-state spec — what the formulas and architecture are
+*today*. For why they got this way (rejected alternatives, superseded
+values, the reasoning behind a specific number), see
+[`docs/decisions/`](docs/decisions/README.md) — one immutable file per
+engine-level design decision, referenced from the relevant section below.
+
 ## Pitch
 
 An explainable styling recommendation engine. Instead of a black-box "you're a
@@ -56,35 +62,23 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
 `shoulder` is a **circumference** around the fullest part of the shoulders/
 upper arms (the stylist body-shape-calculator convention) — not the
 tailoring point-to-point shoulder width, which is a different scale and
-isn't comparable to bust/hip circumferences.
+isn't comparable to bust/hip circumferences. `frame_scale_dev` takes
+`max(shoulder, bust)` rather than bust alone, since bust size is confounded
+by breast tissue independent of actual frame/width (decision
+[0008](docs/decisions/0008-frame-scale-dev-max-shoulder-bust.md)).
 
-`frame_scale_dev` uses `max(shoulder, bust)`, not bust alone (2026-09): bust
-size is confounded by breast tissue independent of actual frame/width, so
-using it alone can undercount a broad-shouldered, less-busty build and
-overcount a fuller-busted, narrow-shouldered one. Whichever of the two
-measurements is actually wider drives the "how fuller does the top read"
-signal. `WOMEN_FRAME_SCALE_BASELINE` (0.50) was left unchanged — across the
-5 worked-example fixtures, shoulder exceeds bust by only ~0.5-0.6cm where it
-exceeds it at all (`PEAR_FULLER` has bust > shoulder, so it's unaffected),
-too small a shift to justify a new guessed number on top of an already-
-guessed baseline (see "known gaps" below). Revisit alongside that baseline
-once real anthropometric data is in.
-
-"Main concern" = whichever balance point has the largest absolute magnitude.
-A favorable-sign value (e.g. high waist_definition) is an **asset**, not a
-concern — surface it as a strength to build around, not a problem to fix.
-
-**Imbalance deadzone (2026-09)**: `shoulder_hip_balance`, `bust_hip_balance`,
-`torso_leg_balance`, and `frame_scale_dev` are neutral at 0 in both
-directions, so a value under 0.05 (`balance_points.IMBALANCE_DEADZONE`) is
-measurement noise, not a real proportion difference — `main_concern()`
-won't name one of these as the concern below that line (returning `None` if
-nothing on any axis clears it), and `scoring.score()` won't generate a
-reason against that axis either. `waist_definition` is deliberately left
-out: it already has its own asymmetric threshold (0.15, in scoring.py's
-`AXIS_RULES`) for a different reason — one direction is favorable, not "0 is
-neutral both ways" — so stacking a second deadzone on top isn't the same
-kind of fix.
+"Main concern" = whichever balance point has the largest absolute
+magnitude, skipping `shoulder_hip_balance`/`bust_hip_balance`/
+`torso_leg_balance`/`frame_scale_dev` values under 0.05
+(`balance_points.IMBALANCE_DEADZONE`) — those four are neutral at 0 in both
+directions, so a value that small is measurement noise, not a real
+proportion difference; `main_concern()` returns `None` if nothing clears it.
+`waist_definition` has no deadzone — its own asymmetric threshold (0.15, in
+`scoring.py`'s `AXIS_RULES`) already serves that purpose, for a different
+reason (one direction is favorable, not "0 is neutral both ways"). Decision
+[0007](docs/decisions/0007-imbalance-deadzone.md). A favorable-sign value
+(e.g. high `waist_definition`) is an **asset**, not a concern — surface it
+as a strength to build around, not a problem to fix.
 
 ## Balance points — menswear v0
 
@@ -113,54 +107,37 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   waist/midsection-clinging (bad for an undefined waist). Found via a
   worked example, not chased further by hand — better to let real user
   disagreement drive which tags need splitting next.
-- `torso_leg` measurement convention (decided, researched via web search
-  against ISO 8559 — the international garment-measurement standard — and
-  tailoring practice): `torso` = **back waist length** (nape of neck / C7
-  vertebra down to the natural waist); `leg` = **inseam** (crotch seam down
-  to the floor, standing barefoot). These are two independent, standard, self-measurable
-  numbers anchored at different landmarks (waist vs. crotch) — they are
-  *not* expected to sum to height (a clinical pair that does, sitting
-  height + subischial leg length, bakes the head into "torso" and needs a
-  stadiometer, so it doesn't fit a self-measured consumer flow). Still
-  open: back waist length is harder to self-measure accurately than
-  inseam (which is a well-known measurement) — self-report vs. a guided
-  photo measurement is still undecided for the actual input flow.
-  **Formula bug found and fixed (2026-09)**: the original
-  `torso_leg_balance = (torso - leg) / max(torso, leg)` looked plausible
-  but was wrong for real bodies — back waist length (~39-41cm per ASTM
-  misses sizing) and inseam (~0.45-0.46 × height) are structurally
-  different magnitudes for *everyone* (back waist length is roughly half
-  of inseam), so the raw ratio read as strongly "long legs" regardless of
-  actual proportion. The worked-example fixtures had masked this by using
-  unrealistic torso values inflated to sit near leg's magnitude. Fixed by
-  comparing each measurement's deviation from its *own* baseline
-  ratio-to-height (mirroring `frame_scale_dev`'s approach) — see the
-  formula above and `TORSO_HEIGHT_RATIO_BASELINE`/
-  `LEG_HEIGHT_RATIO_BASELINE` in `balance_points.py`. Those two baselines
-  are themselves guessed from general published ranges, not a rigorous
-  study — same caveat as the `frame_scale` baselines below.
-- Shoulder circumference is now in the v0 model as `shoulder_hip_balance`
-  (implemented 2026-09) — see the formula above. It distinguishes a
-  broad-shoulder/narrow-hip build from a top-heavy-by-bust build that
-  would otherwise look identical on `bust_hip_balance` alone. Still not
-  wired into a dedicated `effects.yaml`/`AXIS_RULES` entry of its own — no
-  v0 garment technique (structured shoulders, halter necklines, raglan
-  sleeves) reacts specifically to shoulder width yet; that's a separate,
-  not-yet-made decision needing its own worked example.
-
-  It does now feed `adds_volume_top`/`adds_volume_bottom` (2026-09),
-  though: those were scored against `bust_hip_balance` alone, which meant
-  the engine had no way to know the shoulder line was already broad — it
-  would recommend adding *more* top volume onto an already-broad-shouldered
-  body, and would completely miss recommending bottom volume to balance a
-  broad-shouldered build with an otherwise-balanced bust. Both rules now key
-  off `top_hip_balance = max(shoulder_hip_balance, bust_hip_balance)`
-  (`scoring.py`'s `_axis_value`) — a derived value, not a stored
-  `WomensBalancePoints` field, so it doesn't compete with the two real axes
-  for `main_concern()`. Same deadzone treatment as the four zero-neutral
-  axes. Pinned by
-  `test_scoring.py::test_adds_volume_top_works_against_an_already_broad_shoulder`
-  and `test_adds_volume_bottom_fires_for_broad_shoulders_even_with_balanced_bust`.
+- `torso_leg` measurement convention (researched via web search against
+  ISO 8559 — the international garment-measurement standard — and tailoring
+  practice): `torso` = **back waist length** (nape of neck / C7 vertebra
+  down to the natural waist); `leg` = **inseam** (crotch seam down to the
+  floor, standing barefoot). These are two independent, standard,
+  self-measurable numbers anchored at different landmarks (waist vs.
+  crotch) — they are *not* expected to sum to height (a clinical pair that
+  does, sitting height + subischial leg length, bakes the head into "torso"
+  and needs a stadiometer, so it doesn't fit a self-measured consumer
+  flow). `torso_leg_balance` compares each measurement's deviation from its
+  own baseline ratio-to-height rather than the two raw measurements to each
+  other (decision
+  [0001](docs/decisions/0001-torso-leg-balance-formula-fix.md) — the two
+  landmarks are structurally different magnitudes for everyone, so a raw
+  ratio read as "long legs" universally). `TORSO_HEIGHT_RATIO_BASELINE`/
+  `LEG_HEIGHT_RATIO_BASELINE` in `balance_points.py` are themselves guessed
+  from general published ranges, not a rigorous study — same caveat as the
+  `frame_scale` baselines above. Still open: back waist length is harder to
+  self-measure accurately than inseam (which is a well-known measurement) —
+  self-report vs. a guided photo measurement is still undecided for the
+  actual input flow.
+- `shoulder_hip_balance` (decision
+  [0002](docs/decisions/0002-shoulder-hip-balance-axis.md)) distinguishes a
+  broad-shoulder/narrow-hip build from a top-heavy-by-bust build that would
+  otherwise look identical on `bust_hip_balance` alone. It feeds
+  `adds_volume_top`/`adds_volume_bottom` via the derived `top_hip_balance`
+  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)), but has no
+  dedicated `effects.yaml`/`AXIS_RULES` entry of its own yet — no v0 garment
+  technique (structured shoulders, halter necklines, raglan sleeves) reacts
+  specifically to shoulder width; that's a separate, not-yet-made decision
+  needing its own worked example.
 
 ## Worked examples (now automated tests)
 
@@ -202,35 +179,19 @@ photo, below): there is no computer vision, no photo input — items are
 manually authored data, exactly like `effects.yaml`.
 
 The v1 catalog started by deliberately reusing only the original 7
-technique keys; the vocabulary has since been extended (2026-09) with 4
-more, added specifically to back 4 new catalog items — `high_rise`
-(`elongates_leg`, reusing the existing tag), `low_rise` (`elongates_torso`
-+ `shortens_leg`, same tags `drop_waist` already uses — a low rise sits
-below the natural waist the same way a dropped waist seam does),
-`wide_leg` (a new tag, `adds_volume_bottom` — see below), and
-`cropped_ankle_length` (`shortens_leg`). `bomber_jacket` needed no new
-technique at all — it reuses `oversized_top` verbatim, since a bomber's
-boxy, bulk-adding silhouette is the same real effect that technique already
-models (the same reuse `oversized_jacket` already relied on). `wide_leg`'s
-`adds_volume_bottom` is the one genuinely new effect tag, wired into
-`AXIS_RULES` as the mirror image of `adds_volume_top` (same axis,
-opposite-sign weight) — bottom volume helps a top-heavy build and works
-against an already bottom-heavy one, tested in
-`test_scoring.py::test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign`.
-Further vocabulary growth stays a case-by-case decision, not a batch
-exercise — each addition should be this deliberate about which existing
-tag it reuses versus genuinely needing a new one.
-
-`oversized_top` also carries `hides_waist` (2026-09) — a boxy, unshaped
-silhouette is a genuine, wearer-independent fact about the technique, not
-just "adds volume/bulk": it obscures whatever natural waist definition is
-already there. Wired into `AXIS_RULES` as the mirror of
-`defines_waist`/`clings_to_waist` (same axis and reference, opposite-sign
-weight), so it only costs anything once `waist_definition` clears the same
-0.15 threshold those two use — see worked example 5 above, which this
-changed from `recommended` to `neutral`: the correction it makes to
-`bust_hip_balance` is real, but no longer enough on its own to outweigh
-hiding an already-defined waist.
+technique keys; the vocabulary has since been extended with `high_rise`
+(`elongates_leg`), `low_rise` (`elongates_torso` + `shortens_leg`, same tags
+`drop_waist` uses), `wide_leg` (`adds_volume_bottom`),
+`cropped_ankle_length` (`shortens_leg`), and reusing `oversized_top`
+verbatim for `bomber_jacket` — decision
+[0003](docs/decisions/0003-effects-vocabulary-extension.md). `oversized_top`
+also carries `hides_waist` — a boxy, unshaped silhouette obscures whatever
+natural waist definition is already there, wired as the mirror of
+`defines_waist`/`clings_to_waist` — decision
+[0006](docs/decisions/0006-hides-waist-effect.md). Further vocabulary
+growth stays a case-by-case decision, not a batch exercise — each addition
+should be this deliberate about which existing tag it reuses versus
+genuinely needing a new one.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques
@@ -248,19 +209,24 @@ back to which selected item(s) produced it (`attribute_reasons()` in
 only, not a substitution suggestion; recommending a specific replacement
 item is explicitly deferred, a further scoped-down step beyond this v1.
 
-## Avatar: to-scale, not balance-point-driven (2026-09)
+## Avatar: to-scale, not balance-point-driven
 
-`web/src/lib/avatarGeometry.ts` now draws the silhouette directly from real
-`Measurements` (one shared cm-to-SVG scale for every width and length),
-not from balance-point ratios — two people with the same proportions but
-different absolute sizes used to render identically; now the avatar is a
-true-to-scale drawing of the actual entered numbers. Circumferences convert
-to a front-view width via the standard anthropometric ellipse
-approximation (~10:7 circumference-to-width ratio) — an approximation, not
-exact, same caveat class as `frame_scale`'s baseline. Neck/ankle aren't
-measured inputs; they're drawn as a fixed proportion of shoulder/hip width
-for visual completeness only. This is purely a rendering change —
-`balance_points.py`, `scoring.py`, and `effects.yaml` are untouched.
+`web/src/lib/avatarGeometry.ts` draws the silhouette directly from real
+`Measurements` (one shared cm-to-SVG scale for every width and length), not
+from balance-point ratios, so two people with the same proportions but
+different absolute sizes render at different sizes. The outline is a closed
+Catmull-Rom spline through the measurement keypoints (not a straight-edged
+polygon), with a head ellipse sized off total figure height (the classic
+"7.5 heads tall" convention) sitting on the neck keypoint. Circumferences
+convert to a front-view width via `WIDTH_FROM_CIRCUMFERENCE = 0.32`
+(circumference/π for a circular cross-section, nudged up for a torso's
+elliptical shape) — an approximation, not exact, same caveat class as
+`frame_scale`'s baseline. Neck/ankle aren't measured inputs; they're drawn
+as a fixed proportion of shoulder/hip width for visual completeness only.
+Decisions [0004](docs/decisions/0004-avatar-to-scale-rendering.md) and
+[0005](docs/decisions/0005-avatar-curvy-head-width-fix.md). Purely a
+rendering concern — `balance_points.py`, `scoring.py`, and `effects.yaml`
+are untouched.
 
 ## Build order — status
 

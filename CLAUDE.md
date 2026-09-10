@@ -7,9 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 fit-balance is an explainable styling-recommendation engine: instead of a black-box
 body-shape label or a photorealistic try-on render, it surfaces *why* a garment
 technique works with or against a user's proportions, with editable, inspectable
-reasons behind every verdict. Full architecture, formulas, and rationale live in
-`NOTES.md` — read it before making design decisions; it is the source of truth,
-not this file.
+reasons behind every verdict. `NOTES.md` is the current-state spec — full
+architecture and formulas — and the source of truth, not this file; read it
+before making design decisions. `docs/decisions/` holds the *why*: one
+immutable file per past engine-level decision, referenced from the relevant
+`NOTES.md` section.
 
 Stack: Python (`uv`, `pydantic`, `pytest`, `ruff`) for the engine/CLI/API,
 React + TypeScript + Vite for the web frontend. See `plan.md` for the full
@@ -41,13 +43,16 @@ Commands: `uv run pytest` / `uv run ruff check .` (Python), `npm run build`
 
 ## Workflow
 
-- **Decide in `NOTES.md` first, for anything touching the engine.** A new
-  formula, axis, or scoring rule gets its rationale written into `NOTES.md`
-  as part of the same change that implements it — not left to only exist in
-  chat history. If a change to `balance_points.py`/`scoring.py`/`effects.yaml`
-  alters a documented worked example's outcome, update that example's line in
-  `NOTES.md` too, deliberately — see the "hides_waist" and `top_hip_balance`
-  changes for the pattern.
+- **Decide in writing first, for anything touching the engine** — not left
+  to only exist in chat history. A new formula, axis, or scoring rule gets:
+  (1) a new, immutable file in `docs/decisions/NNNN-slug.md` (context /
+  decision / consequences — see any existing one for the shape) written as
+  part of the same change that implements it, never edited later — a
+  reversal gets its own new decision file that supersedes the old one; and
+  (2) `NOTES.md` updated to describe the resulting current state, with a
+  link to that decision file. If the change alters a documented worked
+  example's outcome, update that example's line in `NOTES.md` too,
+  deliberately — see decision 0006 (`hides_waist`) for the pattern.
 - **New scoring behavior needs a worked example, not just a unit test.**
   Before wiring up a new axis interaction or effect tag, state the concrete
   case in NOTES.md-worked-example form ("body X + garment Y → verdict Z") and
