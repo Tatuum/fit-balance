@@ -46,13 +46,14 @@ Commands: `uv run pytest` / `uv run ruff check .` (Python), `npm run build`
 - **Decide in writing first, for anything touching the engine** — not left
   to only exist in chat history. A new formula, axis, or scoring rule gets:
   (1) a new, immutable file in `docs/decisions/NNNN-slug.md` (context /
-  decision / consequences — see any existing one for the shape) written as
-  part of the same change that implements it, never edited later — a
-  reversal gets its own new decision file that supersedes the old one; and
-  (2) `NOTES.md` updated to describe the resulting current state, with a
-  link to that decision file. If the change alters a documented worked
-  example's outcome, update that example's line in `NOTES.md` too,
-  deliberately — see decision 0006 (`hides_waist`) for the pattern.
+  decision / consequences — use the `new-decision` skill to scaffold it,
+  or see any existing file for the shape) written as part of the same
+  change that implements it, never edited later — a reversal gets its own
+  new decision file that supersedes the old one; and (2) `NOTES.md` updated
+  to describe the resulting current state, with a link to that decision
+  file. If the change alters a documented worked example's outcome, update
+  that example's line in `NOTES.md` too, deliberately — see decision 0006
+  (`hides_waist`) for the pattern.
 - **New scoring behavior needs a worked example, not just a unit test.**
   Before wiring up a new axis interaction or effect tag, state the concrete
   case in NOTES.md-worked-example form ("body X + garment Y → verdict Z") and
