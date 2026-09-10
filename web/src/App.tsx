@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react'
 import { Avatar } from './components/Avatar'
 import { BalancePointsChart } from './components/BalancePointsChart'
 import { MeasurementGuide } from './components/MeasurementGuide'
-import { getGarments, scoreOutfit } from './lib/api'
+import { getGarments, recommendOutfits, scoreOutfit } from './lib/api'
 import { groupBySlot, SLOTS } from './lib/garments'
-import type { GarmentSummary, Measurements, ScoreOutfitResponse, Slot } from './lib/types'
+import type {
+  GarmentSummary,
+  Measurements,
+  RecommendOutfitsResponse,
+  ScoreOutfitResponse,
+  Slot,
+} from './lib/types'
 import './App.css'
 
 const SLOT_LABELS: Record<Slot, string> = {
@@ -64,12 +70,32 @@ function App() {
   const [result, setResult] = useState<ScoreOutfitResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [recommendations, setRecommendations] = useState<RecommendOutfitsResponse | null>(null)
+  const [recommendError, setRecommendError] = useState<string | null>(null)
+  const [recommendLoading, setRecommendLoading] = useState(false)
 
   useEffect(() => {
     getGarments()
       .then(setGarments)
       .catch((err) => setGarmentsError(err instanceof Error ? err.message : String(err)))
   }, [])
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setRecommendLoading(true)
+      recommendOutfits(measurements, 5)
+        .then((response) => {
+          setRecommendations(response)
+          setRecommendError(null)
+        })
+        .catch((err) => {
+          setRecommendError(err instanceof Error ? err.message : String(err))
+          setRecommendations(null)
+        })
+        .finally(() => setRecommendLoading(false))
+    }, 500)
+    return () => clearTimeout(handle)
+  }, [measurements])
 
   const updateMeasurement = (key: keyof Measurements) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value)
@@ -125,6 +151,25 @@ function App() {
                 />
               </label>
             ))}
+          </fieldset>
+
+          <fieldset>
+            <legend>Recommended for you</legend>
+            {recommendLoading && <p>Scoring your best-fitting outfits…</p>}
+            {recommendError && <p className="error">Couldn't load recommendations: {recommendError}</p>}
+            {recommendations && (
+              <ol className="recommendations">
+                {recommendations.recommendations.map((rec) => (
+                  <li key={rec.item_ids.join('+')} className="recommendation">
+                    <span className="recommendation-labels">{rec.labels.join(' + ')}</span>
+                    <span className={`verdict verdict-${rec.verdict.recommendation}`}>
+                      {RECOMMENDATION_LABEL[rec.verdict.recommendation]} ({rec.verdict.score.toFixed(3)})
+                    </span>
+                  </li>
+                ))}
+                {recommendations.recommendations.length === 0 && <li>No candidate outfits found.</li>}
+              </ol>
+            )}
           </fieldset>
 
           {garmentsError && <p className="error">Couldn't load garment catalog: {garmentsError}</p>}

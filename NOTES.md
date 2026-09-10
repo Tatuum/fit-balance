@@ -209,6 +209,42 @@ back to which selected item(s) produced it (`attribute_reasons()` in
 only, not a substitution suggestion; recommending a specific replacement
 item is explicitly deferred, a further scoped-down step beyond this v1.
 
+## Outfit recommendations (ranking layer, v1)
+
+`src/fit_balance/recommend.py` adds a ranking layer on top of the outfit
+catalog above: instead of the user manually picking one item per slot and
+getting a single verdict, `POST /recommend-outfits` (`api/main.py`) takes
+just `measurements` (+ an optional `limit`, default 5) and returns the
+top-scoring outfits out of every valid combination the catalog can produce.
+
+This is the same kind of presentation-layer work as the catalog itself —
+`enumerate_outfit_combinations()` builds candidate `item_ids` lists from
+`garments.list_items()`, and `recommend_outfits()` scores each one via the
+*unchanged* `garments.resolve_outfit()` + `scoring.score()`, then sorts by
+`verdict.score` descending and slices to `limit`. No engine change, no new
+axis or rule — `balance_points.py`, `scoring.py`, and `effects.yaml` stay
+untouched, so this did not get a `docs/decisions/` entry, only this
+section (same precedent as the garment-catalog feature above).
+
+Valid combinations are **dress XOR (top + bottom), with outerwear optional
+on either branch** — top-alone, bottom-alone, and top+dress/bottom+dress
+are never enumerated. With the current catalog (4 dress / 4 top / 6 bottom
+/ 4 outerwear items) that's exactly 140 candidates, cheap enough to score
+fresh on every request with a plain nested loop — no caching. Ranking is a
+simple sort with no dedup/near-duplicate suppression (e.g. the same top
+paired with several different jackets could fill multiple slots of the top
+5) — accepted as v1-simplicity, consistent with the catalog's own
+tag-overlap stacking choice; revisit only if real usage shows it producing
+an unhelpful list.
+
+This ranks whole candidate outfits from the existing catalog — a different,
+broader thing than the single-item "replacement suggestion" still deferred
+above (fixing one reason within an outfit the user already picked). The web
+UI's "Recommended for you" panel (`web/src/App.tsx`) calls this endpoint
+directly off the measurement fields (debounced, independent of the manual
+slot-picker below it), so a user sees good starting points before ever
+touching the catalog picker.
+
 ## Avatar: to-scale, not balance-point-driven
 
 `web/src/lib/avatarGeometry.ts` draws the silhouette directly from real

@@ -3,7 +3,7 @@ from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from fit_balance.balance_points import compute_womens_balance_points
 from fit_balance.garments import (
@@ -13,6 +13,7 @@ from fit_balance.garments import (
     list_items,
     resolve_outfit,
 )
+from fit_balance.recommend import recommend_outfits
 from fit_balance.schemas import GarmentAttributes, Measurements, Verdict
 from fit_balance.scoring import score as score_garment
 
@@ -102,4 +103,43 @@ def score_outfit_endpoint(request: ScoreOutfitRequest) -> ScoreOutfitResponse:
             score=verdict.score,
             reasons=attribute_reasons(verdict.reasons, items),
         ),
+    )
+
+
+class RecommendOutfitsRequest(BaseModel):
+    measurements: Measurements
+    limit: int = Field(default=5, ge=1)
+
+
+class RecommendedOutfit(BaseModel):
+    item_ids: list[str]
+    labels: list[str]
+    verdict: OutfitVerdict
+
+
+class RecommendOutfitsResponse(BaseModel):
+    balance_points: dict[str, float]
+    main_concern: str | None
+    recommendations: list[RecommendedOutfit]
+
+
+@app.post("/recommend-outfits", response_model=RecommendOutfitsResponse)
+def recommend_outfits_endpoint(request: RecommendOutfitsRequest) -> RecommendOutfitsResponse:
+    balance_points = compute_womens_balance_points(request.measurements)
+    ranked = recommend_outfits(balance_points, limit=request.limit)
+    return RecommendOutfitsResponse(
+        balance_points=asdict(balance_points),
+        main_concern=balance_points.main_concern(),
+        recommendations=[
+            RecommendedOutfit(
+                item_ids=[item.id for item in rec.items],
+                labels=[item.label for item in rec.items],
+                verdict=OutfitVerdict(
+                    recommendation=rec.verdict.recommendation,
+                    score=rec.verdict.score,
+                    reasons=attribute_reasons(rec.verdict.reasons, rec.items),
+                ),
+            )
+            for rec in ranked
+        ],
     )

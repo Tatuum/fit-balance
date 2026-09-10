@@ -64,3 +64,35 @@ def test_score_outfit_endpoint_rejects_unknown_item_id():
         json={"measurements": PEAR_FULLER.model_dump(), "item_ids": ["not_a_real_item"]},
     )
     assert response.status_code == 422
+
+
+def test_recommend_outfits_endpoint_returns_ranked_results():
+    response = client.post(
+        "/recommend-outfits",
+        json={"measurements": HOURGLASS_BALANCED.model_dump()},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    recommendations = body["recommendations"]
+    assert len(recommendations) == 5
+    scores = [rec["verdict"]["score"] for rec in recommendations]
+    assert scores == sorted(scores, reverse=True)
+    for rec in recommendations:
+        assert set(rec) == {"item_ids", "labels", "verdict"}
+
+
+def test_recommend_outfits_endpoint_respects_limit_param():
+    response = client.post(
+        "/recommend-outfits",
+        json={"measurements": HOURGLASS_BALANCED.model_dump(), "limit": 1},
+    )
+    assert response.status_code == 200
+    assert len(response.json()["recommendations"]) == 1
+
+
+def test_recommend_outfits_endpoint_rejects_non_positive_limit():
+    response = client.post(
+        "/recommend-outfits",
+        json={"measurements": HOURGLASS_BALANCED.model_dump(), "limit": 0},
+    )
+    assert response.status_code == 422

@@ -64,3 +64,15 @@ export interface ScoreOutfitResponse {
   main_concern: string | null
   verdict: OutfitVerdict
 }
+
+export interface RecommendedOutfit {
+  item_ids: string[]
+  labels: string[]
+  verdict: OutfitVerdict
+}
+
+export interface RecommendOutfitsResponse {
+  balance_points: BalancePoints
+  main_concern: string | null
+  recommendations: RecommendedOutfit[]
+}

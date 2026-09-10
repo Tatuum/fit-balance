@@ -2,6 +2,7 @@ import type {
   GarmentAttributes,
   GarmentSummary,
   Measurements,
+  RecommendOutfitsResponse,
   ScoreOutfitResponse,
   ScoreResponse,
 } from './types'
@@ -42,6 +43,21 @@ export async function scoreOutfit(
   })
   if (!response.ok) {
     throw new Error(`Score-outfit request failed: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function recommendOutfits(
+  measurements: Measurements,
+  limit = 5,
+): Promise<RecommendOutfitsResponse> {
+  const response = await fetch(`${API_BASE}/recommend-outfits`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ measurements, limit }),
+  })
+  if (!response.ok) {
+    throw new Error(`Recommend-outfits request failed: ${response.status}`)
   }
   return response.json()
 }
