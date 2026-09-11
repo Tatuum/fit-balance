@@ -187,6 +187,10 @@ button {
   color: #555;
 }
 
+.balance-badge-asset {
+  color: #2e9e4a;
+}
+
 .balance-caption {
   grid-column: 1 / -1;
   font-size: 0.68rem;

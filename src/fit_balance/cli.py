@@ -4,7 +4,14 @@ from rich.table import Table
 
 from .balance_points import compute_womens_balance_points
 from .schemas import GarmentAttributes, Measurements
+from .scoring import AXIS_RULES
 from .scoring import score as score_garment
+
+# Same "is this waist_definition value actually favorable" threshold
+# AXIS_RULES's defines_waist/clings_to_waist rules and BalancePointsChart.tsx's
+# AXIS_META.waist_definition.isBalanced use — reused here rather than
+# duplicated, since cli.py and scoring.py are both Python.
+_WAIST_DEFINITION_ASSET_THRESHOLD = AXIS_RULES["defines_waist"].reference
 
 app = typer.Typer(add_completion=False, help="Validate fit-balance scoring rules on real inputs.")
 console = Console()
@@ -80,7 +87,14 @@ def score(
     main_concern = balance_points.main_concern()
     for axis_name in _AXES:
         value = getattr(balance_points, axis_name)
-        label = f"{axis_name} (main concern)" if axis_name == main_concern else axis_name
+        if axis_name != main_concern:
+            label = axis_name
+        elif axis_name == "waist_definition" and value >= _WAIST_DEFINITION_ASSET_THRESHOLD:
+            # A favorable waist_definition is an asset, not a concern — see
+            # WomensBalancePoints.main_concern()'s docstring.
+            label = f"{axis_name} (key asset)"
+        else:
+            label = f"{axis_name} (main concern)"
         balance_table.add_row(label, f"{value:+.3f}")
     console.print(balance_table)
 

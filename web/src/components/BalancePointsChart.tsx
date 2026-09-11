@@ -71,6 +71,18 @@ interface AxisMeta {
 const describeBySign = (positive: string, negative: string) => (value: number, balanced: boolean) =>
   balanced ? 'balanced' : value >= 0 ? positive : negative
 
+/**
+ * Text for the badge on whichever row main_concern names. A favorable
+ * waist_definition is an asset, not a concern (see balance_points.py's
+ * main_concern() docstring, and cli.py's matching special-case) — labeling
+ * it "main concern" right next to "an asset" is self-contradictory, so that
+ * one case gets its own badge text. Every other axis never carries a
+ * favorable/asset framing, so it always reads as "main concern".
+ */
+export function mainConcernBadgeText(axis: SingleAxis, balanced: boolean): string {
+  return axis === 'waist_definition' && balanced ? 'key asset' : 'main concern'
+}
+
 const AXIS_META: Record<SingleAxis, AxisMeta> = {
   waist_definition: {
     label: 'Waist definition',
@@ -123,6 +135,8 @@ export function BalancePointsChart({ balancePoints, mainConcern }: BalancePoints
         const isMainConcern = axis === mainConcern
         const balanced = meta.isBalanced(value)
         const statusText = meta.describe(value, balanced)
+        const badgeText = isMainConcern ? mainConcernBadgeText(axis, balanced) : null
+        const isAssetBadge = badgeText === 'key asset'
 
         return (
           <div
@@ -134,7 +148,11 @@ export function BalancePointsChart({ balancePoints, mainConcern }: BalancePoints
             <span className="balance-text">
               <span className="balance-label">{meta.label}:</span> {statusText}
             </span>
-            {isMainConcern && <span className="balance-badge">main concern</span>}
+            {badgeText && (
+              <span className={`balance-badge${isAssetBadge ? ' balance-badge-asset' : ''}`}>
+                {badgeText}
+              </span>
+            )}
           </div>
         )
       })}
