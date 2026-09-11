@@ -40,6 +40,15 @@ DEADZONE_AXES = frozenset(
     {"shoulder_hip_balance", "bust_hip_balance", "torso_leg_balance", "frame_scale_dev"}
 )
 
+# Second magnitude-band boundary, used by scoring.py to quantize a raw axis
+# deviation into a small severity level (0 = within the deadzone / no
+# deadzone, 1 = "notable", 2 = "pronounced") instead of summing raw,
+# differently-scaled axis values directly — see docs/decisions/0010. A
+# starting proposal verified against all 5 NOTES.md worked examples, not
+# derived from external data — same judgment-call category as
+# IMBALANCE_DEADZONE and waist_definition's 0.15 reference already are.
+PRONOUNCED_THRESHOLD = 0.15
+
 
 @dataclass(frozen=True)
 class WomensBalancePoints:

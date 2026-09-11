@@ -45,17 +45,20 @@ class GarmentAttributes(BaseModel):
 class Reason(BaseModel):
     """One effect tag's contribution to a Verdict's score.
 
-    direction is "+" when the effect helps (positive contribution) and "-"
-    when it works against the wearer's balance points (negative contribution).
+    contribution is a small discrete severity level (weight * one of
+    {-2,-1,0,1,2}), not a raw balance-point value — see
+    docs/decisions/0010. direction is "+" when the effect helps (positive
+    contribution) and "-" when it works against the wearer's balance points
+    (negative contribution).
     """
 
     tag: str
     axis: str
-    contribution: float
+    contribution: int
     direction: Literal["+", "-"]
 
 
 class Verdict(BaseModel):
     recommendation: Literal["recommended", "neutral", "avoid", "strong_avoid"]
-    score: float
+    score: int
     reasons: list[Reason]

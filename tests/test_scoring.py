@@ -138,6 +138,82 @@ def test_adds_volume_top_works_against_an_already_broad_shoulder():
     assert any(r.tag == "adds_volume_top" and r.direction == "-" for r in verdict.reasons)
 
 
+def test_deadzone_boundary_value_counts_as_notable_not_balanced():
+    """A deviation exactly at IMBALANCE_DEADZONE (0.05) is not treated as
+    balanced -- the boundary is exclusive (`magnitude < deadzone`), matching
+    the pre-existing `abs(value) < IMBALANCE_DEADZONE` skip condition this
+    replaced. See docs/decisions/0010."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0.05,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    verdict = score(bp, GarmentAttributes(techniques=["wide_leg"]))
+    assert len(verdict.reasons) == 1
+    assert verdict.reasons[0].contribution == 1
+
+
+def test_just_under_deadzone_is_still_balanced():
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0.049,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    verdict = score(bp, GarmentAttributes(techniques=["wide_leg"]))
+    assert verdict.reasons == []
+    assert verdict.score == 0
+
+
+def test_pronounced_threshold_boundary_value_is_level_two():
+    """A deviation exactly at PRONOUNCED_THRESHOLD (0.15) rounds up to the
+    "pronounced" level 2, not level 1 -- the boundary is exclusive
+    (`magnitude < PRONOUNCED_THRESHOLD`)."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0,
+        waist_definition=0,
+        torso_leg_balance=0.15,
+        frame_scale_dev=0,
+    )
+    verdict = score(bp, GarmentAttributes(techniques=["high_rise"]))
+    assert len(verdict.reasons) == 1
+    assert verdict.reasons[0].contribution == 2
+
+
+def test_just_under_pronounced_threshold_is_level_one():
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0,
+        waist_definition=0,
+        torso_leg_balance=0.149,
+        frame_scale_dev=0,
+    )
+    verdict = score(bp, GarmentAttributes(techniques=["high_rise"]))
+    assert len(verdict.reasons) == 1
+    assert verdict.reasons[0].contribution == 1
+
+
+def test_waist_definition_has_no_deadzone_any_deviation_scores():
+    """Unlike the four zero-neutral axes, waist_definition gets no deadzone
+    -- a deviation from its 0.15 reference as small as 0.01 still scores at
+    level 1, matching decision 0007's reasoning (already excluded from the
+    deadzone) that this change deliberately preserves rather than reopens."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0,
+        bust_hip_balance=0,
+        waist_definition=0.16,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    verdict = score(bp, GarmentAttributes(techniques=["belted_natural_waist"]))
+    assert len(verdict.reasons) == 1
+    assert verdict.reasons[0].contribution == 1
+
+
 def test_adds_volume_bottom_fires_for_broad_shoulders_even_with_balanced_bust():
     """A broad-shouldered build whose bust happens to match hip still
     benefits from bottom volume — bust_hip_balance alone would miss this

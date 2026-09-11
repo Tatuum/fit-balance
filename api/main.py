@@ -71,7 +71,7 @@ class OutfitVerdict(BaseModel):
     # presentation-layer feature (see NOTES.md). Keep these four strings
     # byte-for-byte identical to schemas.Verdict's Literal if either changes.
     recommendation: Literal["recommended", "neutral", "avoid", "strong_avoid"]
-    score: float
+    score: int
     reasons: list[AttributedReason]
 
 

@@ -21,3 +21,4 @@ to know what was tried, rejected, or superseded.
 | [0007](0007-imbalance-deadzone.md) | Imbalance deadzone for the four zero-neutral axes | Accepted |
 | [0008](0008-frame-scale-dev-max-shoulder-bust.md) | frame_scale_dev uses max(shoulder, bust) | Accepted |
 | [0009](0009-top-hip-balance-axis.md) | adds_volume_top/bottom scored against top_hip_balance | Accepted |
+| [0010](0010-discrete-severity-level-scoring.md) | Discrete severity-level scoring | Accepted |

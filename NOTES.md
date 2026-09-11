@@ -43,11 +43,15 @@ editable data, not a trained model's opinion.
    `elongates_leg`, `clings_to_hip`). This is a fact about the technique,
    independent of who wears it.
 3. **Scoring** — for each balance point, a want/avoid list of effect tags,
-   with the contribution scaled by how far the balance point is from
-   neutral (not a flat +1/-1 for a category match). Output = a verdict
-   *plus the specific reasons that fired*, e.g. "+ defines your waist
-   (asset) / − clings to hip (works against your shape) / + reduces bulk
-   (helps your frame scale)."
+   with the contribution quantized into one of three hand-picked severity
+   levels (0/1/2, sign-preserved) based on how far the balance point is
+   from neutral — not a flat +1/-1 for a category match, and not a raw,
+   differently-scaled ratio summed directly across axes either, which
+   isn't safely comparable (decision
+   [0010](docs/decisions/0010-discrete-severity-level-scoring.md)). Output
+   = a verdict *plus the specific reasons that fired*, e.g. "+ defines your
+   waist (asset) / − clings to hip (works against your shape) / + reduces
+   bulk (helps your frame scale)."
 
 ## Balance points — women's v0
 
@@ -144,6 +148,13 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   technique (structured shoulders, halter necklines, raglan sleeves) reacts
   specifically to shoulder width; that's a separate, not-yet-made decision
   needing its own worked example.
+- `WomensBalancePoints.main_concern()` still picks the axis with the
+  largest *raw* magnitude to name as "the" main concern — the same
+  cross-axis comparability problem decision
+  [0010](docs/decisions/0010-discrete-severity-level-scoring.md) fixed for
+  scoring, left unfixed here since it touches the CLI, `BalancePointsChart.tsx`,
+  and its own tests, none of which were in scope for that change. A future
+  decision could apply the same severity-level concept to it.
 
 ## Worked examples (now automated tests)
 

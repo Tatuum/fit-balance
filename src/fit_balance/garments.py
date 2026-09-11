@@ -95,7 +95,7 @@ class AttributedReason(BaseModel):
 
     tag: str
     axis: str
-    contribution: float
+    contribution: int
     direction: Literal["+", "-"]
     item_ids: list[str]
 

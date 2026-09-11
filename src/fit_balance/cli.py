@@ -62,7 +62,7 @@ def score(
     style = _RECOMMENDATION_STYLE.get(verdict.recommendation, "white")
     console.print(
         f"[{style}]{verdict.recommendation.upper().replace('_', ' ')}[/{style}] "
-        f"(score: {verdict.score:+.3f})"
+        f"(score: {verdict.score:+d})"
     )
 
     if verdict.reasons:
@@ -75,7 +75,7 @@ def score(
             reasons_table.add_row(
                 reason.tag,
                 reason.axis,
-                f"[{sign_style}]{reason.direction}{abs(reason.contribution):.3f}[/{sign_style}]",
+                f"[{sign_style}]{reason.direction}{abs(reason.contribution)}[/{sign_style}]",
             )
         console.print(reasons_table)
     else:
