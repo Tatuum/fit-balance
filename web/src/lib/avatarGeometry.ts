@@ -153,3 +153,37 @@ export function toSvgPath(points: Keypoint[]): string {
   const first = points[0]
   return `M ${first.x.toFixed(2)} ${first.y.toFixed(2)} ${commands.join(' ')} Z`
 }
+
+// Spike: how much each (positive/"helps") effect tag nudges specific
+// silhouette widths, to sketch "what would the corrected line look like"
+// on top of the body outline, reusing the same width→outline pipeline
+// above rather than a real garment-geometry model. Hand-tuned for visual
+// legibility only — not derived from anything, and only covers tags with
+// an obvious width-based reading (waist/shoulder/bust/hip/ankle). Tags
+// about torso/leg length (elongates_leg etc.) aren't represented yet —
+// that needs a keypoint-position shift, not a width multiplier.
+const EFFECT_WIDTH_ADJUSTMENTS: Record<string, Partial<Record<keyof AvatarGeometry['widths'], number>>> = {
+  defines_waist: { waist: 0.8 },
+  clings_to_waist: { waist: 0.92 },
+  clings_to_hip: { hip: 0.95 },
+  hides_waist: { waist: 1.18 },
+  adds_volume_top: { shoulder: 1.15, bust: 1.15 },
+  adds_bulk: { shoulder: 1.08, bust: 1.08, waist: 1.08 },
+  reduces_bulk: { shoulder: 0.94, bust: 0.94, waist: 0.94 },
+  adds_volume_bottom: { hip: 1.15, ankle: 1.15 },
+}
+
+/** Nudges silhouette widths per a scored outfit's effect tags — multiple
+ * tags touching the same width compound multiplicatively. Unknown tags
+ * are ignored (no-op), not an error. */
+export function applyEffectAdjustments(geometry: AvatarGeometry, effectTags: string[]): AvatarGeometry {
+  const widths = { ...geometry.widths }
+  for (const tag of effectTags) {
+    const adjustment = EFFECT_WIDTH_ADJUSTMENTS[tag]
+    if (!adjustment) continue
+    for (const [key, multiplier] of Object.entries(adjustment)) {
+      widths[key as keyof typeof widths] *= multiplier
+    }
+  }
+  return { ...geometry, widths }
+}

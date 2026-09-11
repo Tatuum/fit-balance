@@ -210,7 +210,12 @@ function App() {
 
           {result && (
             <>
-              <Avatar measurements={measurements} />
+              <Avatar
+                measurements={measurements}
+                effectTags={result.verdict.reasons
+                  .filter((reason) => reason.direction === '+')
+                  .map((reason) => reason.tag)}
+              />
               <p className={`verdict verdict-${result.verdict.recommendation}`}>
                 {RECOMMENDATION_LABEL[result.verdict.recommendation]} (score:{' '}
                 {result.verdict.score.toFixed(3)})
