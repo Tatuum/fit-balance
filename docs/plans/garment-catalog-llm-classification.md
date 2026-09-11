@@ -1,5 +1,8 @@
 # Real, LLM-classified garment catalog (replaces hand-authored `garments.yaml`)
 
+Status: **Not started.** Planned only — `garments.yaml` is still the live
+19-item hand-authored catalog.
+
 ## Context
 
 The garment catalog (`src/fit_balance/garments.yaml`, 19 items) is currently

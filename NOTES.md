@@ -78,7 +78,13 @@ proportion difference; `main_concern()` returns `None` if nothing clears it.
 reason (one direction is favorable, not "0 is neutral both ways"). Decision
 [0007](docs/decisions/0007-imbalance-deadzone.md). A favorable-sign value
 (e.g. high `waist_definition`) is an **asset**, not a concern — surface it
-as a strength to build around, not a problem to fix.
+as a strength to build around, not a problem to fix. Both the CLI
+(`cli.py`) and the web `BalancePointsChart` now honor this at the label
+level too: when `main_concern()` names a favorable `waist_definition`, they
+show "(key asset)" instead of "(main concern)" — a favorable value labeled
+as a concern read as self-contradictory ("defined waist (an asset) — MAIN
+CONCERN"). Presentation-only fix, `main_concern()`'s own selection logic is
+unchanged.
 
 ## Balance points — menswear v0
 
@@ -263,6 +269,21 @@ Decisions [0004](docs/decisions/0004-avatar-to-scale-rendering.md) and
 [0005](docs/decisions/0005-avatar-curvy-head-width-fix.md). Purely a
 rendering concern — `balance_points.py`, `scoring.py`, and `effects.yaml`
 are untouched.
+
+**Garment-corrected overlay — prototype, not finished.** `Avatar` can take
+an `effectTags` prop (the scored outfit's positive/"helps" reason tags,
+already on the wire via `verdict.reasons[].tag` — no backend change needed)
+and draws a second dashed outline on top of the body silhouette, nudging
+specific widths per tag via `avatarGeometry.ts`'s `applyEffectAdjustments()`
+and a hand-tuned `EFFECT_WIDTH_ADJUSTMENTS` table (e.g. `defines_waist` →
+waist ×0.8, `adds_volume_top` → shoulder/bust ×1.15). `App.tsx` wires this
+off `result.verdict.reasons` automatically. Only covers tags with an
+obvious width-based reading — tags about torso/leg length
+(`elongates_leg`, `shortens_torso`, etc.) aren't represented yet, since
+those need a keypoint-position shift, not a width multiplier, and are
+silently ignored for now. Spike-quality: reuses the existing rendering
+pipeline (same "purely a rendering concern" scope as the section above),
+not yet validated for visual accuracy beyond a manual spot-check.
 
 ## Build order — status
 
