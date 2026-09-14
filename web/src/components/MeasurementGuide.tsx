@@ -32,7 +32,10 @@ const RIGHT_OUTLINE: [number, number][] = [
   [53, 200], // inner ankle
   [51, 150], // inner knee
 ]
-const CROTCH: [number, number] = [50, 97]
+// Below hip level (y=95, the "hip level" outline point above), not at it —
+// the hip measurement is the fullest point of the hips/glutes, while the
+// crotch (where inseam starts) is where the legs fork, noticeably lower.
+const CROTCH: [number, number] = [50, 118]
 
 const HEAD = { cx: 50, cy: 14, r: 13 }
 const FEET_Y = 210
@@ -49,11 +52,41 @@ const BANDS = [
   { y: 95, leftEdge: 100 - 61, label: 'HIP' },
 ]
 
+// Rounds every corner of a closed polygon into a smooth curve: each vertex
+// becomes a quadratic-curve control point, pulling the line toward (rather
+// than through) it, with the curve itself passing through the midpoint of
+// each edge. Simple and numerically stable (no Catmull-Rom overshoot at
+// the sharper turns like the armpit/wrist) — a body outline reads as a
+// natural, hand-drawn silhouette instead of the straight-segment polygon
+// this replaces.
+//
+// `sharp` vertex indices are drawn as an exact straight-line pass-through
+// instead of rounded — the crotch needs this: rounding it (cutting the
+// corner toward each inner-leg midpoint) bulges the curve out sideways
+// across the big vertical gap down to the knees, tangling visually with
+// the INSEAM arrow drawn straight down from that same point.
+function smoothClosedPath(points: [number, number][], sharp: Set<number> = new Set()): string {
+  const n = points.length
+  const midpoint = (a: [number, number], b: [number, number]): [number, number] => [
+    (a[0] + b[0]) / 2,
+    (a[1] + b[1]) / 2,
+  ]
+  const start = sharp.has(n - 1) ? points[n - 1] : midpoint(points[n - 1], points[0])
+  const segments = points.map((point, i) => {
+    if (sharp.has(i)) {
+      return `L ${point[0]} ${point[1]}`
+    }
+    const next = points[(i + 1) % n]
+    const m = midpoint(point, next)
+    return `Q ${point[0]} ${point[1]} ${m[0]} ${m[1]}`
+  })
+  return `M ${start[0]} ${start[1]} ${segments.join(' ')} Z`
+}
+
 function buildBodyPath(): string {
   const left = [...RIGHT_OUTLINE].reverse().map(([x, y]) => [100 - x, y] as [number, number])
   const points = [...RIGHT_OUTLINE, CROTCH, ...left]
-  const [first, ...rest] = points
-  return `M ${first[0]} ${first[1]} ${rest.map(([x, y]) => `L ${x} ${y}`).join(' ')} Z`
+  return smoothClosedPath(points, new Set([RIGHT_OUTLINE.length]))
 }
 
 export function MeasurementGuide() {
