@@ -1,4 +1,5 @@
-"""Shared Measurements fixtures for the 5 worked examples in NOTES.md.
+"""Shared Measurements fixtures for the 5 worked examples in NOTES.md, plus
+fixtures for garments-layer decisions (e.g. decision 0012) below them.
 
 NOTES.md expresses each example as a shape/frame label (e.g. "shape≈apple,
 torso_leg=long_torso") rather than raw measurements. Each constant below is a
@@ -50,4 +51,17 @@ RECTANGLE_LONG_TORSO_PETITE = Measurements(
 # trait in its label.
 PEAR_FULLER = Measurements(
     shoulder=89.0, bust=91.4, waist=76.2, hip=106.7, torso=39.2, leg=72.8, height=160.0
+)
+
+# Not one of the 5 NOTES.md worked examples above — added for decision
+# 0012's test_garments.py case, the first real (non-synthetic) verdict to
+# exercise adds_volume_top. shoulder=100/hip=88 gives shoulder_hip_balance
+# ≈0.12 (clears the 0.05 deadzone, level 1), while bust=84/hip=88 keeps
+# bust_hip_balance ≈ -0.045 (inside the deadzone) — isolates top_hip_balance
+# to the shoulder-driven case decision 0002 exists to catch. torso/leg at
+# this height's baseline ratio (40.5cm / 75.0cm, same as HOURGLASS_BALANCED)
+# and waist=66 keeps frame_scale_dev inside its own deadzone — no other
+# axis contributes.
+BROAD_SHOULDER_NARROW_HIP = Measurements(
+    shoulder=100.0, bust=84.0, waist=66.0, hip=88.0, torso=40.5, leg=75.0, height=165.1
 )

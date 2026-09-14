@@ -69,14 +69,12 @@ AXIS_RULES: dict[str, _AxisRule] = {
     # already-broad shoulders, and miss recommending bottom volume to
     # balance a broad-shouldered/narrow-bust build. See axis_value below.
     #
-    # No current effects.yaml technique produces adds_volume_top —
-    # oversized_top lost it (decision 0011: a boxy, uniformly loose cut
-    # doesn't specifically widen the top the way structured/padded
-    # shoulders would; that's already what adds_bulk models). Kept here,
-    # the mirror of clings_to_hip's "known fact, not yet scored" situation:
-    # a scored rule with no technique to fire it yet, ready for a future
-    # technique that genuinely adds top-specific width (padded/structured
-    # shoulders, puff sleeves — see NOTES.md's shoulder_hip_balance gap).
+    # oversized_top lost this tag in decision 0011 (a boxy, uniformly loose
+    # cut doesn't specifically widen the top the way structured/padded
+    # shoulders would; that's already what adds_bulk models) — left this
+    # rule dead until decision 0012 gave it real producers:
+    # structured_shoulder and puff_sleeve (see garments.yaml's
+    # structured_blazer/puff_sleeve_top).
     "adds_volume_top": _AxisRule(axis="top_hip_balance", weight=-1),
     # Mirrors adds_volume_top with the opposite sign: bottom volume (e.g.
     # wide-leg trousers) helps balance a top-heavy build (positive

@@ -40,11 +40,11 @@ class DimensionAdvice:
     exposed directly rather than left for a caller to infer from whether
     `recommendations` is empty — those aren't the same thing. A notable,
     directional reading can still have an empty `recommendations` list if
-    the tag for that direction has no current catalog item behind it (e.g.
-    adds_volume_top, orphaned since decision 0011) — that's a catalog gap,
-    not the body being unremarkable on this axis, and callers describing
-    "what this body reads like" need the real signal, not the coincidence
-    of today's catalog coverage.
+    a tag for that direction has no current catalog item behind it — that's
+    a catalog gap, not the body being unremarkable on this axis, and callers
+    describing "what this body reads like" need the real signal, not the
+    coincidence of today's catalog coverage. (adds_volume_top was the
+    standing example of this until decision 0012 gave it real items.)
     """
 
     axis: str

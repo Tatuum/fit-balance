@@ -147,11 +147,11 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   broad-shoulder/narrow-hip build from a top-heavy-by-bust build that would
   otherwise look identical on `bust_hip_balance` alone. It feeds
   `adds_volume_top`/`adds_volume_bottom` via the derived `top_hip_balance`
-  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)), but has no
-  dedicated `effects.yaml`/`AXIS_RULES` entry of its own yet — no v0 garment
-  technique (structured shoulders, halter necklines, raglan sleeves) reacts
-  specifically to shoulder width; that's a separate, not-yet-made decision
-  needing its own worked example.
+  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)); it still
+  has no dedicated `effects.yaml`/`AXIS_RULES` entry of its own, but as of
+  decision [0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md)
+  `structured_shoulder`/`puff_sleeve` do react to it via `adds_volume_top`.
+  Necklines/sleeves beyond those two (halter, raglan) are still open.
 - `WomensBalancePoints.main_concern()` still picks the axis with the
   largest *raw* magnitude to name as "the" main concern — the same
   cross-axis comparability problem decision
@@ -219,12 +219,18 @@ specifically widen the top the way structured/padded shoulders would —
 that's already what `adds_bulk` models, so the two tags were double-
 counting the same real effect — decision
 [0011](docs/decisions/0011-remove-adds-volume-top-from-oversized-top.md).
-`adds_volume_top` has no current technique producing it as a result
-(same "known fact, not yet scored" status `clings_to_hip` has, inverted),
-kept in `scoring.py`'s `AXIS_RULES` for a future top-width-specific
-technique. Further vocabulary growth stays a case-by-case decision, not a
-batch exercise — each addition should be this deliberate about which
-existing tag it reuses versus genuinely needing a new one.
+`adds_volume_top` had no technique producing it until decision
+[0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md) added
+`structured_shoulder` (structured/built-up shoulder blazer) and
+`puff_sleeve` (gathered sleeve) — both real, independent constructions that
+genuinely widen the top of the silhouette. That same decision added
+`peplum` (`defines_waist` + `adds_volume_bottom`), `wrap_style`
+(`defines_waist`), `v_neck` (`elongates_torso`), `a_line`
+(`adds_volume_bottom`), and `pencil_skirt` (`clings_to_hip`) — all reusing
+existing tags, no `scoring.py` changes. Further vocabulary growth stays a
+case-by-case decision, not a batch exercise — each addition should be this
+deliberate about which existing tag it reuses versus genuinely needing a
+new one.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques

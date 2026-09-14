@@ -28,6 +28,10 @@ def test_pear_waist_definition_seeks_belted_and_fitted_avoids_oversized():
         "belted_blouse",
         "belted_skirt",
         "belted_coat",
+        "peplum_top",
+        "peplum_dress",
+        "wrap_top",
+        "wrap_dress",
     }
     assert by_tag["clings_to_waist"].direction == "+"
     assert {i.id for i in by_tag["clings_to_waist"].items} == {
@@ -42,9 +46,12 @@ def test_pear_waist_definition_seeks_belted_and_fitted_avoids_oversized():
     }
 
 
-def test_pear_horizontal_balance_avoids_added_bottom_volume():
-    """adds_volume_top has no current producing technique (decision 0011),
-    so only the "avoid" side fires here for this hip-heavy body."""
+def test_pear_horizontal_balance_seeks_top_volume_avoids_added_bottom_volume():
+    """PEAR_FULLER is hip-heavy (negative top_hip_balance): adding top
+    volume (structured_shoulder/puff_sleeve, decision 0012) helps balance
+    it, so adds_volume_top shows on the "seek" side; adding more bottom
+    volume works against it, so adds_volume_bottom shows on the "avoid"
+    side."""
     bp = compute_womens_balance_points(PEAR_FULLER)
     advice = _advice_by_axis(bp)["top_hip_balance"]
     assert advice.notable is True
@@ -52,11 +59,19 @@ def test_pear_horizontal_balance_avoids_added_bottom_volume():
     assert advice.pronounced is False
 
     by_tag = {r.tag: r for r in advice.recommendations}
-    assert "adds_volume_top" not in by_tag
+    assert by_tag["adds_volume_top"].direction == "+"
+    assert {i.id for i in by_tag["adds_volume_top"].items} == {
+        "structured_blazer",
+        "puff_sleeve_top",
+    }
     assert by_tag["adds_volume_bottom"].direction == "-"
     assert {i.id for i in by_tag["adds_volume_bottom"].items} == {
         "wide_leg_high_rise_trousers",
         "wide_leg_low_rise_trousers",
+        "a_line_skirt",
+        "a_line_dress",
+        "peplum_top",
+        "peplum_dress",
     }
 
 
@@ -132,10 +147,12 @@ def test_pear_vertical_proportion_has_no_strong_trait():
 
 def test_notable_and_direction_are_driven_by_level_not_by_item_coverage():
     """A broad-shouldered (positive top_hip_balance) body: notable/direction
-    must reflect the axis's own level, not merely "recommendations is
-    non-empty" -- the "avoid" side here (adds_volume_top) has no current
-    catalog item at all (decision 0011), so recommendations only has the
-    "seek" side, but the axis itself is still notable and positive."""
+    must reflect the axis's own level, not merely mirror whichever direction
+    dominates `recommendations`. Decision 0012 gave adds_volume_top real
+    catalog items (structured_shoulder/puff_sleeve), so both the "seek"
+    (adds_volume_bottom) and "avoid" (adds_volume_top) sides are populated
+    here -- direction still tracks level's sign exactly, not the mix of
+    recommendation directions."""
     bp = WomensBalancePoints(
         shoulder_hip_balance=0.1,
         bust_hip_balance=0.1,
@@ -146,7 +163,10 @@ def test_notable_and_direction_are_driven_by_level_not_by_item_coverage():
     advice = _advice_by_axis(bp)["top_hip_balance"]
     assert advice.notable is True
     assert advice.direction == "+"
-    assert all(r.direction == "+" for r in advice.recommendations)
+
+    by_tag = {r.tag: r for r in advice.recommendations}
+    assert by_tag["adds_volume_bottom"].direction == "+"
+    assert by_tag["adds_volume_top"].direction == "-"
 
 
 def test_rectangle_vertical_proportion_is_pronounced_and_only_dimension():

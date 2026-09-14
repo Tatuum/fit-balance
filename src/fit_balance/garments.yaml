@@ -92,3 +92,54 @@ bomber_jacket:
   label: Bomber jacket
   slot: outerwear
   techniques: [oversized_top]
+
+# Items below added by decision 0012 — a garment catalog realism pass.
+structured_blazer:
+  label: Structured blazer with built-up shoulders
+  slot: outerwear
+  techniques: [structured_shoulder]
+
+puff_sleeve_top:
+  label: Puff-sleeve top
+  slot: top
+  techniques: [puff_sleeve]
+
+peplum_top:
+  label: Peplum top
+  slot: top
+  techniques: [peplum]
+
+peplum_dress:
+  label: Peplum dress
+  slot: dress
+  techniques: [peplum]
+
+wrap_top:
+  label: Wrap top
+  slot: top
+  techniques: [wrap_style]
+
+wrap_dress:
+  label: Wrap dress
+  slot: dress
+  techniques: [wrap_style]
+
+v_neck_top:
+  label: V-neck top
+  slot: top
+  techniques: [v_neck]
+
+a_line_skirt:
+  label: A-line skirt
+  slot: bottom
+  techniques: [a_line]
+
+a_line_dress:
+  label: A-line dress
+  slot: dress
+  techniques: [a_line]
+
+pencil_skirt:
+  label: Pencil skirt
+  slot: bottom
+  techniques: [pencil_skirt]

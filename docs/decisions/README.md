@@ -23,3 +23,4 @@ to know what was tried, rejected, or superseded.
 | [0009](0009-top-hip-balance-axis.md) | adds_volume_top/bottom scored against top_hip_balance | Accepted |
 | [0010](0010-discrete-severity-level-scoring.md) | Discrete severity-level scoring | Accepted |
 | [0011](0011-remove-adds-volume-top-from-oversized-top.md) | Remove adds_volume_top from oversized_top | Accepted |
+| [0012](0012-garment-catalog-vocabulary-expansion.md) | Expand garment catalog with realistic garment types and techniques | Accepted |

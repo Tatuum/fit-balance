@@ -41,3 +41,27 @@ wide_leg:
 
 cropped_ankle_length:
   - shortens_leg
+
+# Techniques below added by decision 0012 — a garment catalog realism pass.
+# All reuse existing effect tags; none require new scoring.py rules.
+structured_shoulder:
+  - adds_volume_top
+
+puff_sleeve:
+  - adds_volume_top
+
+peplum:
+  - defines_waist
+  - adds_volume_bottom
+
+wrap_style:
+  - defines_waist
+
+v_neck:
+  - elongates_torso
+
+a_line:
+  - adds_volume_bottom
+
+pencil_skirt:
+  - clings_to_hip

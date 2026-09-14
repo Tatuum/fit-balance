@@ -18,7 +18,7 @@ from fit_balance.garments import (
     resolve_outfit,
 )
 from fit_balance.scoring import EFFECTS_TABLE, score
-from tests.fixtures import PEAR_FULLER
+from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, PEAR_FULLER
 
 
 def test_catalog_covers_all_four_slots():
@@ -94,3 +94,21 @@ def test_wide_leg_and_rise_items_resolve_to_expected_techniques():
     assert CATALOG["wide_leg_low_rise_trousers"].techniques == ("wide_leg", "low_rise")
     assert CATALOG["ankle_length_trousers"].techniques == ("cropped_ankle_length",)
     assert CATALOG["bomber_jacket"].techniques == ("oversized_top",)
+
+
+def test_structured_blazer_fires_adds_volume_top_for_broad_shoulders():
+    """Decision 0012: structured_shoulder is the first real technique to
+    produce adds_volume_top, wiring up an AXIS_RULES entry that's existed
+    since decision 0009 but had no producer since decision 0011 removed
+    oversized_top's. A broad-shouldered, narrow-hipped body (shoulder-driven
+    top_hip_balance, not bust-driven) should avoid adding more top volume."""
+    items, garment = resolve_outfit(["structured_blazer"])
+    assert garment.techniques == ["structured_shoulder"]
+
+    bp = compute_womens_balance_points(BROAD_SHOULDER_NARROW_HIP)
+    verdict = score(bp, garment)
+    assert verdict.recommendation == "avoid"
+
+    attributed = attribute_reasons(verdict.reasons, items)
+    by_tag = {r.tag: r.item_ids for r in attributed}
+    assert by_tag["adds_volume_top"] == ["structured_blazer"]

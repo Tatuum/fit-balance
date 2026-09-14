@@ -22,7 +22,7 @@ OUTERWEAR_OPTIONS = OUTERWEAR_COUNT + 1  # + "none"
 
 def test_enumerate_outfit_combinations_counts_current_catalog():
     expected = DRESS_COUNT * OUTERWEAR_OPTIONS + TOP_COUNT * BOTTOM_COUNT * OUTERWEAR_OPTIONS
-    assert len(enumerate_outfit_combinations()) == expected == 140
+    assert len(enumerate_outfit_combinations()) == expected == 426
 
 
 def test_enumerate_outfit_combinations_excludes_invalid_shapes():
@@ -53,7 +53,7 @@ def test_recommend_outfits_ranks_descending_by_score():
 def test_recommend_outfits_respects_limit():
     bp = compute_womens_balance_points(HOURGLASS_BALANCED)
     assert len(recommend_outfits(bp, limit=3)) == 3
-    assert len(recommend_outfits(bp, limit=1000)) == 140
+    assert len(recommend_outfits(bp, limit=1000)) == 426
 
 
 def test_recommend_outfits_top_pick_matches_engine_score_for_worked_example_1():
