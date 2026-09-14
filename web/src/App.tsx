@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Avatar } from './components/Avatar'
 import { BalancePointsChart } from './components/BalancePointsChart'
+import { DimensionAdvice } from './components/DimensionAdvice'
 import { MeasurementGuide } from './components/MeasurementGuide'
-import { getGarments, recommendOutfits, scoreOutfit } from './lib/api'
+import { getGarments, getTechniqueRecommendations, recommendOutfits, scoreOutfit } from './lib/api'
 import { groupBySlot, SLOTS } from './lib/garments'
 import type {
   GarmentSummary,
@@ -10,6 +11,7 @@ import type {
   RecommendOutfitsResponse,
   ScoreOutfitResponse,
   Slot,
+  TechniqueRecommendationsResponse,
 } from './lib/types'
 import './App.css'
 
@@ -73,6 +75,10 @@ function App() {
   const [recommendations, setRecommendations] = useState<RecommendOutfitsResponse | null>(null)
   const [recommendError, setRecommendError] = useState<string | null>(null)
   const [recommendLoading, setRecommendLoading] = useState(false)
+  const [techniqueAdvice, setTechniqueAdvice] = useState<TechniqueRecommendationsResponse | null>(
+    null,
+  )
+  const [techniqueAdviceError, setTechniqueAdviceError] = useState<string | null>(null)
 
   useEffect(() => {
     getGarments()
@@ -93,6 +99,21 @@ function App() {
           setRecommendations(null)
         })
         .finally(() => setRecommendLoading(false))
+    }, 500)
+    return () => clearTimeout(handle)
+  }, [measurements])
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      getTechniqueRecommendations(measurements)
+        .then((response) => {
+          setTechniqueAdvice(response)
+          setTechniqueAdviceError(null)
+        })
+        .catch((err) => {
+          setTechniqueAdviceError(err instanceof Error ? err.message : String(err))
+          setTechniqueAdvice(null)
+        })
     }, 500)
     return () => clearTimeout(handle)
   }, [measurements])
@@ -206,6 +227,14 @@ function App() {
         </form>
 
         <div className="results">
+          <section className="technique-advice-section">
+            <h2>What to look for</h2>
+            {techniqueAdviceError && (
+              <p className="error">Couldn't load technique advice: {techniqueAdviceError}</p>
+            )}
+            {techniqueAdvice && <DimensionAdvice dimensions={techniqueAdvice.dimensions} />}
+          </section>
+
           {error && <p className="error">{error}</p>}
 
           {result && (

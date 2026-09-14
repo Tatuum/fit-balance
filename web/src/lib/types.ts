@@ -76,3 +76,22 @@ export interface RecommendOutfitsResponse {
   main_concern: string | null
   recommendations: RecommendedOutfit[]
 }
+
+export interface TechniqueExample {
+  tag: string
+  direction: '+' | '-'
+  items: GarmentSummary[]
+}
+
+export interface DimensionAdvice {
+  axis: string
+  label: string
+  value: number
+  pronounced: boolean
+  recommendations: TechniqueExample[]
+}
+
+export interface TechniqueRecommendationsResponse {
+  balance_points: BalancePoints
+  dimensions: DimensionAdvice[]
+}

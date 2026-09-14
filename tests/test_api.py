@@ -96,3 +96,29 @@ def test_recommend_outfits_endpoint_rejects_non_positive_limit():
         json={"measurements": HOURGLASS_BALANCED.model_dump(), "limit": 0},
     )
     assert response.status_code == 422
+
+
+def test_technique_recommendations_endpoint_matches_pear_dimensions():
+    response = client.post(
+        "/technique-recommendations",
+        json={"measurements": PEAR_FULLER.model_dump()},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert "main_concern" not in body
+    dimensions_by_axis = {d["axis"]: d for d in body["dimensions"]}
+    assert set(dimensions_by_axis) == {
+        "waist_definition",
+        "top_hip_balance",
+        "torso_leg_balance",
+        "frame_scale_dev",
+    }
+
+    waist = dimensions_by_axis["waist_definition"]
+    tags = {r["tag"]: r["direction"] for r in waist["recommendations"]}
+    assert tags["hides_waist"] == "-"
+    assert tags["defines_waist"] == "+"
+
+    vertical = dimensions_by_axis["torso_leg_balance"]
+    assert vertical["recommendations"] == []
+    assert vertical["pronounced"] is False

@@ -16,6 +16,7 @@ from fit_balance.garments import (
 from fit_balance.recommend import recommend_outfits
 from fit_balance.schemas import GarmentAttributes, Measurements, Verdict
 from fit_balance.scoring import score as score_garment
+from fit_balance.technique_advice import recommend_techniques
 
 app = FastAPI(title="fit-balance API")
 
@@ -141,5 +142,62 @@ def recommend_outfits_endpoint(request: RecommendOutfitsRequest) -> RecommendOut
                 ),
             )
             for rec in ranked
+        ],
+    )
+
+
+class TechniqueRecommendationsRequest(BaseModel):
+    measurements: Measurements
+
+
+class TechniqueExampleResponse(BaseModel):
+    tag: str
+    direction: Literal["+", "-"]
+    items: list[GarmentSummary]
+
+
+class DimensionAdviceResponse(BaseModel):
+    axis: str
+    label: str
+    value: float
+    pronounced: bool
+    recommendations: list[TechniqueExampleResponse]
+
+
+class TechniqueRecommendationsResponse(BaseModel):
+    balance_points: dict[str, float]
+    # Deliberately no main_concern here: this endpoint reports each
+    # dimension independently, on purpose (see NOTES.md's "Technique
+    # recommendations" section) — a "which axis matters most" field would
+    # contradict that.
+    dimensions: list[DimensionAdviceResponse]
+
+
+@app.post("/technique-recommendations", response_model=TechniqueRecommendationsResponse)
+def technique_recommendations_endpoint(
+    request: TechniqueRecommendationsRequest,
+) -> TechniqueRecommendationsResponse:
+    balance_points = compute_womens_balance_points(request.measurements)
+    return TechniqueRecommendationsResponse(
+        balance_points=asdict(balance_points),
+        dimensions=[
+            DimensionAdviceResponse(
+                axis=dimension.axis,
+                label=dimension.label,
+                value=dimension.value,
+                pronounced=dimension.pronounced,
+                recommendations=[
+                    TechniqueExampleResponse(
+                        tag=rec.tag,
+                        direction=rec.direction,
+                        items=[
+                            GarmentSummary(id=item.id, label=item.label, slot=item.slot)
+                            for item in rec.items
+                        ],
+                    )
+                    for rec in dimension.recommendations
+                ],
+            )
+            for dimension in recommend_techniques(balance_points)
         ],
     )

@@ -270,6 +270,58 @@ directly off the measurement fields (debounced, independent of the manual
 slot-picker below it), so a user sees good starting points before ever
 touching the catalog picker.
 
+## Technique recommendations (independent per-dimension, v1)
+
+`src/fit_balance/technique_advice.py`'s `recommend_techniques()` answers a
+different question than the outfit-ranking layer above: not "which whole
+outfit scores best," but "for each of the 4 scored dimensions
+(`waist_definition`, `top_hip_balance`, `torso_leg_balance`,
+`frame_scale_dev`), which garment techniques help, which hurt, and which
+catalog items use them" — reported per dimension, **never combined into
+one verdict**. `POST /technique-recommendations` (`api/main.py`) takes
+just `measurements` and returns a `DimensionAdviceResponse` per axis;
+deliberately no `main_concern` field on this response, since naming a
+single "most important" axis would contradict the point of reporting
+dimensions independently.
+
+Same presentation-layer precedent as the two sections above — no engine
+change (`balance_points.py`/`scoring.py`/`effects.yaml` untouched, only
+`AXIS_RULES`/`EFFECTS_TABLE` read), so no `docs/decisions/` entry, only
+this section. It does lean on a structural fact already true of
+`AXIS_RULES`: every tag sharing an axis also shares that axis's
+`reference`, so a dimension's severity level is computed once (via
+`scoring.py`'s now-public `signed_level`/`axis_value`, promoted from
+private helpers only `score()` used before) and reused for every tag on
+that axis — which side a tag lands on is purely its `weight`'s sign
+against that one level. A level of `0` (axis inside its deadzone) leaves
+every tag on that axis empty on both sides, which is how "no strong
+trait" fell out for a body with no real torso/leg skew, with no
+special-casing needed.
+
+Each dimension also carries `pronounced: bool` (the axis's own severity
+level hits 2, "pronounced") — a **highlight, not a ranking**: any number
+of dimensions (0, 1, or more) can be pronounced for a given body, with no
+forced single "main concern" pick and no cross-axis comparison at all.
+This deliberately supersedes an earlier explored (and shipped-then-not)
+direction of fixing `WomensBalancePoints.main_concern()` itself to be
+level-based — that path needed a tie-break policy and ran into a
+latent-bug/reference-point rabbit hole for no real gain once per-dimension
+independence made a single winner unnecessary. `main_concern()` itself
+stays exactly as documented in "Known gaps" below — untouched.
+
+A real, expected consequence of reporting dimensions independently: the
+same catalog item can appear more than once across dimensions, sometimes
+consistently (`oversized_top` reads `avoid` on both `waist_definition`
+and `frame_scale_dev` for a fuller-framed body with a defined waist — two
+independent reasons pointing the same way, not a combined score), and
+sometimes as a genuine split — an item whose two techniques touch two
+different axes can be `seek` on one and `avoid` on the other for the same
+body (e.g. `wide_leg_high_rise_trousers` on a hip-heavy, long-torsoed
+build: `adds_volume_bottom` works against the already-hip-heavy
+`top_hip_balance`, `elongates_leg` helps the long `torso_leg_balance`).
+That's the actual trade-off, surfaced directly, not a bug to resolve by
+picking a winner.
+
 ## Avatar: to-scale, not balance-point-driven
 
 `web/src/lib/avatarGeometry.ts` draws the silhouette directly from real

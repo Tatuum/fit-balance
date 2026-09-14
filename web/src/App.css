@@ -219,3 +219,64 @@ button {
   flex: none;
   font-size: 0.85rem;
 }
+
+.technique-advice-section {
+  width: 100%;
+  max-width: 360px;
+}
+
+.technique-advice-section h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.dimension-advice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dimension-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+}
+
+.dimension-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dimension-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.dimension-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #9a6b00;
+}
+
+.dimension-empty {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.3rem 0 0;
+}
+
+.dimension-seek,
+.dimension-avoid {
+  font-size: 0.8rem;
+  margin: 0.3rem 0 0;
+}
+
+.dimension-seek {
+  color: #1a7f37;
+}
+
+.dimension-avoid {
+  color: #c62828;
+}

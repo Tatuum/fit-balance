@@ -31,7 +31,7 @@ class _AxisRule:
 
 # For each effect tag: which balance-point axis it interacts with, and how.
 # contribution = weight * signed_level(balance_point_value, reference, axis)
-# — a small integer severity level (see _signed_level below), not a flat
+# — a small integer severity level (see signed_level below), not a flat
 # category match (NOTES.md "Core architecture" #3) and not the raw,
 # differently-scaled balance-point value either (docs/decisions/0010).
 # reference defaults to 0 (the formula's own neutral point);
@@ -67,7 +67,7 @@ AXIS_RULES: dict[str, _AxisRule] = {
     # distinction shoulder_hip_balance exists for, see balance_points.py),
     # so scoring only against bust would recommend adding top volume onto
     # already-broad shoulders, and miss recommending bottom volume to
-    # balance a broad-shouldered/narrow-bust build. See _axis_value below.
+    # balance a broad-shouldered/narrow-bust build. See axis_value below.
     #
     # No current effects.yaml technique produces adds_volume_top —
     # oversized_top lost it (decision 0011: a boxy, uniformly loose cut
@@ -99,13 +99,13 @@ _TOP_HIP_BALANCE_AXIS = "top_hip_balance"
 _SCORING_DEADZONE_AXES = DEADZONE_AXES | {_TOP_HIP_BALANCE_AXIS}
 
 
-def _axis_value(balance_points: WomensBalancePoints, axis: str) -> float:
+def axis_value(balance_points: WomensBalancePoints, axis: str) -> float:
     if axis == _TOP_HIP_BALANCE_AXIS:
         return max(balance_points.shoulder_hip_balance, balance_points.bust_hip_balance)
     return getattr(balance_points, axis)
 
 
-def _signed_level(value: float, reference: float, axis: str) -> int:
+def signed_level(value: float, reference: float, axis: str) -> int:
     """Quantizes a raw axis deviation into a small severity level — 0
     (within the deadzone, or for axes with none), 1 ("notable"), or 2
     ("pronounced") — sign preserved. Raw, differently-scaled axis values
@@ -133,8 +133,8 @@ def score(balance_points: WomensBalancePoints, garment: GarmentAttributes) -> Ve
             rule = AXIS_RULES.get(tag)
             if rule is None:
                 continue
-            value = _axis_value(balance_points, rule.axis)
-            contribution = rule.weight * _signed_level(value, rule.reference, rule.axis)
+            value = axis_value(balance_points, rule.axis)
+            contribution = rule.weight * signed_level(value, rule.reference, rule.axis)
             if contribution == 0:
                 continue
             reasons.append(

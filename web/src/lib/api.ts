@@ -5,6 +5,7 @@ import type {
   RecommendOutfitsResponse,
   ScoreOutfitResponse,
   ScoreResponse,
+  TechniqueRecommendationsResponse,
 } from './types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8000'
@@ -58,6 +59,20 @@ export async function recommendOutfits(
   })
   if (!response.ok) {
     throw new Error(`Recommend-outfits request failed: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function getTechniqueRecommendations(
+  measurements: Measurements,
+): Promise<TechniqueRecommendationsResponse> {
+  const response = await fetch(`${API_BASE}/technique-recommendations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ measurements }),
+  })
+  if (!response.ok) {
+    throw new Error(`Technique-recommendations request failed: ${response.status}`)
   }
   return response.json()
 }
