@@ -17,7 +17,7 @@ from fit_balance.garments import (
     list_items,
     resolve_outfit,
 )
-from fit_balance.scoring import EFFECTS_TABLE, score
+from fit_balance.scoring import AXIS_RULES, EFFECTS_TABLE, score
 from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, BUST_DRIVEN_TOP_HEAVY, PEAR_FULLER
 
 
@@ -29,6 +29,31 @@ def test_catalog_covers_all_four_slots():
 def test_catalog_covers_all_known_techniques():
     catalog_techniques = {t for item in list_items() for t in item.techniques}
     assert catalog_techniques == set(EFFECTS_TABLE)
+
+
+def test_every_axis_rules_tag_has_a_catalog_producer():
+    """Every scored effect tag (AXIS_RULES) must have at least one
+    technique that produces it (effects.yaml) AND that technique must be
+    used by a real catalog item -- otherwise the rule is dead code,
+    unreachable through any real garment. This is exactly the gap
+    adds_volume_top sat in after decision 0011 removed its only producer,
+    until decision 0012 gave it real ones -- this test exists so a future
+    technique removal can't silently reopen a gap like that one without a
+    test failing.
+
+    Doesn't require both signs of an axis to have a producer (e.g.
+    shoulder_hip_balance currently has only narrows_shoulder, no
+    "+weight" counterpart, which is a legitimate, deliberate asymmetry,
+    not a gap) -- just that every tag that IS in AXIS_RULES is reachable.
+    """
+    catalog_techniques = {t for item in list_items() for t in item.techniques}
+    for tag, rule in AXIS_RULES.items():
+        producers = [t for t, tags in EFFECTS_TABLE.items() if tag in tags]
+        assert producers, f"{tag!r} (axis={rule.axis}) has no producing technique in effects.yaml"
+        assert any(t in catalog_techniques for t in producers), (
+            f"{tag!r} (axis={rule.axis}) has producing techniques {producers} but none "
+            "are used by any catalog item in garments.yaml"
+        )
 
 
 def test_resolve_outfit_dedupes_identical_technique_across_items():
