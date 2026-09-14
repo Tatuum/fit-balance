@@ -82,13 +82,17 @@ proportion difference; `main_concern()` returns `None` if nothing clears it.
 reason (one direction is favorable, not "0 is neutral both ways"). Decision
 [0007](docs/decisions/0007-imbalance-deadzone.md). A favorable-sign value
 (e.g. high `waist_definition`) is an **asset**, not a concern — surface it
-as a strength to build around, not a problem to fix. Both the CLI
-(`cli.py`) and the web `BalancePointsChart` now honor this at the label
-level too: when `main_concern()` names a favorable `waist_definition`, they
-show "(key asset)" instead of "(main concern)" — a favorable value labeled
-as a concern read as self-contradictory ("defined waist (an asset) — MAIN
-CONCERN"). Presentation-only fix, `main_concern()`'s own selection logic is
-unchanged.
+as a strength to build around, not a problem to fix. The CLI (`cli.py`)
+honors this at the label level: when `main_concern()` names a favorable
+`waist_definition`, it shows "(key asset)" instead of "(main concern)" —
+a favorable value labeled as a concern read as self-contradictory
+("defined waist (an asset) — MAIN CONCERN"). Presentation-only fix,
+`main_concern()`'s own selection logic is unchanged. The web
+`BalancePointsChart` component has the same honoring logic and its own
+tests, but is no longer rendered by `App.tsx` since the frontend was
+simplified down to measurements/silhouette/technique-advice (see
+"Technique recommendations" below) — it's dead UI-wiring-wise, not
+dead code.
 
 ## Balance points — menswear v0
 
@@ -179,13 +183,17 @@ this suite green — that's the whole point of having it.
 ## Garment catalog (manual, v1 — explicitly not stage 5/6)
 
 `src/fit_balance/garments.yaml` + `garments.py` add a small, hand-curated
-catalog of named items (id/label/slot/techniques) so the web UI shows real
+catalog of named items (id/label/slot/techniques) so a caller gets real
 item names ("Slim-fitted top", "Oversized jacket") instead of raw
-`effects.yaml` technique keys, and so users can select one item per slot
+`effects.yaml` technique keys, and can select one item per slot
 (top/bottom/dress/outerwear) as an outfit and get one combined verdict for
 how it works together — `GET /garments` (never returns `techniques`, so the
 vocabulary never reaches the wire either) and `POST /score-outfit`
-(`api/main.py`).
+(`api/main.py`). Both endpoints are intact and tested; the web UI's manual
+per-slot picker built on top of them was removed when the frontend was
+simplified down to measurements/silhouette/technique-advice (see
+"Technique recommendations" below) — reachable today via the CLI or a
+direct API call, not currently surfaced in `web/`.
 
 This is presentation-layer work sitting on top of the untouched scoring
 engine — outfit scoring resolves the selected items' techniques into one
@@ -264,11 +272,12 @@ an unhelpful list.
 
 This ranks whole candidate outfits from the existing catalog — a different,
 broader thing than the single-item "replacement suggestion" still deferred
-above (fixing one reason within an outfit the user already picked). The web
-UI's "Recommended for you" panel (`web/src/App.tsx`) calls this endpoint
-directly off the measurement fields (debounced, independent of the manual
-slot-picker below it), so a user sees good starting points before ever
-touching the catalog picker.
+above (fixing one reason within an outfit the user already picked). The
+endpoint and its tests are intact; the web UI's "Recommended for you"
+panel that called it was removed in the same frontend simplification that
+dropped the manual picker (see "Technique recommendations" below) — the
+per-dimension technique advice took over as the web UI's proactive
+guidance instead of a ranked outfit list.
 
 ## Technique recommendations (independent per-dimension, v1)
 
@@ -298,10 +307,21 @@ every tag on that axis empty on both sides, which is how "no strong
 trait" fell out for a body with no real torso/leg skew, with no
 special-casing needed.
 
-Each dimension also carries `pronounced: bool` (the axis's own severity
-level hits 2, "pronounced") — a **highlight, not a ranking**: any number
-of dimensions (0, 1, or more) can be pronounced for a given body, with no
-forced single "main concern" pick and no cross-axis comparison at all.
+Each dimension also carries `notable: bool` and `direction: "+" | "-" |
+None` (the axis's own signed severity level, `!= 0`) plus `pronounced: bool`
+(that same level's magnitude `== 2`) — a **highlight, not a ranking**: any
+number of dimensions (0, 1, or more) can be pronounced for a given body,
+with no forced single "main concern" pick and no cross-axis comparison at
+all. `notable`/`direction` are exposed explicitly rather than left for a
+caller to infer from whether `recommendations` is non-empty — those can
+diverge when a tag has no current catalog item behind it (`adds_volume_top`
+is still orphaned per decision 0011, so a positive `top_hip_balance` body
+is notable and `direction="+"` even though only the *other* tag on that
+axis, `adds_volume_bottom`, has real items). The web UI's
+`DimensionAdvice.tsx` uses these two fields to render a plain-language
+description per dimension (e.g. "noticeably defined", "hip notably wider
+than shoulders/bust") ahead of the seek/avoid technique lists.
+
 This deliberately supersedes an earlier explored (and shipped-then-not)
 direction of fixing `WomensBalancePoints.main_concern()` itself to be
 level-based — that path needed a tie-break policy and ran into a
@@ -341,20 +361,25 @@ Decisions [0004](docs/decisions/0004-avatar-to-scale-rendering.md) and
 rendering concern — `balance_points.py`, `scoring.py`, and `effects.yaml`
 are untouched.
 
-**Garment-corrected overlay — prototype, not finished.** `Avatar` can take
-an `effectTags` prop (the scored outfit's positive/"helps" reason tags,
-already on the wire via `verdict.reasons[].tag` — no backend change needed)
-and draws a second dashed outline on top of the body silhouette, nudging
-specific widths per tag via `avatarGeometry.ts`'s `applyEffectAdjustments()`
-and a hand-tuned `EFFECT_WIDTH_ADJUSTMENTS` table (e.g. `defines_waist` →
-waist ×0.8, `adds_volume_top` → shoulder/bust ×1.15). `App.tsx` wires this
-off `result.verdict.reasons` automatically. Only covers tags with an
-obvious width-based reading — tags about torso/leg length
-(`elongates_leg`, `shortens_torso`, etc.) aren't represented yet, since
-those need a keypoint-position shift, not a width multiplier, and are
-silently ignored for now. Spike-quality: reuses the existing rendering
-pipeline (same "purely a rendering concern" scope as the section above),
-not yet validated for visual accuracy beyond a manual spot-check.
+**Garment-corrected overlay — prototype, not finished, and currently
+unwired.** `Avatar` can take an `effectTags` prop and draws a second
+dashed outline on top of the body silhouette, nudging specific widths per
+tag via `avatarGeometry.ts`'s `applyEffectAdjustments()` and a hand-tuned
+`EFFECT_WIDTH_ADJUSTMENTS` table (e.g. `defines_waist` → waist ×0.8,
+`adds_volume_top` → shoulder/bust ×1.15). It previously drew off a scored
+outfit's positive reasons; since the frontend simplification removed the
+manual outfit-scoring flow (`result` in `App.tsx`) that fed it, `App.tsx`
+now renders `Avatar` with no `effectTags` at all — the capability (prop,
+adjustment table, tests) is untouched, just not currently exercised by
+any caller. Reconnecting it would need a new source for the tags (e.g.
+the "Technique recommendations" section's per-dimension advice), not
+resurrecting the removed outfit picker. Only covers tags with an obvious
+width-based reading — tags about torso/leg length (`elongates_leg`,
+`shortens_torso`, etc.) aren't represented, since those need a
+keypoint-position shift, not a width multiplier. Spike-quality: reuses
+the existing rendering pipeline (same "purely a rendering concern" scope
+as the section above), not yet validated for visual accuracy beyond a
+manual spot-check.
 
 ## Build order — status
 
