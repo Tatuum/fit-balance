@@ -1,4 +1,5 @@
 import type {
+  BalanceGarmentResponse,
   GarmentAttributes,
   GarmentSummary,
   Measurements,
@@ -73,6 +74,21 @@ export async function getTechniqueRecommendations(
   })
   if (!response.ok) {
     throw new Error(`Technique-recommendations request failed: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function balanceGarment(
+  measurements: Measurements,
+  itemId: string,
+): Promise<BalanceGarmentResponse> {
+  const response = await fetch(`${API_BASE}/balance-garment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ measurements, item_id: itemId }),
+  })
+  if (!response.ok) {
+    throw new Error(`Balance-garment request failed: ${response.status}`)
   }
   return response.json()
 }

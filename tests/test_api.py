@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
 
 from api.main import app
-from tests.fixtures import HOURGLASS_BALANCED, PEAR_FULLER
+from fit_balance.balance_points import compute_womens_balance_points
+from fit_balance.garment_balance import suggest_balance
+from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, HOURGLASS_BALANCED, PEAR_FULLER
 
 client = TestClient(app)
 
@@ -126,3 +128,30 @@ def test_technique_recommendations_endpoint_matches_pear_dimensions():
     assert vertical["direction"] is None
     assert vertical["recommendations"] == []
     assert vertical["pronounced"] is False
+
+
+def test_balance_garment_endpoint_matches_engine_call():
+    response = client.post(
+        "/balance-garment",
+        json={"measurements": BROAD_SHOULDER_NARROW_HIP.model_dump(), "item_id": "structured_blazer"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["item"] == {"id": "structured_blazer", "label": "Structured blazer with built-up shoulders", "slot": "outerwear"}
+    assert body["verdict"]["recommendation"] == "avoid"
+
+    bp = compute_womens_balance_points(BROAD_SHOULDER_NARROW_HIP)
+    advice = suggest_balance(bp, "structured_blazer")
+    assert body["verdict"]["score"] == advice.verdict.score
+    assert [d["axis"] for d in body["suggestions"]] == [d.axis for d in advice.suggestions]
+    suggested_item_ids = {i["id"] for d in body["suggestions"] for r in d["recommendations"] for i in r["items"]}
+    engine_item_ids = {i.id for d in advice.suggestions for r in d.recommendations for i in r.items}
+    assert suggested_item_ids == engine_item_ids
+
+
+def test_balance_garment_endpoint_rejects_unknown_item_id():
+    response = client.post(
+        "/balance-garment",
+        json={"measurements": HOURGLASS_BALANCED.model_dump(), "item_id": "not_a_real_item"},
+    )
+    assert response.status_code == 422

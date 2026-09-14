@@ -278,8 +278,9 @@ section (same precedent as the garment-catalog feature above).
 
 Valid combinations are **dress XOR (top + bottom), with outerwear optional
 on either branch** — top-alone, bottom-alone, and top+dress/bottom+dress
-are never enumerated. With the current catalog (4 dress / 4 top / 6 bottom
-/ 4 outerwear items) that's exactly 140 candidates, cheap enough to score
+are never enumerated. With the current catalog (7 dress / 9 top / 8 bottom
+/ 5 outerwear items, after decisions 0012/0013) that's exactly 474
+candidates, cheap enough to score
 fresh on every request with a plain nested loop — no caching. Ranking is a
 simple sort with no dedup/near-duplicate suppression (e.g. the same top
 paired with several different jackets could fill multiple slots of the top
@@ -332,9 +333,10 @@ with no forced single "main concern" pick and no cross-axis comparison at
 all. `notable`/`direction` are exposed explicitly rather than left for a
 caller to infer from whether `recommendations` is non-empty — those can
 diverge when a tag has no current catalog item behind it (`adds_volume_top`
-is still orphaned per decision 0011, so a positive `top_hip_balance` body
-is notable and `direction="+"` even though only the *other* tag on that
-axis, `adds_volume_bottom`, has real items). The web UI's
+was the standing example of this, orphaned per decision 0011, until
+decision 0012 gave it real items; `tests/test_garments.py`'s
+`test_every_axis_rules_tag_has_a_catalog_producer` now guards against that
+gap reopening silently). The web UI's
 `DimensionAdvice.tsx` uses these two fields to render a plain-language
 description per dimension (e.g. "noticeably defined", "hip notably wider
 than shoulders/bust") ahead of the seek/avoid technique lists.
@@ -358,6 +360,47 @@ build: `adds_volume_bottom` works against the already-hip-heavy
 `top_hip_balance`, `elongates_leg` helps the long `torso_leg_balance`).
 That's the actual trade-off, surfaced directly, not a bug to resolve by
 picking a winner.
+
+## Single-garment balance advice (v1)
+
+`src/fit_balance/garment_balance.py`'s `suggest_balance(balance_points,
+item_id)` answers a third, narrower question than the two features above:
+not "which whole outfit scores best" (outfit recommendations) and not
+"which techniques generally help/hurt, body-wide" (technique
+recommendations), but "I'm set on wearing *this specific* item — what does
+it do to my silhouette, and what else (in a different slot) would offset
+whatever it hurts." `POST /balance-garment` (`api/main.py`) takes
+`measurements` + one `item_id` and returns that item's own `Verdict` (no
+attribution needed — there's only one item) plus `suggestions`, a list of
+`DimensionAdvice` restricted to the axes where this item scored a negative
+reason, `recommendations` filtered to the "seek" (opposite-sign) side, and
+`items` filtered to exclude the chosen item's own slot.
+
+This deliberately sits between two things named elsewhere as out of scope:
+it is **not** the single-item *replacement* suggestion the "Garment
+catalog" section above defers ("recommending a specific replacement item
+is explicitly deferred") — nothing here proposes swapping the chosen item,
+only complementing it — and it is **not** full outfit recommendation
+(`recommend.py`) — it only ever reasons about the one item the user
+already committed to. Same presentation-layer precedent as the three
+features above: `resolve_outfit()`, `score()`, and `recommend_techniques()`
+are reused completely unchanged, no new `AXIS_RULES`/`effects.yaml` logic,
+so no `docs/decisions/` entry, only this section.
+
+One consequence of reusing `recommend_techniques()` as-is: a negative
+reason on an axis that function doesn't report — currently only
+`shoulder_hip_balance` (`narrows_shoulder`, decision 0013; see "Known
+gaps" and "Technique recommendations" above) — simply produces no
+suggestion for that reason, same documented gap, not a special case here.
+The "other slot" filter is a deliberate v1 simplification too: it's
+`item.slot != suggestion.slot`, not the full dress-XOR-(top+bottom)
+valid-outfit-shape logic `enumerate_outfit_combinations()` uses, since this
+feature only ever proposes one complementary item at a time. The web UI's
+`GarmentBalance.tsx` renders the item's own verdict/reasons next to a
+second `Avatar` (driven by **all** of the item's reason tags, not just the
+positive ones — unlike the old removed picker's curated "your recommended
+outfit" avatar, the point here is showing the item's real effect, good and
+bad) and reuses `DimensionAdvice.tsx` wholesale for the suggestions list.
 
 ## Avatar: to-scale, not balance-point-driven
 

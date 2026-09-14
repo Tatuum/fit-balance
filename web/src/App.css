@@ -131,3 +131,78 @@ input[type='number'] {
 .dimension-avoid {
   color: #c62828;
 }
+
+.garment-balance-section {
+  width: 100%;
+  max-width: 360px;
+}
+
+.garment-balance-section h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.garment-balance-section select {
+  width: 100%;
+}
+
+.garment-balance-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.garment-balance-suggestions {
+  width: 100%;
+}
+
+.garment-balance-suggestions h3 {
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.verdict {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.verdict-recommended {
+  color: #1a7f37;
+}
+
+.verdict-neutral {
+  color: #9a6b00;
+}
+
+.verdict-avoid {
+  color: #c62828;
+}
+
+.verdict-strong_avoid {
+  color: #7f1010;
+}
+
+.reasons {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.reasons li {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0;
+}
+
+.reasons li.helps {
+  background: #eaf7ee;
+  color: #1a7f37;
+}
+
+.reasons li.hurts {
+  background: #fdecea;
+  color: #c62828;
+}

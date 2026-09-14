@@ -97,3 +97,11 @@ export interface TechniqueRecommendationsResponse {
   balance_points: BalancePoints
   dimensions: DimensionAdvice[]
 }
+
+export interface BalanceGarmentResponse {
+  balance_points: BalancePoints
+  main_concern: string | null
+  item: GarmentSummary
+  verdict: Verdict
+  suggestions: DimensionAdvice[]
+}

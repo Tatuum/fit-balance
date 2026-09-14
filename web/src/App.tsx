@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Avatar } from './components/Avatar'
 import { DimensionAdvice } from './components/DimensionAdvice'
+import { GarmentBalance } from './components/GarmentBalance'
 import { MeasurementGuide } from './components/MeasurementGuide'
 import { getTechniqueRecommendations } from './lib/api'
 import type { Measurements, TechniqueRecommendationsResponse } from './lib/types'
@@ -98,6 +99,8 @@ function App() {
             )}
             {techniqueAdvice && <DimensionAdvice dimensions={techniqueAdvice.dimensions} />}
           </section>
+
+          <GarmentBalance measurements={measurements} />
         </div>
       </div>
     </div>

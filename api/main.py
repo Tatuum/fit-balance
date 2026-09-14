@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from fit_balance.balance_points import compute_womens_balance_points
+from fit_balance.garment_balance import suggest_balance
 from fit_balance.garments import (
     AttributedReason,
     UnknownGarmentItemError,
@@ -16,7 +17,7 @@ from fit_balance.garments import (
 from fit_balance.recommend import recommend_outfits
 from fit_balance.schemas import GarmentAttributes, Measurements, Verdict
 from fit_balance.scoring import score as score_garment
-from fit_balance.technique_advice import recommend_techniques
+from fit_balance.technique_advice import DimensionAdvice, recommend_techniques
 
 app = FastAPI(title="fit-balance API")
 
@@ -175,6 +176,30 @@ class TechniqueRecommendationsResponse(BaseModel):
     dimensions: list[DimensionAdviceResponse]
 
 
+def _dimension_advice_response(dimension: DimensionAdvice) -> DimensionAdviceResponse:
+    """Shared by /technique-recommendations and /balance-garment — both
+    return technique_advice.DimensionAdvice values over the wire."""
+    return DimensionAdviceResponse(
+        axis=dimension.axis,
+        label=dimension.label,
+        value=dimension.value,
+        notable=dimension.notable,
+        pronounced=dimension.pronounced,
+        direction=dimension.direction,
+        recommendations=[
+            TechniqueExampleResponse(
+                tag=rec.tag,
+                direction=rec.direction,
+                items=[
+                    GarmentSummary(id=item.id, label=item.label, slot=item.slot)
+                    for item in rec.items
+                ],
+            )
+            for rec in dimension.recommendations
+        ],
+    )
+
+
 @app.post("/technique-recommendations", response_model=TechniqueRecommendationsResponse)
 def technique_recommendations_endpoint(
     request: TechniqueRecommendationsRequest,
@@ -183,25 +208,38 @@ def technique_recommendations_endpoint(
     return TechniqueRecommendationsResponse(
         balance_points=asdict(balance_points),
         dimensions=[
-            DimensionAdviceResponse(
-                axis=dimension.axis,
-                label=dimension.label,
-                value=dimension.value,
-                notable=dimension.notable,
-                pronounced=dimension.pronounced,
-                direction=dimension.direction,
-                recommendations=[
-                    TechniqueExampleResponse(
-                        tag=rec.tag,
-                        direction=rec.direction,
-                        items=[
-                            GarmentSummary(id=item.id, label=item.label, slot=item.slot)
-                            for item in rec.items
-                        ],
-                    )
-                    for rec in dimension.recommendations
-                ],
-            )
+            _dimension_advice_response(dimension)
             for dimension in recommend_techniques(balance_points)
         ],
+    )
+
+
+class BalanceGarmentRequest(BaseModel):
+    measurements: Measurements
+    item_id: str
+
+
+class BalanceGarmentResponse(BaseModel):
+    balance_points: dict[str, float]
+    main_concern: str | None
+    item: GarmentSummary
+    # Reused directly from schemas, like /score does — a single item's own
+    # verdict needs no per-item attribution (see OutfitVerdict above).
+    verdict: Verdict
+    suggestions: list[DimensionAdviceResponse]
+
+
+@app.post("/balance-garment", response_model=BalanceGarmentResponse)
+def balance_garment_endpoint(request: BalanceGarmentRequest) -> BalanceGarmentResponse:
+    balance_points = compute_womens_balance_points(request.measurements)
+    try:
+        advice = suggest_balance(balance_points, request.item_id)
+    except UnknownGarmentItemError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown garment item id: {exc}") from exc
+    return BalanceGarmentResponse(
+        balance_points=asdict(balance_points),
+        main_concern=balance_points.main_concern(),
+        item=GarmentSummary(id=advice.item.id, label=advice.item.label, slot=advice.item.slot),
+        verdict=advice.verdict,
+        suggestions=[_dimension_advice_response(d) for d in advice.suggestions],
     )
