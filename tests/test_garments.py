@@ -44,7 +44,7 @@ def test_resolve_outfit_raises_for_unknown_item_id():
 
 def test_attribution_reuses_worked_example_5():
     """NOTES.md worked example 5: pear + fuller frame, oversized top +
-    skinny/straight bottom -> neutral, with both a helping and a hurting
+    skinny/straight bottom -> avoid, with both a helping and a hurting
     reason (including oversized_top hiding this body's defined waist). Same
     body, same techniques (via catalog items instead of raw technique
     strings), plus attribution pinned to the right item."""
@@ -53,7 +53,7 @@ def test_attribution_reuses_worked_example_5():
 
     bp = compute_womens_balance_points(PEAR_FULLER)
     verdict = score(bp, garment)
-    assert verdict.recommendation == "neutral"
+    assert verdict.recommendation == "avoid"
 
     attributed = attribute_reasons(verdict.reasons, items)
     by_tag = {r.tag: r.item_ids for r in attributed}

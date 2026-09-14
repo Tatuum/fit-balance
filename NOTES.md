@@ -170,7 +170,7 @@ by re-reading doesn't scale. These 5 are now encoded as regression tests in
 2. shape≈apple,     torso_leg=long_torso,  garment=[sheath_bodycon, belted_natural_waist] → avoid
 3. shape≈rectangle, torso_leg=long_torso, height=petite, garment=[drop_waist]              → strong avoid
 4. shape≈rectangle, torso_leg=long_torso, height=petite, garment=[empire_waistline, vertical_detail] → recommended
-5. shape≈pear,      frame_scale=fuller,   garment=[oversized_top, skinny_straight]         → neutral, with a noted tension (shape wants some added volume on top, frame_scale wants less overall bulk, but oversized_top also hides this body's defined waist — a real asset — so the net doesn't clear "recommended")
+5. shape≈pear,      frame_scale=fuller,   garment=[oversized_top, skinny_straight]         → avoid (decision 0011: oversized_top no longer credits added top volume, only adds_bulk and hides_waist — both work against this body's fuller frame and defined waist, and skinny_straight's reduces_bulk isn't enough on its own to offset them)
 ```
 
 Any change to `balance_points.py`, `effects.yaml`, or `scoring.py` must keep
@@ -205,10 +205,18 @@ verbatim for `bomber_jacket` — decision
 also carries `hides_waist` — a boxy, unshaped silhouette obscures whatever
 natural waist definition is already there, wired as the mirror of
 `defines_waist`/`clings_to_waist` — decision
-[0006](docs/decisions/0006-hides-waist-effect.md). Further vocabulary
-growth stays a case-by-case decision, not a batch exercise — each addition
-should be this deliberate about which existing tag it reuses versus
-genuinely needing a new one.
+[0006](docs/decisions/0006-hides-waist-effect.md). `oversized_top` no
+longer carries `adds_volume_top`: a boxy, uniformly loose cut doesn't
+specifically widen the top the way structured/padded shoulders would —
+that's already what `adds_bulk` models, so the two tags were double-
+counting the same real effect — decision
+[0011](docs/decisions/0011-remove-adds-volume-top-from-oversized-top.md).
+`adds_volume_top` has no current technique producing it as a result
+(same "known fact, not yet scored" status `clings_to_hip` has, inverted),
+kept in `scoring.py`'s `AXIS_RULES` for a future top-width-specific
+technique. Further vocabulary growth stays a case-by-case decision, not a
+batch exercise — each addition should be this deliberate about which
+existing tag it reuses versus genuinely needing a new one.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques

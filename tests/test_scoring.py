@@ -46,16 +46,17 @@ def test_example_4_rectangle_petite_empire_vertical_is_recommended():
     assert verdict.recommendation == "recommended"
 
 
-def test_example_5_pear_fuller_oversized_skinny_is_neutral_with_tension():
+def test_example_5_pear_fuller_oversized_skinny_is_avoid():
     bp = compute_womens_balance_points(PEAR_FULLER)
     garment = GarmentAttributes(techniques=["oversized_top", "skinny_straight"])
     verdict = score(bp, garment)
-    assert verdict.recommendation == "neutral"
-    # NOTES.md: "shape wants some added volume on top; frame_scale wants
-    # less overall bulk; oversized_top also hides this body's defined
-    # waist" — a helping and a hurting reason both appear, and the hurting
-    # side (including hiding a real asset) keeps the net from clearing
-    # "recommended".
+    assert verdict.recommendation == "avoid"
+    # NOTES.md / decision 0011: oversized_top no longer carries
+    # adds_volume_top (a boxy, uniformly loose cut doesn't specifically
+    # widen the top the way structured/padded shoulders would — it just
+    # reads as bulk, already covered by adds_bulk). skinny_straight's
+    # reduces_bulk still helps a little, but hides_waist and adds_bulk both
+    # hurt, and nothing offsets them anymore.
     assert any(r.direction == "+" for r in verdict.reasons)
     assert any(r.direction == "-" for r in verdict.reasons)
     assert any(r.tag == "hides_waist" and r.direction == "-" for r in verdict.reasons)
@@ -116,26 +117,6 @@ def test_adds_volume_bottom_mirrors_adds_volume_top_with_opposite_sign():
     garment = GarmentAttributes(techniques=["wide_leg"])
     assert score(top_heavy, garment).score > 0
     assert score(bottom_heavy, garment).score < 0
-
-
-def test_adds_volume_top_works_against_an_already_broad_shoulder():
-    """Broad shoulders should flip adds_volume_top negative even though
-    bust_hip_balance alone reads as needing top volume: top_hip_balance is
-    max(shoulder_hip_balance, bust_hip_balance), so the already-wide
-    shoulder — not the narrower bust — decides it. It doesn't just fail to
-    recommend oversized_top, it actively counts against it: the shoulder
-    line already reads wide, so adding more volume there works against this
-    body rather than doing nothing."""
-    bp = WomensBalancePoints(
-        shoulder_hip_balance=0.2,
-        bust_hip_balance=-0.2,
-        waist_definition=0,
-        torso_leg_balance=0,
-        frame_scale_dev=0,
-    )
-    garment = GarmentAttributes(techniques=["oversized_top"])
-    verdict = score(bp, garment)
-    assert any(r.tag == "adds_volume_top" and r.direction == "-" for r in verdict.reasons)
 
 
 def test_deadzone_boundary_value_counts_as_notable_not_balanced():

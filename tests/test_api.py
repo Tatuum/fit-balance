@@ -51,7 +51,7 @@ def test_score_outfit_endpoint_matches_worked_example_5_and_attributes_problem_i
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["verdict"]["recommendation"] == "neutral"
+    assert body["verdict"]["recommendation"] == "avoid"
     reasons_by_tag = {r["tag"]: r["item_ids"] for r in body["verdict"]["reasons"]}
     assert reasons_by_tag["adds_bulk"] == ["oversized_top"]
     assert reasons_by_tag["reduces_bulk"] == ["slim_trousers"]
