@@ -160,7 +160,9 @@ class DimensionAdviceResponse(BaseModel):
     axis: str
     label: str
     value: float
+    notable: bool
     pronounced: bool
+    direction: Literal["+", "-"] | None
     recommendations: list[TechniqueExampleResponse]
 
 
@@ -185,7 +187,9 @@ def technique_recommendations_endpoint(
                 axis=dimension.axis,
                 label=dimension.label,
                 value=dimension.value,
+                notable=dimension.notable,
                 pronounced=dimension.pronounced,
+                direction=dimension.direction,
                 recommendations=[
                     TechniqueExampleResponse(
                         tag=rec.tag,

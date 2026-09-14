@@ -37,10 +37,6 @@ fieldset label {
   margin: 0.4rem 0;
 }
 
-fieldset label.checkbox {
-  justify-content: flex-start;
-}
-
 .help-icon {
   cursor: help;
   color: #888;
@@ -63,11 +59,6 @@ input[type='number'] {
   width: 6rem;
 }
 
-button {
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-}
-
 .results {
   flex: 1 1 280px;
   display: flex;
@@ -76,148 +67,8 @@ button {
   gap: 0.75rem;
 }
 
-.verdict {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-.verdict-recommended {
-  color: #1a7f37;
-}
-
-.verdict-neutral {
-  color: #9a6b00;
-}
-
-.verdict-avoid {
-  color: #c62828;
-}
-
-.verdict-strong_avoid {
-  color: #7f1010;
-}
-
-.reasons {
-  list-style: none;
-  padding: 0;
-  width: 100%;
-  max-width: 320px;
-}
-
-.reasons li {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  margin: 0.25rem 0;
-}
-
-.reasons li.helps {
-  background: #eaf7ee;
-  color: #1a7f37;
-}
-
-.reasons li.hurts {
-  background: #fdecea;
-  color: #c62828;
-}
-
-.reason-source {
-  font-size: 0.8em;
-  opacity: 0.75;
-}
-
 .error {
   color: #c62828;
-}
-
-.balance-chart {
-  width: 100%;
-  max-width: 360px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.balance-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 6px;
-}
-
-.balance-row-main-concern {
-  background: #f9f9f7;
-  box-shadow: inset 2px 0 0 #1a1a1a;
-}
-
-.balance-dot {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
-.balance-dot-balanced {
-  background: #2e9e4a;
-}
-
-.balance-dot-notable {
-  background: #9a9a90;
-}
-
-.balance-text {
-  font-size: 0.8rem;
-  color: #1a1a1a;
-}
-
-.balance-label {
-  font-weight: 500;
-}
-
-.balance-row-main-concern .balance-label {
-  font-weight: 700;
-}
-
-.balance-badge {
-  margin-left: auto;
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #555;
-}
-
-.balance-badge-asset {
-  color: #2e9e4a;
-}
-
-.balance-caption {
-  grid-column: 1 / -1;
-  font-size: 0.68rem;
-  color: #888;
-}
-
-.recommendations {
-  list-style: decimal;
-  padding-left: 1.2rem;
-  margin: 0.5rem 0;
-}
-
-.recommendation {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  align-items: baseline;
-  margin: 0.3rem 0;
-}
-
-.recommendation-labels {
-  flex: 1 1 auto;
-}
-
-.recommendation .verdict {
-  flex: none;
-  font-size: 0.85rem;
 }
 
 .technique-advice-section {
@@ -261,9 +112,9 @@ button {
   color: #9a6b00;
 }
 
-.dimension-empty {
+.dimension-description {
   font-size: 0.8rem;
-  color: #888;
+  color: #555;
   margin: 0.3rem 0 0;
 }
 

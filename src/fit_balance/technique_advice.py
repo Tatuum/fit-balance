@@ -34,12 +34,25 @@ class DimensionAdvice:
     """One dimension's independent readout — never combined with the other
     3. `pronounced` is a per-dimension highlight (severity level 2), not a
     cross-dimension ranking: any number of dimensions (including zero) can
-    be pronounced for a given body."""
+    be pronounced for a given body.
+
+    `notable`/`direction` are the axis's own severity level and sign,
+    exposed directly rather than left for a caller to infer from whether
+    `recommendations` is empty — those aren't the same thing. A notable,
+    directional reading can still have an empty `recommendations` list if
+    the tag for that direction has no current catalog item behind it (e.g.
+    adds_volume_top, orphaned since decision 0011) — that's a catalog gap,
+    not the body being unremarkable on this axis, and callers describing
+    "what this body reads like" need the real signal, not the coincidence
+    of today's catalog coverage.
+    """
 
     axis: str
     label: str
     value: float
+    notable: bool
     pronounced: bool
+    direction: Literal["+", "-"] | None
     recommendations: list[TechniqueExample]
 
 
@@ -76,7 +89,9 @@ def recommend_techniques(balance_points: WomensBalancePoints) -> list[DimensionA
                 axis=axis,
                 label=label,
                 value=value,
+                notable=level != 0,
                 pronounced=abs(level) == 2,
+                direction=("+" if level > 0 else "-") if level != 0 else None,
                 recommendations=recommendations,
             )
         )

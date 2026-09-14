@@ -115,10 +115,14 @@ def test_technique_recommendations_endpoint_matches_pear_dimensions():
     }
 
     waist = dimensions_by_axis["waist_definition"]
+    assert waist["notable"] is True
+    assert waist["direction"] == "+"
     tags = {r["tag"]: r["direction"] for r in waist["recommendations"]}
     assert tags["hides_waist"] == "-"
     assert tags["defines_waist"] == "+"
 
     vertical = dimensions_by_axis["torso_leg_balance"]
+    assert vertical["notable"] is False
+    assert vertical["direction"] is None
     assert vertical["recommendations"] == []
     assert vertical["pronounced"] is False

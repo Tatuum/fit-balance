@@ -17,6 +17,8 @@ def _advice_by_axis(balance_points):
 def test_pear_waist_definition_seeks_belted_and_fitted_avoids_oversized():
     bp = compute_womens_balance_points(PEAR_FULLER)
     advice = _advice_by_axis(bp)["waist_definition"]
+    assert advice.notable is True
+    assert advice.direction == "+"
     assert advice.pronounced is False
 
     by_tag = {r.tag: r for r in advice.recommendations}
@@ -45,6 +47,8 @@ def test_pear_horizontal_balance_avoids_added_bottom_volume():
     so only the "avoid" side fires here for this hip-heavy body."""
     bp = compute_womens_balance_points(PEAR_FULLER)
     advice = _advice_by_axis(bp)["top_hip_balance"]
+    assert advice.notable is True
+    assert advice.direction == "-"
     assert advice.pronounced is False
 
     by_tag = {r.tag: r for r in advice.recommendations}
@@ -120,8 +124,29 @@ def test_pear_vertical_proportion_has_no_strong_trait():
     deadzone, so every tag on that axis is empty on both sides."""
     bp = compute_womens_balance_points(PEAR_FULLER)
     advice = _advice_by_axis(bp)["torso_leg_balance"]
+    assert advice.notable is False
+    assert advice.direction is None
     assert advice.recommendations == []
     assert advice.pronounced is False
+
+
+def test_notable_and_direction_are_driven_by_level_not_by_item_coverage():
+    """A broad-shouldered (positive top_hip_balance) body: notable/direction
+    must reflect the axis's own level, not merely "recommendations is
+    non-empty" -- the "avoid" side here (adds_volume_top) has no current
+    catalog item at all (decision 0011), so recommendations only has the
+    "seek" side, but the axis itself is still notable and positive."""
+    bp = WomensBalancePoints(
+        shoulder_hip_balance=0.1,
+        bust_hip_balance=0.1,
+        waist_definition=0,
+        torso_leg_balance=0,
+        frame_scale_dev=0,
+    )
+    advice = _advice_by_axis(bp)["top_hip_balance"]
+    assert advice.notable is True
+    assert advice.direction == "+"
+    assert all(r.direction == "+" for r in advice.recommendations)
 
 
 def test_rectangle_vertical_proportion_is_pronounced_and_only_dimension():

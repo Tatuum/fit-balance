@@ -87,7 +87,9 @@ export interface DimensionAdvice {
   axis: string
   label: string
   value: number
+  notable: boolean
   pronounced: boolean
+  direction: '+' | '-' | null
   recommendations: TechniqueExample[]
 }
 
