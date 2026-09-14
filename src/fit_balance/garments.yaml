@@ -143,3 +143,9 @@ pencil_skirt:
   label: Pencil skirt
   slot: bottom
   techniques: [pencil_skirt]
+
+# Item below added by decision 0013.
+scoop_neck_top:
+  label: Scoop-neck top
+  slot: top
+  techniques: [scoop_neck]

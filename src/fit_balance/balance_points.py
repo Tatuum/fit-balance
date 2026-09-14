@@ -55,10 +55,12 @@ class WomensBalancePoints:
     # + = shoulder wider than hip (broad-shoulder build), − = hip wider than
     # shoulder. Distinguishes a broad-shoulder/narrow-hip build from a
     # top-heavy-by-bust build that would otherwise look identical on
-    # bust_hip_balance alone (NOTES.md "known gaps"). No dedicated
-    # effects.yaml AXIS_RULES entry of its own, but feeds top_hip_balance
+    # bust_hip_balance alone (NOTES.md "known gaps"). Feeds top_hip_balance
     # (max of this and bust_hip_balance, decision 0009) — structured_shoulder
-    # and puff_sleeve (decision 0012) react to it that way.
+    # and puff_sleeve (decision 0012) react to it that way — and also has
+    # its own dedicated AXIS_RULES entry, narrows_shoulder (decision 0013),
+    # for techniques (scoop necklines) that specifically address shoulder
+    # width rather than top volume generally.
     shoulder_hip_balance: float
     bust_hip_balance: float
     waist_definition: float

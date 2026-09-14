@@ -80,6 +80,15 @@ AXIS_RULES: dict[str, _AxisRule] = {
     # wide-leg trousers) helps balance a top-heavy build (positive
     # top_hip_balance) and works against an already bottom-heavy one.
     "adds_volume_bottom": _AxisRule(axis="top_hip_balance", weight=1),
+    # Unlike the two rules above, scored directly against shoulder_hip_balance
+    # rather than the derived top_hip_balance — a technique that narrows the
+    # shoulder line itself (e.g. a scoop neckline) only helps a body whose
+    # top-heaviness actually comes from broad shoulders, not one that's
+    # top-heavy from a fuller bust with balanced shoulders (those would
+    # otherwise look identical through top_hip_balance's max()). Decision
+    # 0013 — closes the shoulder_hip_balance gap NOTES.md flagged since
+    # decision 0002.
+    "narrows_shoulder": _AxisRule(axis="shoulder_hip_balance", weight=1),
 }
 
 RECOMMENDED_THRESHOLD = 1

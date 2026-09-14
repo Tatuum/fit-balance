@@ -5,12 +5,17 @@ from .balance_points import WomensBalancePoints
 from .garments import GarmentItem, list_items
 from .scoring import AXIS_RULES, EFFECTS_TABLE, axis_value, signed_level
 
-# The 4 scored dimensions, independent of each other — no cross-axis
+# The 4 reported dimensions, independent of each other — no cross-axis
 # combination or ranking, so none of the raw-magnitude-comparability
 # problems a single combined Verdict runs into apply here. shoulder_hip_balance
-# and bust_hip_balance aren't listed separately: AXIS_RULES only ever scores
-# against the derived top_hip_balance (see scoring.py's axis_value), same
-# "Top vs hip" combination BalancePointsChart.tsx already does for display.
+# and bust_hip_balance aren't listed separately here, matching the "Top vs
+# hip" combination BalancePointsChart.tsx already does for display — most
+# AXIS_RULES entries score against the derived top_hip_balance (see
+# scoring.py's axis_value). narrows_shoulder (decision 0013) is the one
+# exception, scored directly against shoulder_hip_balance: it still won't
+# surface here since shoulder_hip_balance isn't one of the 4 below, only in
+# score()'s full verdict — a deliberately deferred follow-on, not an
+# oversight.
 DIMENSIONS: tuple[tuple[str, str], ...] = (
     ("waist_definition", "Waist definition"),
     ("top_hip_balance", "Horizontal balance"),

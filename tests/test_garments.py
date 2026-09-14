@@ -18,7 +18,7 @@ from fit_balance.garments import (
     resolve_outfit,
 )
 from fit_balance.scoring import EFFECTS_TABLE, score
-from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, PEAR_FULLER
+from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, BUST_DRIVEN_TOP_HEAVY, PEAR_FULLER
 
 
 def test_catalog_covers_all_four_slots():
@@ -112,3 +112,34 @@ def test_structured_blazer_fires_adds_volume_top_for_broad_shoulders():
     attributed = attribute_reasons(verdict.reasons, items)
     by_tag = {r.tag: r.item_ids for r in attributed}
     assert by_tag["adds_volume_top"] == ["structured_blazer"]
+
+
+def test_scoop_neck_fires_narrows_shoulder_for_broad_shoulders():
+    """Decision 0013: scoop_neck is the first technique scored directly
+    against shoulder_hip_balance. On the same broad-shouldered body decision
+    0012 used for adds_volume_top, narrowing the shoulder line is itself a
+    win."""
+    _, garment = resolve_outfit(["scoop_neck_top"])
+    assert garment.techniques == ["scoop_neck"]
+
+    bp = compute_womens_balance_points(BROAD_SHOULDER_NARROW_HIP)
+    verdict = score(bp, garment)
+    assert verdict.recommendation == "recommended"
+
+
+def test_narrows_shoulder_distinguishes_shoulder_from_bust_driven_top_heaviness():
+    """The exact distinction top_hip_balance alone can't make: on a body
+    that's top-heavy because of a fuller bust with perfectly balanced
+    shoulders, scoop_neck (shoulder-specific) has nothing to offer, while
+    structured_blazer (adds_volume_top, scored against the bust-inclusive
+    top_hip_balance) still correctly reads avoid."""
+    bp = compute_womens_balance_points(BUST_DRIVEN_TOP_HEAVY)
+
+    _, scoop_neck_garment = resolve_outfit(["scoop_neck_top"])
+    scoop_verdict = score(bp, scoop_neck_garment)
+    assert scoop_verdict.reasons == []
+    assert scoop_verdict.recommendation == "neutral"
+
+    _, blazer_garment = resolve_outfit(["structured_blazer"])
+    blazer_verdict = score(bp, blazer_garment)
+    assert blazer_verdict.recommendation == "avoid"

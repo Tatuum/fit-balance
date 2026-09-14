@@ -147,11 +147,18 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   broad-shoulder/narrow-hip build from a top-heavy-by-bust build that would
   otherwise look identical on `bust_hip_balance` alone. It feeds
   `adds_volume_top`/`adds_volume_bottom` via the derived `top_hip_balance`
-  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)); it still
-  has no dedicated `effects.yaml`/`AXIS_RULES` entry of its own, but as of
-  decision [0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md)
-  `structured_shoulder`/`puff_sleeve` do react to it via `adds_volume_top`.
-  Necklines/sleeves beyond those two (halter, raglan) are still open.
+  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)) —
+  `structured_shoulder`/`puff_sleeve` react to it that way (decision
+  [0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md)) — and
+  as of decision
+  [0013](docs/decisions/0013-narrows-shoulder-effect.md) also has its own
+  dedicated `AXIS_RULES` entry, `narrows_shoulder` (`scoop_neck`), for
+  techniques that address shoulder width specifically rather than top
+  volume generally. Still open: `narrows_shoulder` doesn't surface in
+  `technique_advice.py`'s per-dimension advice (its `DIMENSIONS` tuple has
+  no standalone `shoulder_hip_balance` entry, only the combined
+  `top_hip_balance`), and necklines/sleeves beyond scoop/structured/puff
+  (halter, raglan) are still unmodeled.
 - `WomensBalancePoints.main_concern()` still picks the axis with the
   largest *raw* magnitude to name as "the" main concern — the same
   cross-axis comparability problem decision
@@ -227,10 +234,14 @@ genuinely widen the top of the silhouette. That same decision added
 `peplum` (`defines_waist` + `adds_volume_bottom`), `wrap_style`
 (`defines_waist`), `v_neck` (`elongates_torso`), `a_line`
 (`adds_volume_bottom`), and `pencil_skirt` (`clings_to_hip`) — all reusing
-existing tags, no `scoring.py` changes. Further vocabulary growth stays a
-case-by-case decision, not a batch exercise — each addition should be this
-deliberate about which existing tag it reuses versus genuinely needing a
-new one.
+existing tags, no `scoring.py` changes. Decision
+[0013](docs/decisions/0013-narrows-shoulder-effect.md) then added
+`scoop_neck` → `narrows_shoulder`, this catalog's one technique scored
+directly against `shoulder_hip_balance` rather than the derived
+`top_hip_balance` (see "Known gaps" above) — a genuinely new `AXIS_RULES`
+entry, not a reused tag. Further vocabulary growth stays a case-by-case
+decision, not a batch exercise — each addition should be this deliberate
+about which existing tag it reuses versus genuinely needing a new one.
 
 **Known interaction, tested not fixed**: `scoring.score()` doesn't dedupe
 reasons by tag, so an outfit whose items use two *different* techniques

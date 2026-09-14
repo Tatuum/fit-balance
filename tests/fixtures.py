@@ -65,3 +65,17 @@ PEAR_FULLER = Measurements(
 BROAD_SHOULDER_NARROW_HIP = Measurements(
     shoulder=100.0, bust=84.0, waist=66.0, hip=88.0, torso=40.5, leg=75.0, height=165.1
 )
+
+# Added for decision 0013's test_garments.py case — the counterpart to
+# BROAD_SHOULDER_NARROW_HIP above, deliberately top-heavy for the opposite
+# reason. shoulder=88/hip=88 keeps shoulder_hip_balance at exactly 0 (inside
+# the deadzone), while bust=105/hip=88 gives bust_hip_balance ≈0.162
+# (clears PRONOUNCED_THRESHOLD on its own) — top_hip_balance still reads
+# top-heavy via the bust, but shoulder_hip_balance alone reads perfectly
+# balanced. Proves narrows_shoulder (shoulder_hip_balance-scored) and
+# adds_volume_top (top_hip_balance-scored) diverge on this body exactly as
+# decision 0013 intends. torso/leg/waist as in BROAD_SHOULDER_NARROW_HIP,
+# keeping torso_leg_balance and frame_scale_dev both inside their deadzones.
+BUST_DRIVEN_TOP_HEAVY = Measurements(
+    shoulder=88.0, bust=105.0, waist=70.0, hip=88.0, torso=40.5, leg=75.0, height=165.1
+)

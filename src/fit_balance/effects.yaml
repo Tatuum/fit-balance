@@ -65,3 +65,8 @@ a_line:
 
 pencil_skirt:
   - clings_to_hip
+
+# Added by decision 0013 — the first technique scored directly against
+# shoulder_hip_balance rather than the derived top_hip_balance.
+scoop_neck:
+  - narrows_shoulder
