@@ -30,6 +30,21 @@ short list of actions you never want run without typing them yourself.
   rules below), *Bypass Permissions* ("auto mode" — skips the rules
   entirely). Recommendation: stay in Default mode; there's no need to touch
   Accept Edits or Bypass for this repo.
+
+  The CLI's mode indicator uses different labels than the names above:
+
+  | UI label | Mode name used here |
+  |---|---|
+  | Manual mode | Default |
+  | Accept edits on | Accept Edits |
+  | Auto mode on | Bypass Permissions |
+  | Plan mode on | Plan |
+
+  Only move to Accept Edits when: the working tree is clean, the current
+  plan already names every file expected to change, and verification for
+  the change is defined (for engine changes, that's `./check.sh` — now
+  backed by the commit hook in `docs/plans/commit-check-hook.md`, not just
+  a suggestion).
 - **Rules**: `permissions.allow` / `permissions.ask` / `permissions.deny`
   arrays of tool-pattern strings (e.g. `Bash(git status:*)`) live in
   `settings.json` (checked in, shared with the repo) or
