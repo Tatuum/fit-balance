@@ -91,6 +91,22 @@ time rather than a gut call:
 > the change is defined (for engine changes, that's `./check.sh` — now
 > backed by the commit hook above, not just a suggestion).
 
+## Observability: don't expect to see "All checks passed"
+
+Per Claude Code's documented hook behavior: a `PreToolUse` hook that exits
+`0` (allow) has its stdout *and* stderr routed to the debug log only —
+never shown in the terminal, and never seen by Claude either. Only a
+blocking exit (`2`) surfaces anything, via stderr as the shown reason. So
+seeing nothing when a commit succeeds is expected, not a sign the hook
+didn't run.
+
+To actually confirm the hook fired and passed (e.g. while debugging it),
+grep the session's transcript file
+(`~/.claude/projects/<project>/<session-id>.jsonl`) for `hook_success` —
+entries with `"hookName":"PreToolUse:Bash"` carry the hook's real stdout
+in `content` (e.g. starting `== pytest ==`) when it ran `check.sh`, versus
+exiting instantly with none for a non-commit command.
+
 ## Files touched
 
 - `.claude/hooks/check-before-commit.sh` — new, executable
