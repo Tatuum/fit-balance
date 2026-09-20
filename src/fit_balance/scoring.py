@@ -33,7 +33,7 @@ class _AxisRule:
 # contribution = weight * signed_level(balance_point_value, reference, axis)
 # — a small integer severity level (see signed_level below), not a flat
 # category match (NOTES.md "Core architecture" #3) and not the raw,
-# differently-scaled balance-point value either (docs/decisions/0010).
+# differently-scaled balance-point value either (docs/adr/0010).
 # reference defaults to 0 (the formula's own neutral point);
 # waist_definition's tags use 0.15 instead, since NOTES.md's formula comment
 # ("~0/− = no natural cinch") implies the practically meaningful cinch
@@ -117,7 +117,7 @@ def signed_level(value: float, reference: float, axis: str) -> int:
     (within the deadzone, or for axes with none), 1 ("notable"), or 2
     ("pronounced") — sign preserved. Raw, differently-scaled axis values
     aren't safely comparable when summed across axes; a small integer level
-    is, by construction (docs/decisions/0010).
+    is, by construction (docs/adr/0010).
 
     Same deadzone WomensBalancePoints.main_concern() uses for the four
     zero-neutral axes: below it, that axis isn't a real imbalance, so no

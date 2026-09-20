@@ -9,7 +9,7 @@ body-shape label or a photorealistic try-on render, it surfaces *why* a garment
 technique works with or against a user's proportions, with editable, inspectable
 reasons behind every verdict. `NOTES.md` is the current-state spec — full
 architecture and formulas — and the source of truth, not this file; read it
-before making design decisions. `docs/decisions/` holds the *why*: one
+before making design decisions. `docs/adr/` holds the *why*: one
 immutable file per past engine-level decision, referenced from the relevant
 `NOTES.md` section.
 
@@ -45,7 +45,7 @@ Commands: `uv run pytest` / `uv run ruff check .` (Python), `npm run build`
 
 - **Decide in writing first, for anything touching the engine** — not left
   to only exist in chat history. A new formula, axis, or scoring rule gets:
-  (1) a new, immutable file in `docs/decisions/NNNN-slug.md` (context /
+  (1) a new, immutable file in `docs/adr/NNNN-slug.md` (context /
   decision / consequences — use the `new-decision` skill to scaffold it,
   or see any existing file for the shape) written as part of the same
   change that implements it, never edited later — a reversal gets its own
@@ -62,3 +62,20 @@ Commands: `uv run pytest` / `uv run ruff check .` (Python), `npm run build`
   split apart later. Keeps `git log` a legible record of the conversation.
 - **Run `./check.sh` before calling any change done.** One gate: `pytest`,
   `ruff check`, the frontend's `tsc --noEmit`, and `vitest run`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as GitHub issues via the `gh` CLI (no remote is
+configured yet — add one before this is usable). See
+`docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: `docs/adr/` at the repo root holds the decision
+log (pre-existing, now the plugin's convention too, so `/domain-modeling`
+and `new-decision` write to the same place). `NOTES.md` stays the
+current-state spec — it isn't replaced by `CONTEXT.md`; a separate, thin
+`CONTEXT.md` may grow lazily via `/domain-modeling` alongside it. See
+`docs/agents/domain.md`.

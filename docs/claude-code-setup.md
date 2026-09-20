@@ -13,10 +13,12 @@ examples as tests) and workflow (decide-in-writing-first, one commit per
 decision, `./check.sh` before done). Read automatically every session.
 
 **Source-of-truth docs**
-`NOTES.md` — current-state spec (architecture, formulas). `docs/decisions/`
+`NOTES.md` — current-state spec (architecture, formulas). `docs/adr/`
 — one immutable file per past engine-level decision, indexed in
-`docs/decisions/README.md`, scaffolded by the `new-decision` skill
-(`.claude/skills/new-decision/SKILL.md`).
+`docs/adr/README.md`, scaffolded by the `new-decision` skill
+(`.claude/skills/new-decision/SKILL.md`). Renamed from `docs/decisions/`
+on 2026-09-20 to align with `mattpocock-skills`' default ADR convention —
+same files, same rules, just the directory name changed.
 
 **Verification gate — `check.sh`**
 Single script: `pytest`, `ruff check`, frontend `tsc --noEmit`, `vitest
@@ -37,7 +39,7 @@ breakdown: `docs/permission-boundaries.md`.
 **Plan/decision doc conventions**
 - `docs/plans/<slug>.md` — per-change plan or rationale, written when a
   plan is finalized, kept afterward as historical record.
-- `docs/decisions/NNNN-slug.md` — immutable engine-decision log, never
+- `docs/adr/NNNN-slug.md` — immutable engine-decision log, never
   edited after acceptance (a reversal supersedes, it doesn't replace).
 - `docs/` root — living, current-state reference docs (this file,
   `permission-boundaries.md`, `run-skill-guide.md`), updated in place.
@@ -52,21 +54,19 @@ keep plan docs lean. Persists across sessions without living in the repo.
 Installed at user scope (v1.2.3, official marketplace) — adds skills like
 `tdd`, `code-review`, `diagnosing-bugs`, `domain-modeling`,
 `codebase-design`, `grilling`, `research`, `wizard`,
-`resolving-merge-conflicts`, `writing-for-agents`. Not yet configured for
-this repo — see below.
+`resolving-merge-conflicts`, `writing-for-agents`. Configured for this
+repo via `/setup-matt-pocock-skills`: issue tracker is GitHub
+(`docs/agents/issue-tracker.md` — aspirational until a remote is added),
+domain docs point at the pre-existing `docs/adr/` (renamed from
+`docs/decisions/` to match) plus `NOTES.md` kept as-is
+(`docs/agents/domain.md`). Both recorded in `CLAUDE.md`'s `## Agent
+skills` section.
 
 ## To improve / open items
 
-**`mattpocock-skills` setup is unfinished.** `/setup-matt-pocock-skills`
-was started but not completed. Two decisions are still open:
-- **Issue tracker**: no git remote is configured at all, so neither the
-  GitHub nor GitLab default applies — needs an explicit choice (local
-  markdown under `.scratch/` is the natural fit for a remote-less repo).
-- **Domain docs**: the plugin's default wants a new `CONTEXT.md` +
-  `docs/adr/`, but this repo already has the equivalent in `NOTES.md` +
-  `docs/decisions/`. Writing the defaults verbatim would create two
-  parallel decision logs — worth pointing `docs/agents/domain.md` at the
-  existing files instead of creating new ones.
+**Issue tracker points at GitHub with no remote configured.** `gh`
+commands in `docs/agents/issue-tracker.md` won't resolve a repo until a
+remote is added — revisit if this stays a local-only project.
 
 **The commit-blocking hook and permission list aren't backed up anywhere.**
 Both `.claude/settings.local.json` and `.claude/hooks/` are gitignored (by
@@ -86,7 +86,7 @@ version and falling back to system Chrome. Worth capturing that as a
 Chrome-channel fallback) so it's a known recipe next time, not a
 rediscovery.
 
-**`docs/plans/` has no index.** `docs/decisions/` has a `README.md` table
+**`docs/plans/` has no index.** `docs/adr/` has a `README.md` table
 of every decision and its status; `docs/plans/` is now 10 files deep
 (`spec.md`, `spec_plan.md`, `dimension_advice_plan.md`,
 `discrete_scoring_plan.md`, `garment_catalog_plan.md`,

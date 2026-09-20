@@ -3,7 +3,7 @@
 This is the current-state spec — what the formulas and architecture are
 *today*. For why they got this way (rejected alternatives, superseded
 values, the reasoning behind a specific number), see
-[`docs/decisions/`](docs/decisions/README.md) — one immutable file per
+[`docs/adr/`](docs/adr/README.md) — one immutable file per
 engine-level design decision, referenced from the relevant section below.
 
 ## Pitch
@@ -48,7 +48,7 @@ editable data, not a trained model's opinion.
    from neutral — not a flat +1/-1 for a category match, and not a raw,
    differently-scaled ratio summed directly across axes either, which
    isn't safely comparable (decision
-   [0010](docs/decisions/0010-discrete-severity-level-scoring.md)). Output
+   [0010](docs/adr/0010-discrete-severity-level-scoring.md)). Output
    = a verdict *plus the specific reasons that fired*, e.g. "+ defines your
    waist (asset) / − clings to hip (works against your shape) / + reduces
    bulk (helps your frame scale)."
@@ -69,7 +69,7 @@ tailoring point-to-point shoulder width, which is a different scale and
 isn't comparable to bust/hip circumferences. `frame_scale_dev` takes
 `max(shoulder, bust)` rather than bust alone, since bust size is confounded
 by breast tissue independent of actual frame/width (decision
-[0008](docs/decisions/0008-frame-scale-dev-max-shoulder-bust.md)).
+[0008](docs/adr/0008-frame-scale-dev-max-shoulder-bust.md)).
 
 "Main concern" = whichever balance point has the largest absolute
 magnitude, skipping `shoulder_hip_balance`/`bust_hip_balance`/
@@ -80,7 +80,7 @@ proportion difference; `main_concern()` returns `None` if nothing clears it.
 `waist_definition` has no deadzone — its own asymmetric threshold (0.15, in
 `scoring.py`'s `AXIS_RULES`) already serves that purpose, for a different
 reason (one direction is favorable, not "0 is neutral both ways"). Decision
-[0007](docs/decisions/0007-imbalance-deadzone.md). A favorable-sign value
+[0007](docs/adr/0007-imbalance-deadzone.md). A favorable-sign value
 (e.g. high `waist_definition`) is an **asset**, not a concern — surface it
 as a strength to build around, not a problem to fix. The CLI (`cli.py`)
 honors this at the label level: when `main_concern()` names a favorable
@@ -133,7 +133,7 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   flow). `torso_leg_balance` compares each measurement's deviation from its
   own baseline ratio-to-height rather than the two raw measurements to each
   other (decision
-  [0001](docs/decisions/0001-torso-leg-balance-formula-fix.md) — the two
+  [0001](docs/adr/0001-torso-leg-balance-formula-fix.md) — the two
   landmarks are structurally different magnitudes for everyone, so a raw
   ratio read as "long legs" universally). `TORSO_HEIGHT_RATIO_BASELINE`/
   `LEG_HEIGHT_RATIO_BASELINE` in `balance_points.py` are themselves guessed
@@ -143,15 +143,15 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
   self-report vs. a guided photo measurement is still undecided for the
   actual input flow.
 - `shoulder_hip_balance` (decision
-  [0002](docs/decisions/0002-shoulder-hip-balance-axis.md)) distinguishes a
+  [0002](docs/adr/0002-shoulder-hip-balance-axis.md)) distinguishes a
   broad-shoulder/narrow-hip build from a top-heavy-by-bust build that would
   otherwise look identical on `bust_hip_balance` alone. It feeds
   `adds_volume_top`/`adds_volume_bottom` via the derived `top_hip_balance`
-  (decision [0009](docs/decisions/0009-top-hip-balance-axis.md)) —
+  (decision [0009](docs/adr/0009-top-hip-balance-axis.md)) —
   `structured_shoulder`/`puff_sleeve` react to it that way (decision
-  [0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md)) — and
+  [0012](docs/adr/0012-garment-catalog-vocabulary-expansion.md)) — and
   as of decision
-  [0013](docs/decisions/0013-narrows-shoulder-effect.md) also has its own
+  [0013](docs/adr/0013-narrows-shoulder-effect.md) also has its own
   dedicated `AXIS_RULES` entry, `narrows_shoulder` (`scoop_neck`), for
   techniques that address shoulder width specifically rather than top
   volume generally. Still open: `narrows_shoulder` doesn't surface in
@@ -162,7 +162,7 @@ than the women's framing; flag it as such wherever it's surfaced to a user.
 - `WomensBalancePoints.main_concern()` still picks the axis with the
   largest *raw* magnitude to name as "the" main concern — the same
   cross-axis comparability problem decision
-  [0010](docs/decisions/0010-discrete-severity-level-scoring.md) fixed for
+  [0010](docs/adr/0010-discrete-severity-level-scoring.md) fixed for
   scoring, left unfixed here since it touches the CLI, `BalancePointsChart.tsx`,
   and its own tests, none of which were in scope for that change. A future
   decision could apply the same severity-level concept to it.
@@ -216,18 +216,18 @@ technique keys; the vocabulary has since been extended with `high_rise`
 `drop_waist` uses), `wide_leg` (`adds_volume_bottom`),
 `cropped_ankle_length` (`shortens_leg`), and reusing `oversized_top`
 verbatim for `bomber_jacket` — decision
-[0003](docs/decisions/0003-effects-vocabulary-extension.md). `oversized_top`
+[0003](docs/adr/0003-effects-vocabulary-extension.md). `oversized_top`
 also carries `hides_waist` — a boxy, unshaped silhouette obscures whatever
 natural waist definition is already there, wired as the mirror of
 `defines_waist`/`clings_to_waist` — decision
-[0006](docs/decisions/0006-hides-waist-effect.md). `oversized_top` no
+[0006](docs/adr/0006-hides-waist-effect.md). `oversized_top` no
 longer carries `adds_volume_top`: a boxy, uniformly loose cut doesn't
 specifically widen the top the way structured/padded shoulders would —
 that's already what `adds_bulk` models, so the two tags were double-
 counting the same real effect — decision
-[0011](docs/decisions/0011-remove-adds-volume-top-from-oversized-top.md).
+[0011](docs/adr/0011-remove-adds-volume-top-from-oversized-top.md).
 `adds_volume_top` had no technique producing it until decision
-[0012](docs/decisions/0012-garment-catalog-vocabulary-expansion.md) added
+[0012](docs/adr/0012-garment-catalog-vocabulary-expansion.md) added
 `structured_shoulder` (structured/built-up shoulder blazer) and
 `puff_sleeve` (gathered sleeve) — both real, independent constructions that
 genuinely widen the top of the silhouette. That same decision added
@@ -235,7 +235,7 @@ genuinely widen the top of the silhouette. That same decision added
 (`defines_waist`), `v_neck` (`elongates_torso`), `a_line`
 (`adds_volume_bottom`), and `pencil_skirt` (`clings_to_hip`) — all reusing
 existing tags, no `scoring.py` changes. Decision
-[0013](docs/decisions/0013-narrows-shoulder-effect.md) then added
+[0013](docs/adr/0013-narrows-shoulder-effect.md) then added
 `scoop_neck` → `narrows_shoulder`, this catalog's one technique scored
 directly against `shoulder_hip_balance` rather than the derived
 `top_hip_balance` (see "Known gaps" above) — a genuinely new `AXIS_RULES`
@@ -273,7 +273,7 @@ This is the same kind of presentation-layer work as the catalog itself —
 *unchanged* `garments.resolve_outfit()` + `scoring.score()`, then sorts by
 `verdict.score` descending and slices to `limit`. No engine change, no new
 axis or rule — `balance_points.py`, `scoring.py`, and `effects.yaml` stay
-untouched, so this did not get a `docs/decisions/` entry, only this
+untouched, so this did not get a `docs/adr/` entry, only this
 section (same precedent as the garment-catalog feature above).
 
 Valid combinations are **dress XOR (top + bottom), with outerwear optional
@@ -313,7 +313,7 @@ dimensions independently.
 
 Same presentation-layer precedent as the two sections above — no engine
 change (`balance_points.py`/`scoring.py`/`effects.yaml` untouched, only
-`AXIS_RULES`/`EFFECTS_TABLE` read), so no `docs/decisions/` entry, only
+`AXIS_RULES`/`EFFECTS_TABLE` read), so no `docs/adr/` entry, only
 this section. It does lean on a structural fact already true of
 `AXIS_RULES`: every tag sharing an axis also shares that axis's
 `reference`, so a dimension's severity level is computed once (via
@@ -385,7 +385,7 @@ only complementing it — and it is **not** full outfit recommendation
 already committed to. Same presentation-layer precedent as the three
 features above: `resolve_outfit()`, `score()`, and `recommend_techniques()`
 are reused completely unchanged, no new `AXIS_RULES`/`effects.yaml` logic,
-so no `docs/decisions/` entry, only this section.
+so no `docs/adr/` entry, only this section.
 
 One consequence of reusing `recommend_techniques()` as-is: a negative
 reason on an axis that function doesn't report — currently only
@@ -416,8 +416,8 @@ convert to a front-view width via `WIDTH_FROM_CIRCUMFERENCE = 0.32`
 elliptical shape) — an approximation, not exact, same caveat class as
 `frame_scale`'s baseline. Neck/ankle aren't measured inputs; they're drawn
 as a fixed proportion of shoulder/hip width for visual completeness only.
-Decisions [0004](docs/decisions/0004-avatar-to-scale-rendering.md) and
-[0005](docs/decisions/0005-avatar-curvy-head-width-fix.md). Purely a
+Decisions [0004](docs/adr/0004-avatar-to-scale-rendering.md) and
+[0005](docs/adr/0005-avatar-curvy-head-width-fix.md). Purely a
 rendering concern — `balance_points.py`, `scoring.py`, and `effects.yaml`
 are untouched.
 

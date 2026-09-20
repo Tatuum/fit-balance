@@ -1,6 +1,6 @@
 """Tests for the per-dimension technique-recommendation layer
 (technique_advice.py). Each dimension is reported independently — no
-cross-axis combination, so no docs/decisions/ entry (same precedent as
+cross-axis combination, so no docs/adr/ entry (same precedent as
 recommend.py/garments.py's catalog); see NOTES.md's "Technique
 recommendations" section.
 """

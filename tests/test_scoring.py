@@ -123,7 +123,7 @@ def test_deadzone_boundary_value_counts_as_notable_not_balanced():
     """A deviation exactly at IMBALANCE_DEADZONE (0.05) is not treated as
     balanced -- the boundary is exclusive (`magnitude < deadzone`), matching
     the pre-existing `abs(value) < IMBALANCE_DEADZONE` skip condition this
-    replaced. See docs/decisions/0010."""
+    replaced. See docs/adr/0010."""
     bp = WomensBalancePoints(
         shoulder_hip_balance=0,
         bust_hip_balance=0.05,
