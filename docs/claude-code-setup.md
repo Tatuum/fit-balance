@@ -62,6 +62,26 @@ domain docs point at the pre-existing `docs/adr/` (renamed from
 (`docs/agents/domain.md`). Both recorded in `CLAUDE.md`'s `## Agent
 skills` section.
 
+## Delegating vs. doing it yourself
+
+Heuristic: delegate what you can verify (code changes — checked by
+`check.sh`/tests); do it yourself what you can't yet verify (git/GitHub
+actions, until fluent with them), and treat hard-to-reverse actions as
+manual regardless of fluency. Consistency between delegated and manual
+work comes from the same written rules applying to both, not from who
+does the work:
+
+> Agentic development forces externalization. The agent has no memory or
+> intuition to fall back on between sessions, so anything you want
+> followed consistently has to become a written, checkable artifact —
+> `CLAUDE.md`, `check.sh`, the ADR log — rather than staying an intention
+> in your head. That artifact then exists independent of who's doing the
+> work, which is why it helps your manual work too, not just the agent's.
+
+One gap this doesn't close automatically: the commit-blocking hook only
+fires on commits made through Claude's own Bash tool — a manual commit
+still needs `./check.sh` run by hand first.
+
 ## To improve / open items
 
 **Issue tracker points at GitHub with no remote configured.** `gh`
