@@ -17,6 +17,14 @@ Decisions confirmed with the user:
 - **Eventual web product.** Stage 4 (parametric SVG avatar) is planned as a
   web UI from the start, with a clean API boundary between engine and
   frontend — but per NOTES.md, stages 1–3 stay UI-free.
+- **Stage 4.5 (decided 2026-09-21): AI-assisted features, targeting GenAI/
+  LLM application engineering, not stage 5/6 computer vision.** The
+  project's portfolio goal (AI/software-engineer job search) is served
+  far better by LLM/agent/RAG skills than by pose-estimation/segmentation
+  CV — stage 5/6 stay **permanently out of scope for this goal**, not
+  just "not started yet." Full design in Stage 4.5 below; see that
+  section for why "upload a photo of an item" no longer implies stage 5
+  (it's handled with a multimodal LLM call, not CV).
 
 ## High-level architecture
 
@@ -74,6 +82,9 @@ the engine is fully usable and testable long before any of that exists.
 | CLI (stage 3) | `Typer` + `rich` | Type-hint-driven CLI reusing the pydantic models directly; `rich` for a readable verdict/reasons table |
 | API (stage 4) | `FastAPI` | Pairs directly with pydantic (already in use) and gets OpenAPI docs for free |
 | Frontend (stage 4) | `React` + `TypeScript` + `Vite` | SVG avatar is a natural fit for React's component model; Vite keeps tooling minimal |
+| Multimodal LLM API (stage 4.5) | TBD — a vision-capable LLM, called directly, no orchestration framework | Garment-photo tag extraction, grounded explanation generation, tool-calling assistant |
+| Auth (stage 4.5) | TBD | First stateful, multi-user feature (private photo-upload closet) needs real accounts |
+| Database (stage 4.5) | TBD (Postgres likely, given prior familiarity) | Persists closet items — tags + verdict only, no images, no vector store |
 | Pose estimation (stage 5) | `mediapipe` | Established, runs without GPU, extracts body landmarks from a photo |
 | Segmentation (stage 5) | `rembg` (fallback: Segment Anything) | Lightweight garment/background segmentation; SAM only if `rembg` accuracy proves insufficient |
 
@@ -127,6 +138,75 @@ fit-balance/
 - `web/`: React + TypeScript + Vite app — a measurement/garment form, calling the API, rendering a parametric SVG avatar whose proportions are a pure function of the returned balance-point values (no photorealism, per NOTES.md).
 - Keep the SVG-rendering function pure and unit-testable independent of React state.
 
+### Stage 4.5 — AI-assisted features (portfolio-focused, decided 2026-09-21)
+
+Goal: demonstrate GenAI/LLM application engineering (grounded generation,
+evals/guardrails, agentic tool-calling, RAG) without touching computer
+vision, while keeping the engine's core "editable data, not a trained
+model's opinion" identity intact — the LLM never gets to invent a verdict,
+only propose tags (subject to human review) or phrase already-derived
+reasons (subject to a faithfulness check). `balance_points.py`,
+`scoring.py`, and `effects.yaml` stay untouched, same as every
+presentation-layer addition above them.
+
+Four pieces, one coherent layer, built in this order:
+
+1. **Private per-user photo-upload closet** (build first — the most
+   differentiated feature, no dependency on the other three). A user
+   uploads a photo of an item they own or want; a multimodal LLM call
+   extracts candidate technique tags, flagging an **uncertain-match**
+   signal whenever the item doesn't cleanly fit the existing
+   `effects.yaml` vocabulary (turns the known "tags are lossy" gap —
+   see NOTES.md's `clings_to_hip` example — into a real signal for
+   future vocabulary decisions, instead of silently forcing a bad fit).
+   The user reviews/edits the proposed tags before anything is scored.
+   Scoring reuses the unchanged engine. Only tags + verdict persist per
+   closet item — **no image storage, no image embeddings, no vector
+   store**: "similar items in your closet" is found via tag-set overlap
+   against the *user's own* past items (explainable — "shares
+   `clings_to_hip`/`hides_waist` with an item that scored avoid before"
+   — not an opaque embedding-distance number), not a shared visual
+   catalog (the existing hand-authored catalog has no reference photos
+   to match against anyway). Requires the app's first user-account
+   system (real accounts, not a lightweight device id — the private data
+   itself justifies the extra work) and its first persistent database —
+   both new to the stack.
+   - This is explicitly **not** stage 5: no pose estimation, no
+     segmentation, no photo-to-measurement extraction — a multimodal LLM
+     call describing a garment from a photo is a raw API call, same
+     skill category as any other LLM call, not a CV pipeline.
+2. **Grounded explanation generation + faithfulness check.** Turns the
+   engine's existing structured reasons into natural-language prose,
+   constrained to only say what those reasons (and, once built, the RAG
+   corpus below) actually support — plus an eval/groundedness check that
+   flags drift instead of trusting the LLM's output blindly.
+3. **Text RAG corpus.** A small (15–30), **self-authored** style-guide
+   note set (optionally supplemented with clearly-attributed CC-licensed
+   content, e.g. Wikipedia), retrieved to ground (2)'s explanations in
+   written styling reasoning. Deliberately not scraped copyrighted
+   articles — redistributing that text via a public repo/live demo would
+   be a real infringement risk, and self-authoring keeps the corpus
+   consistent with the project's existing hand-curated-data identity
+   rather than undermining it with an opaque scraped source.
+4. **Tool-calling conversational assistant** (build last — sits on top
+   of the rest). A chat interface where the LLM calls the real
+   endpoints (scoring, closet items, retrieval) as tools instead of
+   reasoning from scratch — demonstrates agentic orchestration on a real
+   system rather than toy tools.
+
+New stack needs (specifics TBD at implementation time, same "revisit once
+the stage actually starts" posture as stage 5 below):
+- A multimodal-capable LLM API, called directly (no orchestration
+  framework) — consistent with prior hands-on experience with raw API
+  calls, chunking, and embeddings.
+- User authentication (real accounts).
+- A persistent database — the app's first (Postgres is a reasonable
+  default given prior familiarity, not yet decided).
+- Deliberately **no** vector database / image-embedding service — the
+  earlier idea of visual (image-embedding) matching was considered and
+  dropped in favor of tag-overlap similarity, which is both simpler and
+  more explainable.
+
 ### Stage 5 — Garment-photo attribute extraction (deferred, exploratory)
 - A CV service (can start as another FastAPI route) using `mediapipe` for pose landmarks and `rembg` for garment segmentation, producing `Measurements`/`GarmentAttributes` objects that feed unchanged into `scoring.py`.
 - Library choices here are the least certain in this plan — revisit once this stage actually starts, per NOTES.md's explicit instruction not to front-load CV work.
@@ -139,4 +219,11 @@ fit-balance/
 - **Stage 1–2**: `pytest` passes with all 5 worked examples green; `ruff check` clean.
 - **Stage 3**: manually run the CLI against each worked example and confirm output matches the expected verdict in NOTES.md.
 - **Stage 4**: `POST /score` via curl/HTTPie returns the same verdict as the CLI for the same inputs (schema reuse should guarantee this); manually load the web app and confirm the SVG avatar updates with measurement changes.
+- **Stage 4.5**: same worked-example discipline as stages 1–2, extended —
+  a fixed set of test photos/descriptions with expected extracted tags
+  (including at least one deliberately-ambiguous case that should trip
+  the uncertain-match flag); a golden set of reasons → expected faithful
+  explanation, asserting the groundedness check rejects an injected
+  unfaithful rewrite; scoring itself still verified by the existing
+  `tests/test_scoring.py` suite, untouched.
 - **Stage 5+**: no automated verification defined yet — deferred until the stage starts, since inputs (real photos) and accuracy targets aren't defined.

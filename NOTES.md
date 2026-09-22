@@ -458,8 +458,14 @@ layout.
 4. **Done.** FastAPI `/score` endpoint (`api/main.py`) + a React/TS parametric
    SVG avatar (`web/`, pure geometry in `web/src/lib/avatarGeometry.ts`) —
    no photorealism, per the original plan.
-5. **Not started.** Garment-photo → attribute extraction (pose estimation +
-   segmentation) for "upload a real item, tell me if it suits me."
+5. **Not started — deprioritized indefinitely (decided 2026-09-21).**
+   Garment-photo → attribute extraction via pose estimation + segmentation.
+   "Upload a real item, tell me if it suits me" is now handled a different
+   way — a private per-user photo-upload closet using a multimodal LLM
+   call (not CV) to extract technique tags, reviewed by the user before
+   scoring. See `plan.md`'s Stage 4.5 for the full design; this stage (5)
+   specifically — pose/segmentation-based extraction — is not needed for
+   that and stays out of scope.
 6. **Not started.** Multi-garment outfit parsing for "recreate this inspo
    look, adjusted for my proportions."
 
