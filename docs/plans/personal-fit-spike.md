@@ -1,5 +1,10 @@
 # Personal-fit spike: photo + self-reported tags, before Stage 4.5's closet feature
 
+Status: **Spike 0 done** — 4 garments checked against the CLI across two
+bodies, all agreed with judgment (including one deliberate AVOID case).
+Narrow vocabulary coverage noted as an expected limitation, carried into
+Spike 1 below rather than addressed now. **Spike 1 next.**
+
 ## Context
 
 `plan.md`'s Stage 4.5 already plans a private photo-upload closet: user
@@ -74,25 +79,39 @@ picks instead of a hand-built labeled set.
 
 - New file `scripts/spike_photo_tagging.py` — not imported by the app,
   same "offline utility" posture as the (not-yet-built)
-  `scripts/ingest_garments.py` in the catalog-classification plan. Takes an
-  image path, builds a prompt embedding the closed vocabulary (reuse
-  `scoring.load_effects_table()`'s keys, don't hardcode a duplicate list),
-  calls a multimodal LLM (Anthropic, matching the `ANTHROPIC_API_KEY`
-  convention already assumed elsewhere in the repo's plans), and returns
-  `techniques: list[str]` (constrained to existing keys) plus an optional
-  `uncertain_note: str` when the garment doesn't cleanly fit anything.
-- Prompt-building and response-parsing are pure functions, unit-tested with
-  a stubbed response (`tests/test_spike_photo_tagging.py`), no network
-  needed for `pytest`/`./check.sh`.
+  `scripts/ingest_garments.py` in the catalog-classification plan. Three
+  pieces:
+  - `SpikeResult(BaseModel)`: `techniques: list[str]`,
+    `uncertain_note: str | None = None` — same "validate at the boundary"
+    pattern `schemas.py` already uses; the LLM's reply is untrusted input
+    like any other.
+  - `build_prompt(vocabulary: list[str]) -> str` (pure): embeds the closed
+    vocabulary (reuse `scoring.load_effects_table()`'s keys, don't
+    hardcode a duplicate list) and `SpikeResult`'s JSON schema, asking for
+    a reply matching that shape.
+  - `parse_response(raw: str) -> SpikeResult` (pure): extracts the JSON
+    from the reply and calls `SpikeResult.model_validate_json(...)` —
+    pydantic handles parsing and validation together, raising a clear
+    error on malformed output instead of a silent bad parse.
+  - `tag_photo(image_path: Path) -> SpikeResult`: the actual network
+    call — reads the image, sends it + the built prompt to Claude Sonnet
+    (stronger vision capability than a cheaper model, per the ShelfScanner
+    article's own finding that smaller models missed more detail on real
+    photos — this is the first check of whether the idea works at all, not
+    yet a cost-optimization pass), hands the reply to `parse_response`.
+- `build_prompt`/`parse_response` are unit-tested with a stubbed response
+  (`tests/test_spike_photo_tagging.py`), no network needed for
+  `pytest`/`./check.sh`. `tag_photo` itself isn't unit-tested (needs a real
+  API key/network).
 - Usage: for the same items (or new ones), the script prints the LLM's
   proposed techniques. Pick your own techniques *before* looking at its
   proposal (avoids anchoring), then compare. Extend the same plain-data log
   from Spike 0 with a "LLM proposed" field and an agree/disagree note —
   still data, not a doc.
 - Needs `ANTHROPIC_API_KEY` locally; never run in CI, same as the catalog
-  plan's ingestion script. Add an `ingest`-style optional dependency group
-  in `pyproject.toml` only if a package (e.g. `anthropic`) is actually
-  needed — check what's already available before adding one.
+  plan's ingestion script. New `spike = ["anthropic>=0.40"]` optional
+  dependency group in `pyproject.toml` — nothing already in the project
+  covers the Anthropic SDK.
 
 ## Spike 2 (not built now, noted only)
 
