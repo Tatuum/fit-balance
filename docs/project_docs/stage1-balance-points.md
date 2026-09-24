@@ -10,22 +10,12 @@ engine (scoring, CLI, API) builds on.
 
 ### 1. Input shape
 
-Two pydantic models in `schemas.py`, both flat float fields in
-centimeters:
+One pydantic model in `schemas.py`, flat float fields in centimeters:
 
 ```python
 class Measurements(BaseModel):        # women's v0
     shoulder: float
     bust: float
-    waist: float
-    hip: float
-    torso: float
-    leg: float
-    height: float
-
-class MenswearMeasurements(BaseModel):
-    shoulder: float
-    chest: float
     waist: float
     hip: float
     torso: float
@@ -52,9 +42,6 @@ class WomensBalancePoints:
     torso_leg_balance: float
     frame_scale_dev: float
 ```
-
-`MenswearBalancePoints` swaps `bust_hip_balance`/`waist_definition` for
-`chest_waist_balance`/`chest_hip_balance`.
 
 ### 3. The formulas
 
@@ -94,12 +81,6 @@ The `0.245` / `0.455` / `0.50` constants (`TORSO_HEIGHT_RATIO_BASELINE`,
 `LEG_HEIGHT_RATIO_BASELINE`, `WOMEN_FRAME_SCALE_BASELINE`) are
 placeholders picked so an average build lands near zero — not derived
 from real anthropometric data yet (see "Gotchas" below).
-
-Menswear swaps in `chest_waist_balance = (chest - waist) / chest`
-(tailoring's "drop," conventionally targeting ≈0.15, not 0-neutral) and
-`chest_hip_balance = (chest - hip) / max(chest, hip)`, reusing the same
-`torso_leg_balance`/`frame_scale_dev` formulas with a different frame
-baseline (`0.45`).
 
 ### 4. `main_concern()`
 

@@ -105,28 +105,19 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
 - [0007](docs/adr/0007-imbalance-deadzone.md) — the 0.05 deadzone on
   `main_concern()`'s four symmetric axes.
 
-## Balance points — menswear v0
-
-```
-shoulder_hip_balance = same as women's version
-chest_waist_balance = (chest - waist) / chest       # = tailoring's "drop"; convention target ≈ 0.15 (6" drop on a 40" chest)
-chest_hip_balance    = (chest - hip) / max(chest, hip)
-torso_leg_balance    = same as women's version
-frame_scale_dev       = same formula, different baseline (male average build differs)
-```
-
-Important asymmetry: unlike the women's axes, where 0 = neutral,
-menswear convention treats `chest_waist_balance` ≈ 0 as "room to
-improve," not neutral. The target is positive. This is a narrower, more
-rigid convention than the women's framing. Flag it as such wherever
-it's surfaced to a user.
+Menswear support (a parallel `chest_waist_balance`/`chest_hip_balance`
+formula set) was scaffolded in stage 1 but never wired into any test,
+CLI flag, API endpoint, or frontend code. Removed as unused clutter —
+decision [0014](docs/adr/0014-remove-menswear-support.md). Reintroduce
+only with an actual need, as a fresh formula-design pass with its own
+worked examples and tests, not by restoring the old code as-is.
 
 ## Known gaps (calibration/design work still needed, not yet correctness bugs)
 
-- `frame_scale` baseline (both versions) is a guessed placeholder. It
-  needs real anthropometric reference data, not invented cutoffs.
-  Currently implemented as `0.50` (women's v0) / `0.45` (menswear v0)
-  in `src/fit_balance/balance_points.py` — chosen only so the ratio
+- `frame_scale` baseline is a guessed placeholder. It needs real
+  anthropometric reference data, not invented cutoffs. Currently
+  implemented as `0.50` (`WOMEN_FRAME_SCALE_BASELINE` in
+  `src/fit_balance/balance_points.py`) — chosen only so the ratio
   lands near zero for a roughly average build, not from real data.
 - Effect tags are still coarse in places. E.g. `clings_to_hip` doesn't
   distinguish hip-clinging (fine/good for most shapes) from

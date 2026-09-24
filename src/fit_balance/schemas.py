@@ -21,21 +21,6 @@ class Measurements(BaseModel):
     height: float
 
 
-class MenswearMeasurements(BaseModel):
-    """Menswear v0 measurements, in centimeters.
-
-    shoulder: same circumference convention as Measurements.shoulder.
-    """
-
-    shoulder: float
-    chest: float
-    waist: float
-    hip: float
-    torso: float
-    leg: float
-    height: float
-
-
 class GarmentAttributes(BaseModel):
     """A garment described by the techniques it uses (keys into effects.yaml)."""
 

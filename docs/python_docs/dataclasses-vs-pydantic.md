@@ -19,8 +19,8 @@ without hand-writing `__init__`, `__eq__`, `__repr__` yourself.
 The rule, consistently applied across the codebase: **pydantic at the
 boundary, dataclass internally.**
 
-- **`schemas.py`** — `Measurements`, `MenswearMeasurements`,
-  `GarmentAttributes`, `Reason`, `Verdict` — all `pydantic.BaseModel`.
+- **`schemas.py`** — `Measurements`, `GarmentAttributes`, `Reason`,
+  `Verdict` — all `pydantic.BaseModel`.
   These are exactly the objects that cross the API: a user's raw JSON
   body has to be *validated* into `Measurements` (catch a malformed
   request before it hits any math), and `Verdict` has to be
@@ -28,7 +28,7 @@ boundary, dataclass internally.**
   pydantic for the same reason — it's part of `/score-outfit`'s
   response.
 
-- **Everywhere else** — `WomensBalancePoints`/`MenswearBalancePoints`
+- **Everywhere else** — `WomensBalancePoints`
   (`balance_points.py`), the scoring result (`scoring.py`), the advice
   structures (`technique_advice.py`, `garment_balance.py`), the
   recommendation/catalog structures (`recommend.py`, `garments.py`) —

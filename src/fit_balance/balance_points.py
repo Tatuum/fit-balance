@@ -1,15 +1,14 @@
 from dataclasses import dataclass, fields
 
-from .schemas import Measurements, MenswearMeasurements
+from .schemas import Measurements
 
-# Guessed placeholders, not real anthropometric reference data (NOTES.md
-# "known gaps") — chosen so avg(...)/height lands near these values for a
+# Guessed placeholder, not real anthropometric reference data (NOTES.md
+# "known gaps") — chosen so avg(...)/height lands near this value for a
 # roughly average build. This ratio is unit-invariant (numerator and
 # denominator scale together), so it holds regardless of the unit used, as
-# long as Measurements/MenswearMeasurements are consistently in centimeters.
-# Revisit before trusting frame_scale_dev.
+# long as Measurements is consistently in centimeters. Revisit before
+# trusting frame_scale_dev.
 WOMEN_FRAME_SCALE_BASELINE = 0.50
-MEN_FRAME_SCALE_BASELINE = 0.45
 
 # torso_leg_balance baselines, in ratio-to-height. Public reference points,
 # not a rigorous study (same caveat class as the frame-scale baselines
@@ -86,18 +85,6 @@ class WomensBalancePoints:
         return name if self._magnitude(name) > 0 else None
 
 
-@dataclass(frozen=True)
-class MenswearBalancePoints:
-    shoulder_hip_balance: float
-    chest_waist_balance: float
-    chest_hip_balance: float
-    torso_leg_balance: float
-    frame_scale_dev: float
-
-    def main_concern(self) -> str:
-        return max((f.name for f in fields(self)), key=lambda name: abs(getattr(self, name)))
-
-
 def compute_womens_balance_points(
     m: Measurements, *, frame_scale_baseline: float = WOMEN_FRAME_SCALE_BASELINE
 ) -> WomensBalancePoints:
@@ -117,19 +104,4 @@ def compute_womens_balance_points(
         # shoulder (see NOTES.md).
         frame_scale_dev=(max(m.shoulder, m.bust) + m.waist + m.hip) / 3 / m.height
         - frame_scale_baseline,
-    )
-
-
-def compute_menswear_balance_points(
-    m: MenswearMeasurements, *, frame_scale_baseline: float = MEN_FRAME_SCALE_BASELINE
-) -> MenswearBalancePoints:
-    return MenswearBalancePoints(
-        shoulder_hip_balance=(m.shoulder - m.hip) / max(m.shoulder, m.hip),
-        chest_waist_balance=(m.chest - m.waist) / m.chest,
-        chest_hip_balance=(m.chest - m.hip) / max(m.chest, m.hip),
-        torso_leg_balance=(
-            (m.torso / m.height - TORSO_HEIGHT_RATIO_BASELINE)
-            - (m.leg / m.height - LEG_HEIGHT_RATIO_BASELINE)
-        ),
-        frame_scale_dev=(m.chest + m.waist + m.hip) / 3 / m.height - frame_scale_baseline,
     )

@@ -36,7 +36,7 @@ Decisions confirmed with the user:
                     │    Measurements, Garment,     │
                     │    Verdict, Reason             │
                     │  balance_points.py — pure fns │
-                    │    (women's v0, menswear v0)  │
+                    │    (women's v0)                │
                     │  effects.yaml — technique →    │
                     │    effect-tag data             │
                     │  scoring.py — (verdict,        │
@@ -116,8 +116,8 @@ fit-balance/
 
 ### Stage 1 — Balance-point calculator + regression tests
 - Scaffold `pyproject.toml` (uv), `src/fit_balance/` package layout, `ruff` config, `pytest` config.
-- `schemas.py`: pydantic `Measurements` (bust, waist, hip, torso, leg, height, chest) and `MenswearMeasurements` if the two variants need distinct fields.
-- `balance_points.py`: pure functions for both formula sets in NOTES.md (`bust_hip_balance`, `waist_definition`, `torso_leg_balance`, `frame_scale_dev` for women's v0; `chest_waist_balance`, `chest_hip_balance` + shared `torso_leg_balance`/`frame_scale_dev` for menswear v0), plus a `main_concern()` helper (largest absolute-magnitude balance point).
+- `schemas.py`: pydantic `Measurements` (bust, waist, hip, torso, leg, height, shoulder).
+- `balance_points.py`: pure functions for the women's v0 formula set in NOTES.md (`shoulder_hip_balance`, `bust_hip_balance`, `waist_definition`, `torso_leg_balance`, `frame_scale_dev`), plus a `main_concern()` helper (largest absolute-magnitude balance point).
 - **Decision needed at this stage:** the 5 worked examples in NOTES.md are expressed as `shape≈X` labels, not raw measurements — translate each into a concrete `Measurements` fixture that produces the intended balance-point signs before encoding as a test.
 - `tests/test_balance_points.py`: the 5 worked examples as parametrized pytest cases, asserting on balance-point values and `main_concern()`, not on the final verdict (scoring doesn't exist yet).
 - No UI, no images — matches NOTES.md exactly.
