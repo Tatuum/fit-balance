@@ -56,54 +56,60 @@ Each is referenced from the relevant `NOTES.md` section.
 
 Every non-trivial change moves through six stages below. Trivial
 changes (typos, a one-line config tweak) can skip straight to
-Implement.
+Implement. `docs/plans/README.md` indexes every plan (number, title,
+status), same pattern as `docs/adr/README.md`.
 
-1. **Shape** — talk it through (plan mode or normal conversation).
-   Pull in research, a quick prototype, or a domain-modeling pass only
-   if the topic actually needs it. Nothing written yet.
-2. **Plan** — write `docs/plans/NNNN-slug.md` (next number after the
-   highest in `docs/plans/README.md`; template at
-   `docs/plans/TEMPLATE.md`). This is the rereadable record: context,
-   options considered, decision, reasoning. For any change touching
-   `balance_points.py` / `effects.yaml` / `scoring.py`, the plan must
-   state a worked example ("body X + garment Y → verdict Z", with
-   reasoning) before implementation starts — this is the existing
-   worked-example rule (see decision 0006's `hides_waist` for the
-   pattern), just pinned to this stage explicitly. **Wait for explicit
-   approval before moving on.**
-3. **Publish the spec** — once approved, open one GitHub issue: title +
-   summary + a link back to the plan doc. Cross-link both ways: the
-   plan doc's header gets `GitHub: #NN`; the issue body links back to
-   `docs/plans/NNNN-slug.md`. The issue is a pointer, not a duplicate —
-   the plan doc stays the source of depth.
-4. **Steps** — break the plan into an ordered checklist, added to the
-   plan doc as `## Steps`. Mirror each step as a child GitHub issue
-   linked to the spec issue, noting blocking order. **Wait for
-   explicit approval of the breakdown before implementing.**
-5. **Implement** — work one step at a time. Use `tdd` at the seams
-   NOTES.md already calls out. `./check.sh` must pass. `code-review`
-   before committing. One commit per decision, message references
-   `Closes #N`. Close that step's GitHub issue and check off its line
-   in the plan doc.
-   - **A step that edits `balance_points.py`, `effects.yaml`, or
-     `scoring.py` is an engine change**: write its ADR (`new-decision`
-     skill) and update `NOTES.md` — including the worked-example line
-     if one changed — in the *same* change, immediately, even if other
-     steps in the plan are still open. Never deferred to stage 6.
+| Stage | Mode | Input | Output | Where |
+|---|---|---|---|---|
+| 1. Shape | Plan mode or conversation | Human's idea + codebase exploration | Shared understanding | Nothing persisted |
+| 2. Plan | AI agent writes it, human approves | Stage 1's discussion | Context, Options considered, Decision, Worked example, Out of scope | `docs/plans/NNNN-slug.md` |
+| 3. Publish spec | Human runs this once the plan is approved | The approved plan doc | One GitHub issue, linked both ways | GitHub (`Tatuum/fit-balance`) |
+| 4. Steps | Same session | The approved plan | Ordered checklist + one child issue per step | Plan doc's `## Steps` + GitHub child issues |
+| 5. Implement | Normal mode, one step at a time | One step's issue | Code + tests, commit, issue closed | `src/`, `tests/`, etc. (+ `docs/adr/` for engine changes) |
+| 6. Close out | Once *all* steps are done | The shipped feature | Docs updated, issues closed | `NOTES.md`, `docs/project_docs/`, GitHub |
+
+**1. Shape.** Pull in `research`, `prototype`, or `domain-modeling`
+only if the topic actually needs it.
+
+**2. Plan.** Template at `docs/plans/TEMPLATE.md`; number sequentially
+after the highest in `docs/plans/README.md` (indexed same as
+`docs/adr/README.md`, never deleted). For any change touching
+`balance_points.py` / `effects.yaml` / `scoring.py`, state the worked
+example ("body X + garment Y → verdict Z", with reasoning) before
+implementing — see decision 0006's `hides_waist` for the pattern.
+**Wait for explicit approval before moving on.**
+
+**3. Publish spec.** Cross-link both ways: the plan doc's header gets
+`GitHub: #NN`; the issue links back to `docs/plans/NNNN-slug.md`. The
+issue is a pointer, not a duplicate — the plan doc stays the source of
+depth.
+
+**4. Steps.** Mirror each step as a child GitHub issue linked to the
+spec issue, noting blocking order. **Wait for explicit approval of the
+breakdown before implementing.**
+
+**5. Implement.** `tdd` at the seams NOTES.md already calls out.
+`./check.sh` must pass. `code-review` before committing. One commit
+per decision, message references `Closes #N`. Close that step's issue
+and check off its line in the plan.
+   - A step that edits `balance_points.py`, `effects.yaml`, or
+     `scoring.py` is an **engine change**: write its ADR
+     (`new-decision` skill) and update `NOTES.md` — including the
+     worked-example line if one changed — in the *same* change,
+     immediately, even if other steps in the plan are still open.
+     Never deferred to stage 6.
    - Plans and step issues can change during implementation. Small
      corrections: edit in place. An actual change of decision: append
      a dated note under the plan's `## Updates` (`**YYYY-MM-DD:**
      switched from X to Y because...`) rather than rewriting the
      original reasoning — a step issue's comment thread does the same
      job.
-6. **Close out** — once *all* steps are done (not per-step): update
-   `NOTES.md`, and add/update a `docs/project_docs/` write-up if the
-   feature is stage-worthy. Close the parent spec issue. Add `Status:
-   Shipped — see NOTES.md §X` (or `ADR NNNN`) to the top of the plan
-   doc; everything else in it stays untouched and readable.
 
-`docs/plans/README.md` indexes every plan (number, title, status) —
-same pattern as `docs/adr/README.md`.
+**6. Close out.** Once *all* steps are done (not per-step): update
+`NOTES.md`, add/update a `docs/project_docs/` write-up if the feature
+is stage-worthy, close the parent spec issue, and add `Status: Shipped
+— see NOTES.md §X` (or `ADR NNNN`) to the top of the plan doc —
+everything else in it stays untouched and readable.
 
 - **One commit per decision.** Made when it's agreed — not batched up
   and split apart later. Keeps `git log` a legible record of the
