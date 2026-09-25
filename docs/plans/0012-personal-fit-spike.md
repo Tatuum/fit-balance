@@ -10,7 +10,7 @@ Spike 1 below rather than addressed now. **Spike 1 next.**
 
 ## Context
 
-`plan.md`'s Stage 4.5 already plans a private photo-upload closet: user
+`ARCHITECTURE.md`'s Stage 4.5 already plans a private photo-upload closet: user
 uploads a garment photo, a multimodal LLM extracts technique tags, user
 reviews/edits, then the unchanged scoring engine produces a verdict. That
 plan's first deliverable requires building auth + a persistent database
@@ -127,7 +127,7 @@ scheduled — revisit only if Spike 1's results warrant it.
 No auth, no persistent database, no closet UI, no changes to `scoring.py`
 /`balance_points.py`/`effects.yaml`, no integration with the shared
 garment-catalog classification effort. All of that stays exactly as
-already planned in `plan.md`'s Stage 4.5 / the catalog-classification plan.
+already planned in `ARCHITECTURE.md`'s Stage 4.5 / the catalog-classification plan.
 
 ## Caveat to keep in mind (not a blocker)
 

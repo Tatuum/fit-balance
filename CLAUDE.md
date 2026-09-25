@@ -11,7 +11,7 @@ balance points — never a black-box shape label.
 - Python (`uv`, `pydantic`, `pytest`, `ruff`, `FastAPI`) for the
   engine/CLI/API.
 - React + TypeScript + Vite for the web frontend.
-- See `plan.md` for the full architecture and per-stage file layout.
+- See `ARCHITECTURE.md` for the full architecture and per-stage file layout.
 
 ## Project
 

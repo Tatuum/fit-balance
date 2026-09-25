@@ -457,7 +457,7 @@ unwired.**
 
 ## Build order — status
 
-See `plan.md` for the full architecture/stack decisions and per-stage file
+See `ARCHITECTURE.md` for the full architecture/stack decisions and per-stage file
 layout.
 
 1. **Done.** Pure-function balance-point calculator + the 5 worked examples
@@ -479,7 +479,7 @@ layout.
    segmentation. "Upload a real item, tell me if it suits me" is now
    handled a different way: a private per-user photo-upload closet
    using a multimodal LLM call (not CV) to extract technique tags,
-   reviewed by the user before scoring. See `plan.md`'s Stage 4.5 for
+   reviewed by the user before scoring. See `ARCHITECTURE.md`'s Stage 4.5 for
    the full design. This stage (5) specifically — pose/segmentation-
    based extraction — is not needed for that and stays out of scope.
 6. **Not started.** Multi-garment outfit parsing for "recreate this

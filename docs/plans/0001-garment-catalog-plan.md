@@ -24,7 +24,7 @@ explicitly deferred).
 
 This is presentation-layer work sitting on top of the existing, untouched
 scoring engine — not the deferred "stage 6: multi-garment outfit parsing"
-(NOTES.md/`plan.md`), which is specifically about a CV pipeline parsing
+(NOTES.md/`ARCHITECTURE.md`), which is specifically about a CV pipeline parsing
 garments from a photo plus a combination/matching layer, gated as
 higher-risk. This feature is a hand-curated catalog with no photos, no CV —
 it doesn't trigger that gate, but NOTES.md should say so explicitly since

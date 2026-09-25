@@ -13,7 +13,7 @@ best for them, without guessing and checking combinations by hand.
 
 This is presentation-layer work sitting on top of the existing, untouched
 scoring engine — exactly like the original outfit-catalog feature
-(`garment_catalog_plan.md`): enumerate candidate outfits, score each with
+(`docs/plans/0001-garment-catalog-plan.md`): enumerate candidate outfits, score each with
 `scoring.score()` unchanged, rank them. It does not touch `balance_points.py`,
 `scoring.py`, or `effects.yaml`, so per `CLAUDE.md`'s workflow rules it does
 not need a new `docs/decisions/` entry — only a `NOTES.md` update, matching
