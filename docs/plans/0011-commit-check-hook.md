@@ -1,8 +1,11 @@
-# Commit-blocking hook + auto-accept checklist
+# 0011. Commit-blocking hook + auto-accept checklist
+
+Date: 2026-09-17
+Status: Shipped — see docs/claude-code-setup.md
 
 ## Context
 
-Follow-up to `docs/plans/permission-constraints.md`. That plan handled
+Follow-up to `docs/plans/0010-permission-constraints.md`. That plan handled
 per-command approval (allow/ask/deny for Bash calls). Reading through an
 article on structured Claude Code workflows surfaced two gaps that plan
 didn't cover:
@@ -81,7 +84,7 @@ behalf), not a general repo-wide commit gate.
 
 ### 2. Auto-accept checklist
 
-Add a short section to `docs/plans/permission-constraints.md` (after the
+Add a short section to `docs/plans/0010-permission-constraints.md` (after the
 existing "Modes" bullet) recording the article's criterion for when
 leaving Manual mode is actually reasonable, so it's a written check next
 time rather than a gut call:
@@ -112,7 +115,7 @@ exiting instantly with none for a non-commit command.
 - `.claude/hooks/check-before-commit.sh` — new, executable
 - `.claude/settings.local.json` — add `hooks` key
 - `.gitignore` — add `.claude/hooks/`
-- `docs/plans/permission-constraints.md` — add the auto-accept checklist
+- `docs/plans/0010-permission-constraints.md` — add the auto-accept checklist
 
 ## Verification
 

@@ -1,4 +1,7 @@
-# Set up permission constraints for Claude Code in fit-balance
+# 0010. Set up permission constraints for Claude Code in fit-balance
+
+Date: 2026-09-16
+Status: Shipped — see docs/permission-boundaries.md
 
 ## Context
 
@@ -43,7 +46,7 @@ short list of actions you never want run without typing them yourself.
   Only move to Accept Edits when: the working tree is clean, the current
   plan already names every file expected to change, and verification for
   the change is defined (for engine changes, that's `./check.sh` — now
-  backed by the commit hook in `docs/plans/commit-check-hook.md`, not just
+  backed by the commit hook in `docs/plans/0011-commit-check-hook.md`, not just
   a suggestion).
 - **Rules**: `permissions.allow` / `permissions.ask` / `permissions.deny`
   arrays of tool-pattern strings (e.g. `Bash(git status:*)`) live in

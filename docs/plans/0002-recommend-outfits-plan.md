@@ -1,4 +1,7 @@
-# Outfit recommendations: ranking layer over the existing outfit scoring
+# 0002. Outfit recommendations: ranking layer over the existing outfit scoring
+
+Date: 2026-09-10
+Status: Shipped — see NOTES.md "Outfit recommendations"
 
 ## Context
 

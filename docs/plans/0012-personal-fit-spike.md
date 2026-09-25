@@ -1,6 +1,9 @@
-# Personal-fit spike: photo + self-reported tags, before Stage 4.5's closet feature
+# 0012. Personal-fit spike: photo + self-reported tags, before Stage 4.5's closet feature
 
-Status: **Spike 0 done** — 4 garments checked against the CLI across two
+Date: 2026-09-23
+Status: Active — Spike 0 done, Spike 1 next
+
+**Spike 0 done** — 4 garments checked against the CLI across two
 bodies, all agreed with judgment (including one deliberate AVOID case).
 Narrow vocabulary coverage noted as an expected limitation, carried into
 Spike 1 below rather than addressed now. **Spike 1 next.**
@@ -31,7 +34,7 @@ auth/DB/UI. It does **not** change `balance_points.py`, `scoring.py`, or
 becomes its own separate engine-change (ADR via `new-decision` + a
 `NOTES.md` worked-example update), not part of this plan.
 
-**Relationship to `docs/plans/garment-catalog-llm-classification.md`:**
+**Relationship to `docs/plans/0003-garment-catalog-llm-classification.md`:**
 that plan (not started) builds the shared, retail-text-sourced garment
 catalog via LLM classification, with a `tag_candidates` review queue for
 anything outside the closed vocabulary. This spike is complementary, not a
@@ -139,7 +142,7 @@ not that they're provably correct.
 1. Spike 0: no commit needed unless you want the raw data saved
    (`data/personal_fit_spike.json`, gitignored or committed, your call) —
    no new doc either way.
-2. This plan file, committed as `docs/plans/personal-fit-spike.md` — the
+2. This plan file, committed as `docs/plans/0012-personal-fit-spike.md` — the
    only new documentation this plan adds.
 3. Spike 1: `scripts/spike_photo_tagging.py` + its stubbed-response test,
    one commit. Run it locally against your own `ANTHROPIC_API_KEY` (not

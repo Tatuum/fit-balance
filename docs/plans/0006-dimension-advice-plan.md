@@ -1,4 +1,7 @@
-# Per-dimension technique recommendations with garment examples
+# 0006. Per-dimension technique recommendations with garment examples
+
+Date: 2026-09-15
+Status: Shipped — see NOTES.md "Technique recommendations"
 
 ## Context
 

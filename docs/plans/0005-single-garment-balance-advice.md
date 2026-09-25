@@ -1,4 +1,7 @@
-# Single-garment "try it on" balance advice
+# 0005. Single-garment "try it on" balance advice
+
+Date: 2026-09-14
+Status: Shipped — see NOTES.md "Single-garment balance advice"
 
 ## Context
 

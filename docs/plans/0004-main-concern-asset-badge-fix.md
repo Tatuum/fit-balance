@@ -1,6 +1,9 @@
-# Fix: "MAIN CONCERN" badge shown on a favorable waist_definition (asset) result
+# 0004. Fix: "MAIN CONCERN" badge shown on a favorable waist_definition (asset) result
 
-Status: **Implemented** (commit `b462f8e`) — see NOTES.md's "Main concern"
+Date: 2026-09-11
+Status: Shipped (commit `b462f8e`) — see NOTES.md "Main concern"
+
+**Implemented** (commit `b462f8e`) — see NOTES.md's "Main concern"
 paragraph for the current-state summary.
 
 ## Context

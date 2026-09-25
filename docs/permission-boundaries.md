@@ -3,8 +3,8 @@
 Quick reference for what's actually configured. Everything below lives in
 **`.claude/settings.local.json`** (personal to this machine, gitignored —
 nothing here is visible to anyone else who clones the repo). For the
-reasoning behind each piece, see `docs/plans/permission-constraints.md` and
-`docs/plans/commit-check-hook.md`.
+reasoning behind each piece, see `docs/plans/0010-permission-constraints.md`
+and `docs/plans/0011-commit-check-hook.md`.
 
 ## 1. Permission mode
 

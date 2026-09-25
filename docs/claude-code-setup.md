@@ -28,7 +28,7 @@ run`. The one thing that must pass before any change counts as done.
 `.claude/hooks/check-before-commit.sh`, wired as a `PreToolUse` hook on the
 `Bash` matcher in `.claude/settings.local.json`. Intercepts any `git
 commit` (including `--no-verify` attempts) and runs `./check.sh` first,
-blocking the commit on failure. Details/rationale: `docs/plans/commit-check-hook.md`.
+blocking the commit on failure. Details/rationale: `docs/plans/0011-commit-check-hook.md`.
 
 **Permission boundaries — `.claude/settings.local.json`**
 Manual mode (never Accept-Edits/Auto). `allow`-listed: read-only commands
@@ -36,9 +36,15 @@ plus the test/lint/typecheck commands. `ask`-listed: installs, `git push`,
 `curl`, `WebFetch`. `deny`-listed: `sudo`, force-push, `reset --hard`. Full
 breakdown: `docs/permission-boundaries.md`.
 
-**Plan/decision doc conventions**
-- `docs/plans/<slug>.md` — per-change plan or rationale, written when a
-  plan is finalized, kept afterward as historical record.
+**Plan/spec/decision doc conventions**
+- `docs/plans/NNNN-slug.md` — one file per planning session (see
+  `CLAUDE.md`'s Workflow), numbered like `docs/adr/`, indexed in
+  `docs/plans/README.md`, template at `docs/plans/TEMPLATE.md`. Never
+  deleted; can be lightly edited in place (small corrections) or
+  appended to (`## Updates`, for an actual change of decision).
+- GitHub issues (`Tatuum/fit-balance`, via `gh`) — the spec (Workflow
+  stage 3) and per-step tickets (stage 4) for a plan, cross-linked to
+  its `docs/plans/` file. See `docs/agents/issue-tracker.md`.
 - `docs/adr/NNNN-slug.md` — immutable engine-decision log, never
   edited after acceptance (a reversal supersedes, it doesn't replace).
 - `docs/` root — living, current-state reference docs (this file,
@@ -106,12 +112,6 @@ version and falling back to system Chrome. Worth capturing that as a
 Chrome-channel fallback) so it's a known recipe next time, not a
 rediscovery.
 
-**`docs/plans/` has no index.** `docs/adr/` has a `README.md` table
-of every decision and its status; `docs/plans/` is now 10 files deep
-(`spec.md`, `spec_plan.md`, `dimension_advice_plan.md`,
-`discrete_scoring_plan.md`, `garment_catalog_plan.md`,
-`garment-catalog-llm-classification.md`, `main-concern-asset-badge-fix.md`,
-`permission-constraints.md`, `commit-check-hook.md`,
-`single-garment-balance-advice.md`) with no listing of which are live
-history versus fully absorbed into `NOTES.md`. Not urgent, but will get
-harder to navigate the longer it goes unindexed.
+**`docs/plans/` now has an index and numbering** (`docs/plans/README.md`,
+`docs/plans/NNNN-slug.md`), matching `docs/adr/`'s pattern — resolved
+2026-09-25. Check the index for current status of any plan.

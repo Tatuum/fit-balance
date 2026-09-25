@@ -1,4 +1,7 @@
-# Hourglass silhouette goal: ranked outfits + corrected overlay
+# 0009. Hourglass silhouette goal: ranked outfits + corrected overlay
+
+Date: 2026-09-15
+Status: Partially shipped — see NOTES.md "Avatar" (garment-corrected overlay: spike-quality, unwired)
 
 ## Context
 

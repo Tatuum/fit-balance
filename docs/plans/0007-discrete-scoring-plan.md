@@ -1,4 +1,7 @@
-# Discrete severity-level scoring (replaces continuous cross-axis summation)
+# 0007. Discrete severity-level scoring (replaces continuous cross-axis summation)
+
+Date: 2026-09-15
+Status: Shipped — see ADR 0010
 
 ## Context
 

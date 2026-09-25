@@ -1,4 +1,7 @@
-# Manual garment-item catalog + outfit scoring with attribution
+# 0001. Manual garment-item catalog + outfit scoring with attribution
+
+Date: 2026-09-08
+Status: Shipped — see NOTES.md "Garment catalog"
 
 ## Context
 

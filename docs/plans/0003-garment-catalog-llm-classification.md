@@ -1,6 +1,9 @@
-# Real, LLM-classified garment catalog (replaces hand-authored `garments.yaml`)
+# 0003. Real, LLM-classified garment catalog (replaces hand-authored `garments.yaml`)
 
-Status: **Not started.** Planned only — `garments.yaml` is still the live
+Date: 2026-09-11
+Status: Not started — deferred, `garments.yaml` is still hand-authored
+
+**Not started.** Planned only — `garments.yaml` is still the live
 19-item hand-authored catalog.
 
 ## Context
