@@ -1,7 +1,7 @@
 # 0011. Commit-blocking hook + auto-accept checklist
 
 Date: 2026-09-17
-Status: Shipped — see docs/claude-code-setup.md
+Status: Shipped — see docs/learning/claude-code-setup.md
 
 ## Context
 

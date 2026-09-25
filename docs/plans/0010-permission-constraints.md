@@ -1,7 +1,7 @@
 # 0010. Set up permission constraints for Claude Code in fit-balance
 
 Date: 2026-09-16
-Status: Shipped — see docs/permission-boundaries.md
+Status: Shipped — see docs/learning/permission-boundaries.md
 
 ## Context
 
@@ -10,7 +10,7 @@ want "auto mode" (Bypass Permissions), because you don't have a clear model
 of what boundaries exist once prompts are off — the trigger was the `run`
 skill installing Playwright into a scratch folder and launching a real
 Chrome binary under Playwright to verify a feature, which you learned about
-after the fact via `docs/run-skill-guide.md`.
+after the fact via `docs/learning/run-skill-guide.md`.
 
 Checked the current state: there is **no permission configuration anywhere**
 — no `.claude/settings.json`, no `.claude/settings.local.json` in this repo,

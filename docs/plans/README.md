@@ -22,6 +22,6 @@ start there if you want to know what's true today.
 | [0007](0007-discrete-scoring-plan.md) | Discrete severity-level scoring (replaces continuous cross-axis summation) | Shipped — ADR 0010 |
 | [0008](0008-spec.md) | Original app spec (raw) | Superseded by 0009 |
 | [0009](0009-spec-plan.md) | Hourglass silhouette goal: ranked outfits + corrected overlay | Partially shipped — NOTES.md "Avatar" (spike-quality, unwired) |
-| [0010](0010-permission-constraints.md) | Set up permission constraints for Claude Code in fit-balance | Shipped — docs/permission-boundaries.md |
-| [0011](0011-commit-check-hook.md) | Commit-blocking hook + auto-accept checklist | Shipped — docs/claude-code-setup.md |
+| [0010](0010-permission-constraints.md) | Set up permission constraints for Claude Code in fit-balance | Shipped — docs/learning/permission-boundaries.md |
+| [0011](0011-commit-check-hook.md) | Commit-blocking hook + auto-accept checklist | Shipped — docs/learning/claude-code-setup.md |
 | [0012](0012-personal-fit-spike.md) | Personal-fit spike: photo + self-reported tags, before Stage 4.5's closet feature | Active — Spike 0 done, Spike 1 next |

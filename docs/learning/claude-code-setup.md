@@ -2,7 +2,7 @@
 
 Living reference for what's actually configured for Claude Code in
 fit-balance, and what's still open. Mirrors the pattern of
-`docs/permission-boundaries.md` and `docs/run-skill-guide.md` — update this
+`docs/learning/permission-boundaries.md` and `docs/learning/run-skill-guide.md` — update this
 in place as the setup changes, don't fork a new file.
 
 ## Configured
@@ -34,7 +34,7 @@ blocking the commit on failure. Details/rationale: `docs/plans/0011-commit-check
 Manual mode (never Accept-Edits/Auto). `allow`-listed: read-only commands
 plus the test/lint/typecheck commands. `ask`-listed: installs, `git push`,
 `curl`, `WebFetch`. `deny`-listed: `sudo`, force-push, `reset --hard`. Full
-breakdown: `docs/permission-boundaries.md`.
+breakdown: `docs/learning/permission-boundaries.md`.
 
 **Plan/spec/decision doc conventions**
 - `docs/plans/NNNN-slug.md` — one file per planning session (see
@@ -47,8 +47,9 @@ breakdown: `docs/permission-boundaries.md`.
   its `docs/plans/` file. See `docs/agents/issue-tracker.md`.
 - `docs/adr/NNNN-slug.md` — immutable engine-decision log, never
   edited after acceptance (a reversal supersedes, it doesn't replace).
-- `docs/` root — living, current-state reference docs (this file,
-  `permission-boundaries.md`, `run-skill-guide.md`), updated in place.
+- `docs/learning/` — living, current-state reference/study docs (this
+  file, `permission-boundaries.md`, `run-skill-guide.md`,
+  `dataclasses-vs-pydantic.md`), updated in place.
 
 **Cross-session memory**
 Claude Code's own memory system (outside this repo, in
@@ -98,14 +99,14 @@ remote is added — revisit if this stays a local-only project.
 Both `.claude/settings.local.json` and `.claude/hooks/` are gitignored (by
 design — personal to this machine). That means if this machine is lost or
 the repo is re-cloned, the commit gate and permission boundaries vanish
-silently, with only the prose in `docs/permission-boundaries.md` as a
+silently, with only the prose in `docs/learning/permission-boundaries.md` as a
 recovery guide, not the actual files. Worth deciding whether to keep a
 template copy checked in (e.g. `.claude/settings.local.json.example`) so
 reproducing the setup elsewhere doesn't mean re-deriving it from prose.
 
 **No project-specific `run` skill yet.** The built-in `run` skill falls
 back to generic web-app patterns (documented after the fact in
-`docs/run-skill-guide.md`), which on this machine meant discovering —
+`docs/learning/run-skill-guide.md`), which on this machine meant discovering —
 mid-task — that Playwright's bundled Chromium doesn't work on this macOS
 version and falling back to system Chrome. Worth capturing that as a
 `.claude/skills/run-fit-balance/SKILL.md` (exact launch commands, the
