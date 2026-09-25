@@ -4,6 +4,10 @@ One immutable file per engine-level design decision — never edit an
 accepted decision to change its content; if it's later reversed or
 refined, write a new decision that supersedes it (and add a one-line
 `Status: Superseded by NNNN` note to the old one, nothing more).
+Immutability protects the *reasoning*, not incidental facts like a
+referenced file's name — a mechanical path fix when a file gets
+renamed elsewhere (e.g. `plan.md` → `ARCHITECTURE.md`) is fine; a
+rewrite of what was decided or why is not.
 
 `NOTES.md` stays the current-state spec — what the formulas and
 architecture are *today*. This log is the history of *why* they got that

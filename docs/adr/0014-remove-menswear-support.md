@@ -8,7 +8,7 @@ Status: Accepted
 `MenswearMeasurements` (`schemas.py`) and `MenswearBalancePoints` /
 `compute_menswear_balance_points` / `MEN_FRAME_SCALE_BASELINE`
 (`balance_points.py`) were scaffolded in stage 1 alongside the women's
-v0 formulas, per the original `plan.md` design. They were never wired
+v0 formulas, per the original `ARCHITECTURE.md` design. They were never wired
 into anything: no test in `tests/` exercises them, no CLI flag selects
 them, no API endpoint accepts `MenswearMeasurements`, and no frontend
 code references them. Stage 1 through 4 shipped entirely on the
@@ -39,7 +39,7 @@ code as-is.
 balance-point calculator. `NOTES.md`'s "Balance points — menswear v0"
 section is removed, and "Core architecture" / "Balance points —
 women's v0" no longer frame women's as one of two variants.
-`plan.md`'s architecture diagram and stage 1 description are updated
+`ARCHITECTURE.md`'s architecture diagram and stage 1 description are updated
 to match, since they described the original two-variant plan. No test
 file changes needed — nothing in `tests/` referenced the menswear
 code, so the existing suite (including all 5 worked examples) is
