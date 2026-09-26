@@ -13,27 +13,79 @@ balance points — never a black-box shape label.
 - React + TypeScript + Vite for the web frontend.
 - See `ARCHITECTURE.md` for the full architecture and per-stage file layout.
 
-## Project
+## Run & test
 
-**The engine** is the scoring core: `balance_points.py`, `effects.yaml`,
-`scoring.py`. It turns a body's balance points and a garment's
-attributes into a verdict. CLI, API, and web are thin layers on top of
-it.
+**Run**
+- CLI: `uv run fit-balance --help` — score a garment against a set of
+  measurements.
+- API: `uv run uvicorn api.main:app --reload` — starts on `:8000`.
+- Web: `npm run dev` (from `web/`) — dev server, expects the API on
+  `:8000`.
 
-**An engine change** is any edit to those three files.
+**Test / verify**
+- `uv run pytest` — Python test suite.
+- `uv run ruff check .` — Python lint.
+- `npx tsc --noEmit -p .` (from `web/`) — frontend typecheck.
+- `npx vitest run` (from `web/`) — frontend tests.
+- `./check.sh` — runs all four; the one gate before calling any change
+  done.
 
-**Source of truth: `NOTES.md`.** Read it before any design decision.
-Architecture and formulas live there, not here.
+## Structure
 
-`docs/adr/` holds the *why*. One immutable file per past engine change.
-Each is referenced from the relevant `NOTES.md` section.
+```
+fit-balance/
+├── src/fit_balance/  — the engine (balance_points.py, effects.yaml,
+│                       scoring.py) + schemas.py, cli.py, garments.py
+├── api/              — FastAPI, a thin layer over the engine
+├── web/              — React + TS frontend
+├── tests/            — pytest, mirrors src/
+├── docs/             — see Folder map below
+├── NOTES.md, ARCHITECTURE.md, README.md, CLAUDE.md
+└── check.sh          — the one gate: pytest, ruff, tsc, vitest
+```
 
-- **Build order:** stages 1–4 (balance-point calculator, scoring, CLI,
-  web + API) are implemented. Stages 5–6 (garment-photo CV,
-  multi-garment parsing) are not started. See `NOTES.md`'s "Build
-  order — status" section for exactly what's done and where.
-- **Commands:** `uv run pytest` / `uv run ruff check .` (Python),
-  `npm run build` / `npx vitest run` from `web/` (frontend).
+**Folder map**
+
+`NOTES.md` — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
+
+`ARCHITECTURE.md` — stack decisions + per-stage roadmap, including
+stages not built yet.
+
+`docs/adr/` — holds the *why*.
+- One immutable file per past engine change.
+- Each is referenced from the relevant `NOTES.md` section.
+
+`docs/plans/` — planning-session history.
+- Numbered and indexed like `docs/adr/`, but never deleted.
+- See the Workflow section below for how a plan gets there.
+
+`docs/project_docs/` — human-readable, per-stage write-ups.
+- The clean tier meant to be reread, not the dense engine detail.
+
+`docs/agents/` — behavioral conventions an agent actually follows in
+this repo (how to explore, how to file issues).
+
+`docs/learning/` — personal study notes (Claude Code mechanics, Python
+concepts).
+- Gitignored: local only, never pushed.
+
+## Main logic
+
+**Engine**
+- Scoring core: `balance_points.py`, `effects.yaml`, `scoring.py`.
+- Turns a body's balance points and a garment's attributes into a
+  verdict.
+- CLI, API, and web are thin layers on top of it.
+- **An engine change** is any edit to those three files.
+
+## Build order
+
+- Stages 1–4 (balance-point calculator, scoring, CLI, web + API) are
+  implemented.
+- Stages 5–6 (garment-photo CV, multi-garment parsing) are not
+  started.
+- See `NOTES.md`'s "Build order — status" section for exactly what's
+  done and where.
 
 ## Standing rules (from NOTES.md)
 
@@ -114,9 +166,8 @@ everything else in it stays untouched and readable.
 - **One commit per decision.** Made when it's agreed — not batched up
   and split apart later. Keeps `git log` a legible record of the
   conversation.
-- **Run `./check.sh` before calling any change done.** One gate:
-  `pytest`, `ruff check`, the frontend's `tsc --noEmit`, and
-  `vitest run`.
+- **Run `./check.sh` before calling any change done.** See "Run &
+  test", above.
 
 ## Agent skills
 
@@ -126,7 +177,7 @@ everything else in it stays untouched and readable.
   login` before stages 3+ of the Workflow are usable. See
   `docs/agents/issue-tracker.md`.
 - **Domain docs:** `/domain-modeling` and `new-decision` both write to
-  `docs/adr/` (see Project, above). That's a pre-existing convention,
+  `docs/adr/` (see Structure, above). That's a pre-existing convention,
   not overridden. `NOTES.md` remains the current-state spec. A thin
   `CONTEXT.md` may grow lazily via `/domain-modeling` alongside it. See
   `docs/agents/domain.md`.
