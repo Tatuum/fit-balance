@@ -113,22 +113,33 @@ status), same pattern as `docs/adr/README.md`.
 
 | Stage | Mode | Input | Output | Where |
 |---|---|---|---|---|
-| 1. Shape | Plan mode or conversation | Human's idea + codebase exploration | Shared understanding | Nothing persisted |
-| 2. Plan | AI agent writes it, human approves | Stage 1's discussion | Context, Options considered, Decision, Worked example, Out of scope | `docs/plans/NNNN-slug.md` |
+| 1. Shape | Plan mode or conversation | Human's idea + codebase exploration | Requirements, Context, Options considered, Decision | `docs/plans/NNNN-slug.md` |
+| 2. Plan | AI agent expands it, human approves | Stage 1's approved Decision | Technical plan, How it fits into existing architecture, Worked example, Out of scope | `docs/plans/NNNN-slug.md` |
 | 3. Publish spec | Human runs this once the plan is approved | The approved plan doc | One GitHub issue, linked both ways | GitHub (`Tatuum/fit-balance`) |
 | 4. Steps | Same session | The approved plan | Ordered checklist + one child issue per step | Plan doc's `## Steps` + GitHub child issues |
 | 5. Implement | Normal mode, one step at a time | One step's issue | Code + tests, commit, issue closed | `src/`, `tests/`, etc. (+ `docs/adr/` for engine changes) |
 | 6. Close out | Once *all* steps are done | The shipped feature | Docs updated, issues closed | `NOTES.md`, `docs/project_docs/`, GitHub |
 
 **1. Shape.** Pull in `research`, `prototype`, or `domain-modeling`
-only if the topic actually needs it.
+only if the topic actually needs it. Write the conversation's own
+output straight into `docs/plans/NNNN-slug.md` (template at
+`docs/plans/TEMPLATE.md`; number sequentially after the highest in
+`docs/plans/README.md`, indexed same as `docs/adr/README.md`, never
+deleted): Requirements (plain behavior, no tech terms), Context (why
+now), Options considered, Decision (the approach chosen, high-level —
+the bet and why, not yet exact implementation detail). **Wait for
+explicit approval before moving on.**
 
-**2. Plan.** Template at `docs/plans/TEMPLATE.md`; number sequentially
-after the highest in `docs/plans/README.md` (indexed same as
-`docs/adr/README.md`, never deleted). For any change touching
-`balance_points.py` / `effects.yaml` / `scoring.py`, state the worked
-example ("body X + garment Y → verdict Z", with reasoning) before
-implementing — see decision 0006's `hides_waist` for the pattern.
+**2. Plan.** Expand the approved Decision into a Technical plan: exact
+files touched, functions/schemas/data shapes, sequencing — concrete
+enough that a reader could implement it without guessing. Then check
+Decision + Technical plan against `ARCHITECTURE.md` (stage/layer fit,
+stack, build order) and drop the result into "How it fits into
+existing architecture" — positioned right after Context in the plan
+doc so it's visible on a skim, even though it's written last. For any
+change touching `balance_points.py` / `effects.yaml` / `scoring.py`,
+state the worked example here too ("body X + garment Y → verdict Z",
+with reasoning) — see decision 0006's `hides_waist` for the pattern.
 **Wait for explicit approval before moving on.**
 
 **3. Publish spec.** Cross-link both ways: the plan doc's header gets
