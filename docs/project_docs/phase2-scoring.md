@@ -1,6 +1,6 @@
-# Stage 2 — Effects table & scoring engine
+# Phase 2 — Effects table & scoring engine
 
-Turns a body's balance points (stage 1) plus a garment's techniques
+Turns a body's balance points (phase 1) plus a garment's techniques
 into a verdict: a recommendation label, a numeric score, and the
 specific reasons that produced it. This is the layer that makes the
 engine explainable — every verdict traces back to named effect tags,
@@ -143,8 +143,8 @@ def signed_level(value, reference, axis) -> int:
 ```
 
 Turns a raw axis deviation into `-2, -1, 0, 1, or 2` — sign-preserved.
-`0` means "within the deadzone" (same `IMBALANCE_DEADZONE = 0.05` stage
-1's `main_concern()` uses, plus `top_hip_balance` added to that
+`0` means "within the deadzone" (same `IMBALANCE_DEADZONE = 0.05`
+phase 1's `main_concern()` uses, plus `top_hip_balance` added to that
 deadzone set); `1` is "notable," `2` is "pronounced" once magnitude
 clears `PRONOUNCED_THRESHOLD = 0.15`. `waist_definition` isn't in the
 deadzone axis set, so it gets no deadzone here either — same reasoning
@@ -210,7 +210,7 @@ suite — and `tests/test_balance_points.py` — green.
 - `scoring.score()` doesn't dedupe reasons by tag: two different
   techniques producing the same effect tag both contribute that tag's
   axis weight, additively. Currently only observed at the garment-catalog
-  layer (stage after this one), where it's treated as intentional
+  layer (a later phase), where it's treated as intentional
   stacking — see NOTES.md's "Garment catalog" section.
 - `clings_to_hip` has no `AXIS_RULES` entry — a known, deliberately
   unscored fact (see "The effects table" above and NOTES.md's "known

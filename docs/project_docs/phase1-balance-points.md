@@ -1,4 +1,4 @@
-# Stage 1 — Balance-point calculator
+# Phase 1 — Balance-point calculator
 
 Turns a body's raw tape-measure numbers into a small set of continuous,
 signed ratios — no shape category (pear/hourglass/apple) anywhere in
