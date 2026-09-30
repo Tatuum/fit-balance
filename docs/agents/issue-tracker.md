@@ -1,7 +1,7 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues on the
-`Tatuum/fit-balance` remote (already configured as `origin`). Use the
+Issues and specs for this repo live as GitHub issues on the repo's
+`origin` remote (already configured). Use the
 `gh` CLI for all operations. `gh` itself still needs installing (`brew
 install gh`) and authenticating (`gh auth login`, interactive — the
 user's own step) before any of this is usable.

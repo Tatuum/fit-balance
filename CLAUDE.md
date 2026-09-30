@@ -11,7 +11,7 @@ balance points — never a black-box shape label.
 - Python (`uv`, `pydantic`, `pytest`, `ruff`, `FastAPI`) for the
   engine/CLI/API.
 - React + TypeScript + Vite for the web frontend.
-- See `ARCHITECTURE.md` for the full architecture and per-stage file layout.
+- See `specs/architecture.md` for the full architecture and per-stage file layout.
 
 ## Run & test
 
@@ -39,8 +39,9 @@ fit-balance/
 ├── api/              — FastAPI, a thin layer over the engine
 ├── web/              — React + TS frontend
 ├── tests/            — pytest, mirrors src/
+├── specs/            — active per-feature specs (requirements/plan/validation)
 ├── docs/             — see Folder map below
-├── NOTES.md, ARCHITECTURE.md, README.md, CLAUDE.md
+├── NOTES.md, README.md, CLAUDE.md
 └── check.sh          — the one gate: pytest, ruff, tsc, vitest
 ```
 
@@ -48,16 +49,21 @@ fit-balance/
 
 `NOTES.md` — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
 
-`ARCHITECTURE.md` — stack decisions + per-stage roadmap, including
-stages not built yet.
+`specs/architecture.md` — stack decisions + per-stage roadmap,
+including stages not built yet.
+
+`specs/` — active per-feature specs, one dated folder per feature:
+`specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. Written by
+the `feature-spec` skill (see Agent skills, below). Never deleted —
+same historical-record treatment as `docs/adr/`.
 
 `docs/adr/` — holds the *why*.
 - One immutable file per past engine change.
 - Each is referenced from the relevant `NOTES.md` section.
 
-`docs/plans/` — planning-session history.
-- Numbered and indexed like `docs/adr/`, but never deleted.
-- See the Workflow section below for how a plan gets there.
+`docs/plans/` — frozen history of the old plan-doc workflow, from
+before `specs/` existed. No new entries; existing files stay as
+historical record, same as `docs/adr/`.
 
 `docs/project_docs/` — human-readable, per-stage write-ups.
 - The clean tier meant to be reread, not the dense engine detail.
@@ -94,10 +100,6 @@ concepts).
   internal model. A shape label (pear/hourglass/apple/rectangle) may be
   shown to the user as a display string. It must never be used in the
   scoring logic itself.
-- **Follow the build order — do not jump ahead to image/CV work.**
-  Don't start stage 5 or 6 (see Build order, above) without an explicit
-  decision to. They're the highest-uncertainty, least-validated part of
-  the plan.
 - **Worked examples must be automated tests, not eyeballed.** Rule
   changes have silently regressed prior-correct worked examples before
   (the "apple + bodycon" case in NOTES.md). Every engine change must
@@ -106,87 +108,35 @@ concepts).
 
 ## Workflow
 
-Every non-trivial change moves through six stages below. Trivial
-changes (typos, a one-line config tweak) can skip straight to
-Implement. `docs/plans/README.md` indexes every plan (number, title,
-status), same pattern as `docs/adr/README.md`.
+Every non-trivial change gets a spec before code (trivial changes skip
+straight to Implement). Use the `feature-spec` skill to branch,
+interview, and scaffold `specs/YYYY-MM-DD-<slug>/` — see
+`.claude/skills/feature-spec/SKILL.md` for the exact steps.
 
-| Stage | Mode | Input | Output | Where |
-|---|---|---|---|---|
-| 1. Shape | Plan mode or conversation | Human's idea + codebase exploration | Requirements, Context, Options considered, Decision | `docs/plans/NNNN-slug.md` |
-| 2. Plan | AI agent expands it, human approves | Stage 1's approved Decision | Technical plan, How it fits into existing architecture, Worked example, Out of scope | `docs/plans/NNNN-slug.md` |
-| 3. Publish spec | Human runs this once the plan is approved | The approved plan doc | One GitHub issue, linked both ways | GitHub (`Tatuum/fit-balance`) |
-| 4. Steps | Same session | The approved plan | Ordered checklist + one child issue per step | Plan doc's `## Steps` + GitHub child issues |
-| 5. Implement | Normal mode, one step at a time | One step's issue | Code + tests, commit, issue closed | `src/`, `tests/`, etc. (+ `docs/adr/` for engine changes) |
-| 6. Close out | Once *all* steps are done | The shipped feature | Docs updated, issues closed | `NOTES.md`, `docs/project_docs/`, GitHub |
-
-**1. Shape.** Pull in `research`, `prototype`, or `domain-modeling`
-only if the topic actually needs it. Write the conversation's own
-output straight into `docs/plans/NNNN-slug.md` (template at
-`docs/plans/TEMPLATE.md`; number sequentially after the highest in
-`docs/plans/README.md`, indexed same as `docs/adr/README.md`, never
-deleted): Requirements (plain behavior, no tech terms), Context (why
-now), Options considered, Decision (the approach chosen, high-level —
-the bet and why, not yet exact implementation detail). **Wait for
-explicit approval before moving on.**
-
-**2. Plan.** Expand the approved Decision into a Technical plan: exact
-files touched, functions/schemas/data shapes, sequencing — concrete
-enough that a reader could implement it without guessing. Then check
-Decision + Technical plan against `ARCHITECTURE.md` (stage/layer fit,
-stack, build order) and drop the result into "How it fits into
-existing architecture" — positioned right after Context in the plan
-doc so it's visible on a skim, even though it's written last. For any
-change touching `balance_points.py` / `effects.yaml` / `scoring.py`,
-state the worked example here too ("body X + garment Y → verdict Z",
-with reasoning) — see decision 0006's `hides_waist` for the pattern.
-**Wait for explicit approval before moving on.**
-
-**3. Publish spec.** Cross-link both ways: the plan doc's header gets
-`GitHub: #NN`; the issue links back to `docs/plans/NNNN-slug.md`. The
-issue is a pointer, not a duplicate — the plan doc stays the source of
-depth.
-
-**4. Steps.** Mirror each step as a child GitHub issue linked to the
-spec issue, noting blocking order. **Wait for explicit approval of the
-breakdown before implementing.**
-
-**5. Implement.** `tdd` at the seams NOTES.md already calls out.
-`./check.sh` must pass. `code-review` before committing. One commit
-per decision, message references `Closes #N`. Close that step's issue
-and check off its line in the plan.
-   - A step that edits `balance_points.py`, `effects.yaml`, or
-     `scoring.py` is an **engine change**: write its ADR
-     (`new-decision` skill) and update `NOTES.md` — including the
-     worked-example line if one changed — in the *same* change,
-     immediately, even if other steps in the plan are still open.
-     Never deferred to stage 6.
-   - Plans and step issues can change during implementation. Small
-     corrections: edit in place. An actual change of decision: append
-     a dated note under the plan's `## Updates` (`**YYYY-MM-DD:**
-     switched from X to Y because...`) rather than rewriting the
-     original reasoning — a step issue's comment thread does the same
-     job.
-
-**6. Close out.** Once *all* steps are done (not per-step): update
-`NOTES.md`, add/update a `docs/project_docs/` write-up if the feature
-is stage-worthy, close the parent spec issue, and add `Status: Shipped
-— see NOTES.md §X` (or `ADR NNNN`) to the top of the plan doc —
-everything else in it stays untouched and readable.
-
-- **One commit per decision.** Made when it's agreed — not batched up
-  and split apart later. Keeps `git log` a legible record of the
-  conversation.
-- **Run `./check.sh` before calling any change done.** See "Run &
-  test", above.
+- **Wait for explicit approval of `requirements.md` + `plan.md`
+  before implementing.**
+- `validation.md` must require `./check.sh` passing in full, not just
+  a new assertion for this feature.
+- A change touching `balance_points.py` / `effects.yaml` /
+  `scoring.py` must add an entry to `docs/adr/` (via `new-decision`)
+  and land its worked example in `tests/test_balance_points.py` or
+  `tests/test_scoring.py` specifically — `validation.md` must say so
+  explicitly.
+- Run the `changelog` skill before merging.
+- One commit per decision. Merge to `main`, delete the branch.
+- **Close out:** update `NOTES.md` (and `docs/project_docs/` if
+  stage-worthy). `specs/` folders are never deleted, same as
+  `docs/adr/`.
 
 ## Agent skills
 
-- **Issue tracker:** issues and specs live as GitHub issues via the
-  `gh` CLI, on the `Tatuum/fit-balance` remote (already configured as
-  `origin`). The `gh` CLI itself still needs installing + `gh auth
-  login` before stages 3+ of the Workflow are usable. See
-  `docs/agents/issue-tracker.md`.
+- **Feature spec:** `feature-spec` branches, interviews
+  (`AskUserQuestion`: Scope/Decisions/Context), and scaffolds
+  `specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. See
+  `.claude/skills/feature-spec/SKILL.md`.
+- **Changelog:** `changelog` appends new commits into `CHANGELOG.md`
+  from `git log`; run before merging a branch. See
+  `.claude/skills/changelog/SKILL.md`.
 - **Domain docs:** `/domain-modeling` and `new-decision` both write to
   `docs/adr/` (see Structure, above). That's a pre-existing convention,
   not overridden. `NOTES.md` remains the current-state spec. A thin

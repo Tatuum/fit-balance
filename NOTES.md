@@ -16,21 +16,6 @@ are* and *why* a given garment technique works with or against them.
 Every verdict comes with the specific reasons that produced it. Those
 reasons are editable data, not a trained model's opinion.
 
-## The gap (validated via web search)
-
-- Body-shape apps (Style DNA, BodyMuse, MioLook...) are crowded. User
-  reviews consistently complain about vague/inconsistent classification
-  and no way to see or override the reasoning.
-- Photorealistic virtual try-on (Doppl, TryDrobe, FitRoom, Krea...) is
-  also crowded — well-funded, generative, good at "does it look real,"
-  bad at "why does/doesn't this suit me."
-- Explainable AI (XAI) for fashion is mostly unsolved, per industry
-  writing. An arXiv paper (StePO-Rec, 2025) is actively researching
-  "knowledge-guided reasoning" for outfit styling — still a research
-  problem, not a shipped product feature.
-- **The gap: transparent, overridable reasoning.** Not another
-  body-shape classifier. Not another photorealistic renderer.
-
 ## Core architecture
 
 1. **Balance points** — continuous, signed numbers describing body
@@ -194,14 +179,14 @@ the verdicts below.
 Any change to `balance_points.py`, `effects.yaml`, or `scoring.py` must
 keep this suite green. That's the whole point of having it.
 
-## Garment catalog (manual, v1 — explicitly not stage 5/6)
+## Garment catalog (manual, v1 — no computer vision)
 
 **Current state**
 
 `src/fit_balance/garments.yaml` + `garments.py`: a hand-curated
 catalog of named items (id/label/slot/techniques). Manually authored
 data, exactly like `effects.yaml` — no computer vision, no photo
-input (stays out of stage 5/6 scope).
+input.
 
 - `GET /garments` — lists items with real names ("Slim-fitted top",
   "Oversized jacket"); never returns raw `techniques`.
@@ -457,7 +442,7 @@ unwired.**
 
 ## Build order — status
 
-See `ARCHITECTURE.md` for the full architecture/stack decisions and per-stage file
+See `specs/architecture.md` for the full architecture/stack decisions and per-stage file
 layout.
 
 1. **Done.** Pure-function balance-point calculator + the 5 worked examples
@@ -474,17 +459,11 @@ layout.
    parametric SVG avatar (`web/`, pure geometry in
    `web/src/lib/avatarGeometry.ts`) — no photorealism, per the
    original plan.
-5. **Not started — deprioritized indefinitely (decided 2026-09-21).**
-   Garment-photo → attribute extraction via pose estimation +
-   segmentation. "Upload a real item, tell me if it suits me" is now
-   handled a different way: a private per-user photo-upload closet
-   using a multimodal LLM call (not CV) to extract technique tags,
-   reviewed by the user before scoring. See `ARCHITECTURE.md`'s Stage 4.5 for
-   the full design. This stage (5) specifically — pose/segmentation-
-   based extraction — is not needed for that and stays out of scope.
+5. **Not started.** Garment-photo → attribute extraction via pose
+   estimation + segmentation. "Upload a real item, tell me if it suits
+   me" is now handled a different way: a private per-user photo-upload
+   closet using a multimodal LLM call (not CV) to extract technique
+   tags, reviewed by the user before scoring. See `specs/architecture.md`'s
+   "Future development" section for the early direction (not committed).
 6. **Not started.** Multi-garment outfit parsing for "recreate this
    inspo look, adjusted for my proportions."
-
-Do not start (5)/(6) casually. Everything useful and differentiated so
-far needed zero computer vision. CV is the highest-uncertainty,
-least-validated part of this plan.

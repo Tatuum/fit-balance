@@ -1,10 +1,11 @@
 # Plan log
 
-One file per planning session (see `CLAUDE.md`'s Workflow), approved
-before implementation starts. Unlike `docs/adr/`, plans are never
-deleted and can be lightly edited in place — they're the rereadable
-record of *how* a feature got shaped, not an immutable ruling. Template
-at `TEMPLATE.md`.
+**Frozen — new features are specced in `specs/`, not here.** This
+folder holds the history of the old plan-doc workflow: one file per
+planning session, approved before implementation started. Plans here
+are never deleted and could be lightly edited in place — they're the
+rereadable record of *how* a feature got shaped, not an immutable
+ruling. Template at `TEMPLATE.md`, kept for reference only.
 
 `NOTES.md` and `docs/project_docs/` stay the current-state spec.
 `docs/adr/` stays the curated log of hard-to-reverse engine decisions.

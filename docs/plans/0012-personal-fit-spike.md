@@ -25,7 +25,7 @@ Spike 1 below rather than addressed now. **Spike 1 next.**
 
 ## Context
 
-`ARCHITECTURE.md`'s Stage 4.5 plans a private photo-upload closet, but its
+`specs/architecture.md`'s Stage 4.5 plans a private photo-upload closet, but its
 first deliverable needs auth + a database before anyone knows the
 underlying idea actually works.
 
@@ -50,7 +50,7 @@ gap — the existing standing rule, not new overhead.
 
 ## How it fits into existing architecture
 
-- **Stage/layer:** precursor validation for `ARCHITECTURE.md`'s Stage
+- **Stage/layer:** precursor validation for `specs/architecture.md`'s Stage
   4.5, item 1 (private photo-upload closet) — run deliberately
   *before* that stage's real requirements (auth, database) get built,
   to de-risk the core assumption first.
@@ -64,7 +64,7 @@ gap — the existing standing rule, not new overhead.
   earlier than that stage formally starts.
 - **Build order:** doesn't skip ahead. Stays out of Stage 4.5's own
   scope (no auth, no DB — see Out of scope) and stays out of Stage 5
-  (CV) entirely — `ARCHITECTURE.md` is explicit that a multimodal LLM
+  (CV) entirely — `specs/architecture.md` is explicit that a multimodal LLM
   call describing a garment from a photo "is not a CV pipeline," which
   is exactly this spike's approach.
 - **Conflicts found:** none.
@@ -180,7 +180,7 @@ not that they're provably correct.
 No auth, no persistent database, no closet UI, no changes to `scoring.py`
 /`balance_points.py`/`effects.yaml`, no integration with the shared
 garment-catalog classification effort. All of that stays exactly as
-already planned in `ARCHITECTURE.md`'s Stage 4.5 / the catalog-classification plan.
+already planned in `specs/architecture.md`'s Stage 4.5 / the catalog-classification plan.
 
 ## Steps
 

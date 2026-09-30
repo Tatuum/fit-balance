@@ -22,7 +22,7 @@ Rules:
 - How it fits into existing architecture sits near the top (right
   after Context) so the fit conclusion is easy to spot on a skim — but
   is still filled in last, checking Decision + Technical plan together
-  against `ARCHITECTURE.md`. Write the sections in document order;
+  against `specs/architecture.md`. Write the sections in document order;
   fill this one in once Technical plan is done, then go back and drop
   the conclusion in at the top. Required before stage 2's approval,
   same checkpoint as Technical plan.
@@ -59,13 +59,13 @@ missing or broken today that this responds to.
 
 <Filled in last — once Decision and Technical plan below are both
 done — then dropped in here so it's visible on a skim. Checks
-Decision + Technical plan together against `ARCHITECTURE.md`:>
+Decision + Technical plan together against `specs/architecture.md`:>
 - Which stage/layer does this belong to (engine, API, web — see
-  `ARCHITECTURE.md`'s architecture diagram)?
+  `specs/architecture.md`'s architecture diagram)?
 - Does it respect the existing layering, or does it cross a boundary
-  `ARCHITECTURE.md` draws (e.g. business logic leaking into a layer
+  `specs/architecture.md` draws (e.g. business logic leaking into a layer
   meant to stay thin)?
-- Does it introduce anything outside `ARCHITECTURE.md`'s stack, or
+- Does it introduce anything outside `specs/architecture.md`'s stack, or
   jump ahead of the build order (see CLAUDE.md's Standing rules)?
 
 State the fit plainly, or name the conflict found. **Wait for explicit

@@ -1,7 +1,7 @@
 <!--
-Template for docs/project_docs/*.md — Tatiana's own stage/feature
-write-ups. One file per whole stage (e.g. stage1-balance-points.md,
-stage4-web-api-avatar.md), not per sub-feature.
+Template for docs/project_docs/*.md — the author's own phase/feature
+write-ups. One file per whole roadmap phase (see specs/roadmap.md)
+(e.g. phase1-balance-points.md, phase5-avatar.md), not per sub-feature.
 
 Rules:
 - Prose sentences inside each numbered section, not bare bullet
@@ -11,16 +11,16 @@ Rules:
 - Skip "Gotchas" entirely when there's nothing non-obvious; don't pad.
 - For *why* a decision was made, link NOTES.md / docs/adr/NNNN-*.md
   instead of re-explaining it here — this doc is *how it works now*.
-- If the stage grew multiple additions after its initial build, give
+- If the phase grew multiple additions after its initial build, give
   each its own "## <feature name>" header, with that feature's own
   numbered breakdown underneath.
 
 Delete this comment block when copying the template into a real file.
 -->
 
-# Stage <N> — <stage name>
+# Phase <N> — <phase name>
 
-<One or two sentences: what this stage delivered and why it exists —
+<One or two sentences: what this phase delivered and why it exists —
 the goal, not a restatement of the file names.>
 
 **Files:** `path/to/file.py`, `path/to/other.py`
