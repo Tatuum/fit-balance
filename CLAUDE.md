@@ -11,7 +11,7 @@ balance points — never a black-box shape label.
 - Python (`uv`, `pydantic`, `pytest`, `ruff`, `FastAPI`) for the
   engine/CLI/API.
 - React + TypeScript + Vite for the web frontend.
-- See `specs/architecture.md` for the full architecture and per-stage file layout.
+- See `specs/architecture.md` for the full architecture.
 
 ## Run & test
 
@@ -41,25 +41,32 @@ fit-balance/
 ├── tests/            — pytest, mirrors src/
 ├── specs/            — active per-feature specs (requirements/plan/validation)
 ├── docs/             — see Folder map below
-├── NOTES.md, README.md, CLAUDE.md
+├── CURRENT_STATE.md, README.md, CLAUDE.md
 └── check.sh          — the one gate: pytest, ruff, tsc, vitest
 ```
 
 **Folder map**
 
-`NOTES.md` — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
+`CURRENT_STATE.md` — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
 
-`specs/architecture.md` — stack decisions + per-stage roadmap,
-including stages not built yet.
-
-`specs/` — active per-feature specs, one dated folder per feature:
-`specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. Written by
-the `feature-spec` skill (see Agent skills, below). Never deleted —
-same historical-record treatment as `docs/adr/`.
+`specs/` — architecture/mission/stack/roadmap docs, plus active
+per-feature specs.
+- `architecture.md` — stack decisions (Tech stack section), layering
+  (High-level architecture section), and future direction. Read by
+  the `feature-spec` skill before drafting every spec, and again for
+  its architecture-fit check after `plan.md` is drafted.
+- `mission.md` — the *why* behind Purpose above. Read by the
+  `feature-spec` skill before drafting every spec.
+- `roadmap.md` — phase list; `feature-spec` finds the next incomplete
+  phase here to branch and scaffold.
+- `YYYY-MM-DD-<slug>/{requirements,plan,validation}.md` — one dated
+  folder per feature, written by the `feature-spec` skill (see Agent
+  skills, below). Never deleted — same historical-record treatment as
+  `docs/adr/`.
 
 `docs/adr/` — holds the *why*.
 - One immutable file per past engine change.
-- Each is referenced from the relevant `NOTES.md` section.
+- Each is referenced from the relevant `CURRENT_STATE.md` section.
 
 `docs/plans/` — frozen history of the old plan-doc workflow, from
 before `specs/` existed. No new entries; existing files stay as
@@ -86,14 +93,10 @@ concepts).
 
 ## Build order
 
-- Stages 1–4 (balance-point calculator, scoring, CLI, web + API) are
-  implemented.
-- Stages 5–6 (garment-photo CV, multi-garment parsing) are not
-  started.
-- See `NOTES.md`'s "Build order — status" section for exactly what's
-  done and where.
+The engine, CLI, API, and web app are shipped. See `specs/roadmap.md`
+for phase-by-phase build status.
 
-## Standing rules (from NOTES.md)
+## Standing rules (from CURRENT_STATE.md)
 
 - **Balance points, not shape categories, drive scoring.** Continuous
   signed numbers (e.g. `bust_hip_balance`, `waist_definition`) are the
@@ -102,43 +105,45 @@ concepts).
   scoring logic itself.
 - **Worked examples must be automated tests, not eyeballed.** Rule
   changes have silently regressed prior-correct worked examples before
-  (the "apple + bodycon" case in NOTES.md). Every engine change must
+  (the "apple + bodycon" case in CURRENT_STATE.md). Every engine change must
   keep `tests/test_balance_points.py` and `tests/test_scoring.py`
   green. That suite encodes all 5 worked examples.
 
 ## Workflow
 
 Every non-trivial change gets a spec before code (trivial changes skip
-straight to Implement). Use the `feature-spec` skill to branch,
-interview, and scaffold `specs/YYYY-MM-DD-<slug>/` — see
-`.claude/skills/feature-spec/SKILL.md` for the exact steps.
+straight to Implement).
 
-- **Wait for explicit approval of `requirements.md` + `plan.md`
-  before implementing.**
-- `validation.md` must require `./check.sh` passing in full, not just
-  a new assertion for this feature.
-- A change touching `balance_points.py` / `effects.yaml` /
-  `scoring.py` must add an entry to `docs/adr/` (via `new-decision`)
-  and land its worked example in `tests/test_balance_points.py` or
-  `tests/test_scoring.py` specifically — `validation.md` must say so
-  explicitly.
-- Run the `changelog` skill before merging.
-- One commit per decision. Merge to `main`, delete the branch.
-- **Close out:** update `NOTES.md` (and `docs/project_docs/` if
-  stage-worthy). `specs/` folders are never deleted, same as
-  `docs/adr/`.
+1. **Kick off** — `feature-spec` skill: reads `specs/roadmap.md`
+   (finds the next incomplete phase), then `specs/mission.md` +
+   `specs/architecture.md` in full for guidance; branches, interviews,
+   and writes
+   `specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. Once
+   `plan.md` is drafted, checks architecture fit (layering/stack)
+   against that same `specs/architecture.md` read before requesting
+   approval. See `.claude/skills/feature-spec/SKILL.md`.
+2. **Wait for explicit approval** of `requirements.md` + `plan.md`
+   before implementing.
+3. **Implement.** `validation.md` must require `./check.sh` passing in
+   full, not just a new assertion for this feature.
+4. **Engine change?** (any edit to `balance_points.py` /
+   `effects.yaml` / `scoring.py`): run `new-decision` — writes
+   `docs/adr/NNNN-slug.md` + `docs/adr/README.md`, updates `CURRENT_STATE.md`
+   with the resulting current-state behavior. Land the worked example
+   in `tests/test_balance_points.py` or `tests/test_scoring.py`
+   specifically — `validation.md` must say so explicitly.
+5. **Before merging:** run `changelog` — writes `CHANGELOG.md` from
+   `git log`.
+6. One commit per decision. Merge to `main`, delete the branch.
+7. **Close out:** update `CURRENT_STATE.md` (and `docs/project_docs/` if
+   stage-worthy). `specs/` folders are never deleted, same as
+   `docs/adr/`.
 
 ## Agent skills
 
-- **Feature spec:** `feature-spec` branches, interviews
-  (`AskUserQuestion`: Scope/Decisions/Context), and scaffolds
-  `specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. See
-  `.claude/skills/feature-spec/SKILL.md`.
-- **Changelog:** `changelog` appends new commits into `CHANGELOG.md`
-  from `git log`; run before merging a branch. See
-  `.claude/skills/changelog/SKILL.md`.
-- **Domain docs:** `/domain-modeling` and `new-decision` both write to
-  `docs/adr/` (see Structure, above). That's a pre-existing convention,
-  not overridden. `NOTES.md` remains the current-state spec. A thin
-  `CONTEXT.md` may grow lazily via `/domain-modeling` alongside it. See
-  `docs/agents/domain.md`.
+| Skill | Reads | Writes |
+|---|---|---|
+| `feature-spec` (`AskUserQuestion`: Scope/Decisions/Context) | `specs/roadmap.md`, `specs/mission.md`, `specs/architecture.md` (read once in full — used both for guidance and the later architecture-fit check) | `specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. See `.claude/skills/feature-spec/SKILL.md`. |
+| `new-decision` | `docs/adr/*.md` (next number) | `docs/adr/NNNN-slug.md`, `docs/adr/README.md`; updates `CURRENT_STATE.md`'s current-state text. |
+| `changelog` | `git log` | `CHANGELOG.md`; run before merging a branch. See `.claude/skills/changelog/SKILL.md`. |
+| `/domain-modeling` | — | `docs/adr/` (same pre-existing convention as `new-decision` — not overridden), plus a thin `CONTEXT.md` that grows lazily alongside it. See `docs/agents/domain.md`. |

@@ -8,7 +8,7 @@ description: Scaffold a new immutable engine-design decision file in docs/adr/ f
 Scaffolds one immutable file in `docs/adr/` for an engine-level
 design decision (a new formula, axis, scoring rule, or a reversal of a
 prior one). See `docs/adr/README.md` for why this project keeps
-decision history separate from `NOTES.md` (which stays the current-state
+decision history separate from `CURRENT_STATE.md` (which stays the current-state
 spec only).
 
 Args (optional): a title or short description of the decision, e.g.
@@ -56,7 +56,7 @@ not given, ask what the decision is before scaffolding — don't guess.
 5. **Update `docs/adr/README.md`**: add a row to the table in
    numeric order — `| [NNNN](NNNN-slug.md) | <Title> | Accepted |` — and
    update the superseded row's Status cell if step 4 applied.
-6. **Update `NOTES.md`** to describe the resulting current-state behavior
+6. **Update `CURRENT_STATE.md`** to describe the resulting current-state behavior
    (not the history) in whichever section it belongs, with a link to the
    new decision file (`docs/adr/NNNN-slug.md`). Follow the existing
    pattern of terse current-state text plus a decision link, not a

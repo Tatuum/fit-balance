@@ -81,14 +81,14 @@ also use.
 ### Testing / verification
 
 No automated CLI tests. Verification was manual: running `uv run
-fit-balance score ...` against each of the 5 NOTES.md worked examples
+fit-balance score ...` against each of the 5 CURRENT_STATE.md worked examples
 and confirming the printed recommendation and reasons matched what
 `tests/test_scoring.py` already asserts — the CLI is a display layer
 over `score()`, which the phase 1–2 test suites cover directly.
 
 ### Gotchas / open questions
 
-- The original plan (`specs/architecture.md`'s Stage 3) also proposed
+- The original plan (`specs/architecture.md`'s phase 3) also proposed
   an optional Jupyter notebook for interactively tuning `effects.yaml`
   weights. It was never built; the CLI alone has served the
   "confirm rules feel right" validation role so far.

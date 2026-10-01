@@ -109,7 +109,7 @@ own threshold in `scoring.py` instead.
 ### Testing / verification
 
 `tests/test_balance_points.py` encodes the 5 worked examples from
-NOTES.md (each originally phrased as `shape≈X`) as concrete
+CURRENT_STATE.md (each originally phrased as `shape≈X`) as concrete
 `Measurements` fixtures — real cm numbers chosen to produce the
 intended sign/magnitude on the relevant axis — asserted directly
 against the computed balance-point values (not a final verdict, since
@@ -120,7 +120,7 @@ scoring doesn't exist at this stage). Any future change to
 
 - `frame_scale` and `torso_leg` baselines (`0.50`/`0.45`/`0.245`/`0.455`)
   are guessed placeholders, not real anthropometric reference data —
-  see NOTES.md "Known gaps."
+  see CURRENT_STATE.md "Known gaps."
 - `WomensBalancePoints.main_concern()` picks the axis with the largest
   *raw* magnitude — the same cross-axis comparability problem that
   `scoring.py`'s severity-level scoring (decision

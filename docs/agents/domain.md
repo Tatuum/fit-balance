@@ -55,8 +55,8 @@ If your output contradicts an existing ADR, surface it explicitly rather than si
 `docs/adr/` already existed before this file (pre-dating the plugin,
 scaffolded by the repo's own `new-decision` skill) — it's the same
 directory this template points at, so decisions land in one place
-regardless of which skill writes them. `NOTES.md` is *not* replaced by
+regardless of which skill writes them. `CURRENT_STATE.md` is *not* replaced by
 `CONTEXT.md`: it stays the full current-state spec (architecture,
 formulas, worked examples), while `CONTEXT.md` — not created yet — is
 meant to stay a thin, incrementally-grown glossary if `/domain-modeling`
-ever gets used. Don't try to fold `NOTES.md` into `CONTEXT.md`.
+ever gets used. Don't try to fold `CURRENT_STATE.md` into `CONTEXT.md`.

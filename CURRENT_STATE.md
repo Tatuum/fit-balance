@@ -16,6 +16,21 @@ are* and *why* a given garment technique works with or against them.
 Every verdict comes with the specific reasons that produced it. Those
 reasons are editable data, not a trained model's opinion.
 
+## The gap (validated via web search)
+
+- Body-shape apps (Style DNA, BodyMuse, MioLook...) are crowded. User
+  reviews consistently complain about vague/inconsistent classification
+  and no way to see or override the reasoning.
+- Photorealistic virtual try-on (Doppl, TryDrobe, FitRoom, Krea...) is
+  also crowded — well-funded, generative, good at "does it look real,"
+  bad at "why does/doesn't this suit me."
+- Explainable AI (XAI) for fashion is mostly unsolved, per industry
+  writing. An arXiv paper (StePO-Rec, 2025) is actively researching
+  "knowledge-guided reasoning" for outfit styling — still a research
+  problem, not a shipped product feature.
+- **The gap: transparent, overridable reasoning.** Not another
+  body-shape classifier. Not another photorealistic renderer.
+
 ## Core architecture
 
 1. **Balance points** — continuous, signed numbers describing body

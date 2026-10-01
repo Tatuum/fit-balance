@@ -2,7 +2,7 @@
 
 Renders a to-scale visual silhouette from a user's measurements. A
 pure geometric mapping from measurements to shape — no photorealism,
-no shape category, per NOTES.md.
+no shape category, per CURRENT_STATE.md.
 
 **Files:** `web/src/lib/avatarGeometry.ts`, `web/src/components/Avatar.tsx`
 

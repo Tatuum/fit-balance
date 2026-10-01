@@ -2,12 +2,12 @@
 
 Full project history, renumbered as small, independently-shippable
 phases. `[x]` shipped, `[~]` partially shipped / in progress, `[ ]`
-not started. See `NOTES.md`'s "Build order — status" and
+not started. See `CURRENT_STATE.md`'s "Build order — status" and
 `docs/plans/README.md` for the pre-`specs/` record these are drawn
 from.
 
 - [x] **Phase 1 — Balance-point calculator + worked-example tests.**
-  Pure functions for the women's v0 formula set; the 5 NOTES.md worked
+  Pure functions for the women's v0 formula set; the 5 CURRENT_STATE.md worked
   examples as parametrized `pytest` cases. Verified: `pytest` passes
   with all 5 worked examples green; `ruff check` clean.
   (docs/project_docs/phase1-balance-points.md)
@@ -20,7 +20,7 @@ from.
   confirm the rules feel right on real inputs before any web/image
   work starts. Verified: manually ran the CLI against each worked
   example and confirmed output matched the expected verdict in
-  NOTES.md. (docs/project_docs/phase3-cli.md)
+  CURRENT_STATE.md. (docs/project_docs/phase3-cli.md)
 - [x] **Phase 4 — FastAPI `/score` endpoint.** Reuses the pydantic
   models unchanged as request/response bodies. Verified: `POST /score`
   via curl/HTTPie returns the same verdict as the CLI for the same

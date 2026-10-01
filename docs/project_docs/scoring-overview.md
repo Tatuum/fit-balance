@@ -1,6 +1,6 @@
 # How scoring works
 
-This walks through the scoring pipeline as implemented today. `NOTES.md` is
+This walks through the scoring pipeline as implemented today. `CURRENT_STATE.md` is
 still the source of truth for architecture/rationale/known gaps — this file
 is a companion explainer for the mechanics.
 
@@ -24,11 +24,11 @@ frame_scale_dev       = avg(bust, waist, hip)/height - baseline
 `torso_leg_balance` compares each of torso and leg to *its own* researched
 baseline ratio-to-height first, then subtracts the two deviations — a raw
 `(torso-leg)/max(...)` doesn't work because back-waist-length and inseam are
-structurally different magnitudes on every body (see NOTES.md's "known
+structurally different magnitudes on every body (see CURRENT_STATE.md's "known
 gaps" for the full story of that bug and fix).
 
 Each axis has a sign convention (documented next to its formula in
-NOTES.md). Magnitude tracks how far from neutral (0) the body reads on that
+CURRENT_STATE.md). Magnitude tracks how far from neutral (0) the body reads on that
 axis — bigger isn't "worse," just further from average.
 
 ## 2. Effects table (the "what a garment does") — `effects.yaml`
@@ -98,7 +98,7 @@ total = sum(r.contribution for r in reasons)
 
 The output isn't just the label — it's the label **plus every reason that
 fired**. A garment can help on one axis and hurt on another at the same
-time: worked example 5 (NOTES.md) has an oversized top score `+` on
+time: worked example 5 (CURRENT_STATE.md) has an oversized top score `+` on
 `bust_hip_balance` and `-` on `frame_scale_dev` simultaneously, and both
 show up as separate reasons rather than collapsing into one opaque number.
 

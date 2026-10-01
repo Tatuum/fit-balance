@@ -9,7 +9,7 @@ Rules:
   open.
 - Quote the actual formula/schema/constant, not a paraphrase.
 - Skip "Gotchas" entirely when there's nothing non-obvious; don't pad.
-- For *why* a decision was made, link NOTES.md / docs/adr/NNNN-*.md
+- For *why* a decision was made, link CURRENT_STATE.md / docs/adr/NNNN-*.md
   instead of re-explaining it here — this doc is *how it works now*.
 - If the phase grew multiple additions after its initial build, give
   each its own "## <feature name>" header, with that feature's own

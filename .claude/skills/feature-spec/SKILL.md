@@ -31,7 +31,9 @@ Do **not** write any files until the user has answered all three questions.
 
 ### 4. Read guidance files
 
-Read `specs/mission.md` and `specs/tech-stack.md` before drafting.
+Read `specs/mission.md` and `specs/architecture.md` (in full) before
+drafting. Keep `specs/architecture.md`'s content for step 6 — no need
+to re-read it.
 
 ### 5. Create the spec directory
 
@@ -52,8 +54,21 @@ Name: `specs/YYYY-MM-DD-<feature-name>/` using today's date.
 - Tone check if the feature has user-facing copy
 - Definition of done
 
+### 6. Check architecture fit
+
+Using `specs/architecture.md` (already read in step 4), append an
+"## Architecture fit" section to `plan.md` answering:
+- Which layer does this belong to (engine, API, web)?
+- Does it respect the existing layering, or cross a boundary (e.g.
+  business logic leaking into a layer meant to stay thin)?
+- Does it introduce anything outside the stack, or jump ahead of the
+  build order?
+
+State the fit plainly, or name the conflict found — this must be
+resolved or flagged before requesting approval.
+
 ## Constraints
 
-- Respect the existing tech stack defined in `specs/tech-stack.md` — no new dependencies without user approval
+- Respect the existing tech stack defined in `specs/architecture.md`'s "Tech stack" section — no new dependencies without user approval
 - Follow existing conventions and patterns already established in the codebase
 - Keep feature scope focused and independently shippable

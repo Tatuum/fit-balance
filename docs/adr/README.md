@@ -9,7 +9,7 @@ referenced file's name — a mechanical path fix when a file gets
 renamed elsewhere (e.g. `plan.md` → `ARCHITECTURE.md`) is fine; a
 rewrite of what was decided or why is not.
 
-`NOTES.md` stays the current-state spec — what the formulas and
+`CURRENT_STATE.md` stays the current-state spec — what the formulas and
 architecture are *today*. This log is the history of *why* they got that
 way. Start here if you want the current behavior; come here if you want
 to know what was tried, rejected, or superseded.

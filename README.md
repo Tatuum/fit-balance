@@ -47,8 +47,8 @@ Reasons: − clings to a hip that isn't the frame's strength
 ```
 
 This is one of five worked examples encoded as regression tests — see
-[Worked examples](NOTES.md#worked-examples-now-automated-tests) in
-`NOTES.md`.
+[Worked examples](CURRENT_STATE.md#worked-examples-now-automated-tests) in
+`CURRENT_STATE.md`.
 
 ## Engineering approach
 
@@ -61,7 +61,7 @@ This is one of five worked examples encoded as regression tests — see
   examples are pinned in `tests/test_balance_points.py` and
   `tests/test_scoring.py`, and any engine change must keep that suite
   green.
-- **`NOTES.md` is the living source of truth** for the current architecture
+- **`CURRENT_STATE.md` is the living source of truth** for the current architecture
   and formulas; this README is the front door, not the spec.
 
 ## Tech stack
@@ -73,13 +73,21 @@ This is one of five worked examples encoded as regression tests — see
 ## Project layout
 
 ```
-src/fit_balance/   the engine — balance_points.py, effects.yaml, scoring.py,
-                    plus garments/recommend/technique_advice presentation layers
-api/                FastAPI app exposing the engine over HTTP
-web/                React + TS frontend (measurements, silhouette, technique advice)
-tests/              pytest suite — includes the 5 worked examples as regression tests
-docs/adr/           one immutable decision record per past engine-level design choice
-NOTES.md            current-state spec: formulas, architecture, build-order status
+fit-balance/
+├── src/fit_balance/  the engine — balance_points.py, effects.yaml,
+│                     scoring.py, plus garments/recommend/technique_advice
+│                     presentation layers
+├── api/              FastAPI app exposing the engine over HTTP
+├── web/              React + TS frontend (measurements, silhouette,
+│                     technique advice)
+├── tests/            pytest suite — includes the 5 worked examples as
+│                     regression tests
+├── specs/            architecture, mission, stack, and roadmap docs,
+│                     plus one dated spec folder per feature
+├── docs/adr/         one immutable decision record per past
+│                     engine-level design choice
+└── CURRENT_STATE.md  current-state spec: formulas, architecture,
+                      build-order status
 ```
 
 ## Getting started
@@ -112,9 +120,9 @@ npm run test     # vitest
 
 ## Status
 
-Stages 1–4 (balance-point calculator, scoring, CLI, web + API) are
-implemented and tested. Stages 5–6 (garment-photo computer vision,
-multi-garment outfit parsing from a photo) are deliberately not started —
-everything shipped so far needed zero computer vision, and CV is the
-highest-uncertainty, least-validated part of the plan. See "Build order —
-status" in [`NOTES.md`](NOTES.md) for the current line.
+The core engine, CLI, API, and web app are shipped and tested.
+AI-assisted features (photo-upload closet, grounded explanations, a
+personal RAG corpus, a conversational assistant) aren't committed yet
+— see [`specs/roadmap.md`](specs/roadmap.md) for phase-by-phase status
+and `specs/architecture.md`'s "Future development" section for the
+early direction.

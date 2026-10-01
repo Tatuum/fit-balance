@@ -58,8 +58,8 @@ drop_waist:
 ```
 
 `load_effects_table()` reads this into `EFFECTS_TABLE` at import time.
-The first 7 techniques back the 5 NOTES.md worked examples; everything
-added after that backs the manual garment catalog (see NOTES.md's
+The first 7 techniques back the 5 CURRENT_STATE.md worked examples; everything
+added after that backs the manual garment catalog (see CURRENT_STATE.md's
 "Garment catalog" section) — new techniques since then (`high_rise`,
 `structured_shoulder`, `scoop_neck`, etc.) all reuse existing tags
 except `narrows_shoulder` (decision
@@ -68,7 +68,7 @@ except `narrows_shoulder` (decision
 A tag can exist in `effects.yaml` without a scoring rule — `AXIS_RULES`
 just won't have an entry for it, and `score()` silently skips it. That's
 deliberate for `clings_to_hip`: it's a known fact about a technique that
-isn't wired into scoring yet (NOTES.md's "known gaps" — it doesn't yet
+isn't wired into scoring yet (CURRENT_STATE.md's "known gaps" — it doesn't yet
 distinguish hip-clinging, usually fine, from waist-clinging, bad for an
 undefined waist).
 
@@ -105,7 +105,7 @@ AXIS_RULES = {
 ```
 
 `waist_definition`'s tags use `reference=0.15` instead of `0.0`:
-NOTES.md's formula comment ("~0/− = no natural cinch") implies the
+CURRENT_STATE.md's formula comment ("~0/− = no natural cinch") implies the
 practically meaningful cinch threshold sits above literal zero, so
 "defines/clings/hides waist" only score once there's a waist worth
 talking about.
@@ -196,7 +196,7 @@ STRONG_AVOID_THRESHOLD = -3
 
 ### Testing / verification
 
-`tests/test_scoring.py` re-asserts the same 5 NOTES.md worked examples
+`tests/test_scoring.py` re-asserts the same 5 CURRENT_STATE.md worked examples
 as full verdicts (recommendation + score), one test per example. It
 also separately pins threshold-boundary behavior (deadzone edge,
 pronounced-threshold edge, `waist_definition`'s no-deadzone rule) and
@@ -211,7 +211,7 @@ suite — and `tests/test_balance_points.py` — green.
   techniques producing the same effect tag both contribute that tag's
   axis weight, additively. Currently only observed at the garment-catalog
   layer (a later phase), where it's treated as intentional
-  stacking — see NOTES.md's "Garment catalog" section.
+  stacking — see CURRENT_STATE.md's "Garment catalog" section.
 - `clings_to_hip` has no `AXIS_RULES` entry — a known, deliberately
-  unscored fact (see "The effects table" above and NOTES.md's "known
+  unscored fact (see "The effects table" above and CURRENT_STATE.md's "known
   gaps").
