@@ -76,7 +76,7 @@ historical record, same as `docs/adr/`.
 - The clean tier meant to be reread, not the dense engine detail.
 
 `docs/agents/` — behavioral conventions an agent actually follows in
-this repo (how to explore, how to file issues).
+this repo (how to explore domain docs before working in an area).
 
 `docs/learning/` — personal study notes (Claude Code mechanics, Python
 concepts).

@@ -35,7 +35,13 @@ Read `specs/mission.md` and `specs/architecture.md` (in full) before
 drafting. Keep `specs/architecture.md`'s content for step 6 — no need
 to re-read it.
 
-### 5. Create the spec directory
+### 5. Sketch test seams
+
+Before drafting `plan.md`, identify the seam(s) at which this feature will be tested — the boundary where a test can verify behaviour without reaching into implementation details. Prefer an existing seam over a new one, and use the highest seam that still proves the behaviour (e.g. the engine's public functions, as `tests/test_balance_points.py`/`tests/test_scoring.py` already do, rather than poking internals). Fewer seams across the codebase is better — one is ideal.
+
+Confirm the seam(s) match the user's expectations before proceeding.
+
+### 6. Create the spec directory
 
 Name: `specs/YYYY-MM-DD-<feature-name>/` using today's date.
 
@@ -45,16 +51,18 @@ Name: `specs/YYYY-MM-DD-<feature-name>/` using today's date.
 - Context section: tone rules, stack pointers, existing patterns to follow
 
 #### `plan.md`
-- Numbered task groups appropriate to the feature (for example: Data → Components → Page & Route → Navigation → Tests)
+- Numbered task groups as **vertical slices**, not horizontal layers: each group cuts a narrow but complete path through every layer it touches (e.g. engine → API → web for a feature spanning all three) and is demoable/verifiable on its own — not "Data, then Components, then Page & Route, then Tests"
+- Order groups riskiest-assumption-first — the slice most likely to invalidate the plan goes first, so it's proven (or the plan revised) before later slices build on it
 - Each group has numbered sub-tasks; groups should be independently implementable
 
 #### `validation.md`
 - Automated: project test and typecheck commands pass; specific assertions required
+- Testing decisions: the seam(s) chosen in step 5, what makes a good test here (behaviour, not implementation detail), and prior art — similar existing tests to model after
 - Manual: walkthrough, behaviour, edge cases
 - Tone check if the feature has user-facing copy
 - Definition of done
 
-### 6. Check architecture fit
+### 7. Check architecture fit
 
 Using `specs/architecture.md` (already read in step 4), append an
 "## Architecture fit" section to `plan.md` answering:
@@ -72,3 +80,4 @@ resolved or flagged before requesting approval.
 - Respect the existing tech stack defined in `specs/architecture.md`'s "Tech stack" section — no new dependencies without user approval
 - Follow existing conventions and patterns already established in the codebase
 - Keep feature scope focused and independently shippable
+- No file paths or code snippets in `requirements.md`/`plan.md` — they go stale fast. Exception: a snippet that encodes a decision more precisely than prose (a state machine, schema, or type shape) may be inlined, noted briefly as coming from a prototype
