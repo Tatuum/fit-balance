@@ -67,7 +67,7 @@ class WomensBalancePoints:
     frame_scale_dev: float
 
     def _magnitude(self, name: str) -> float:
-        value = abs(getattr(self, name))
+        value: float = abs(getattr(self, name))
         if name in DEADZONE_AXES and value < IMBALANCE_DEADZONE:
             return 0.0
         return value

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import yaml
 from pydantic import BaseModel
@@ -15,7 +15,7 @@ _GARMENTS_PATH = Path(__file__).parent / "garments.yaml"
 
 def load_garments_table() -> dict[str, dict]:
     with _GARMENTS_PATH.open() as f:
-        return yaml.safe_load(f)
+        return cast(dict[str, dict], yaml.safe_load(f))
 
 
 GARMENTS_TABLE = load_garments_table()

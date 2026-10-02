@@ -10,6 +10,9 @@ uv run pytest -q
 echo "== ruff =="
 uv run ruff check .
 
+echo "== mypy =="
+uv run mypy src api
+
 echo "== tsc (web) =="
 (cd web && npx tsc --noEmit -p .)
 

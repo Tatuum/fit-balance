@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal, cast
 
 import yaml
 
@@ -16,7 +17,7 @@ _EFFECTS_PATH = Path(__file__).parent / "effects.yaml"
 
 def load_effects_table() -> dict[str, list[str]]:
     with _EFFECTS_PATH.open() as f:
-        return yaml.safe_load(f)
+        return cast(dict[str, list[str]], yaml.safe_load(f))
 
 
 EFFECTS_TABLE = load_effects_table()
@@ -109,7 +110,7 @@ _SCORING_DEADZONE_AXES = DEADZONE_AXES | {_TOP_HIP_BALANCE_AXIS}
 def axis_value(balance_points: WomensBalancePoints, axis: str) -> float:
     if axis == _TOP_HIP_BALANCE_AXIS:
         return max(balance_points.shoulder_hip_balance, balance_points.bust_hip_balance)
-    return getattr(balance_points, axis)
+    return cast(float, getattr(balance_points, axis))
 
 
 def signed_level(value: float, reference: float, axis: str) -> int:
@@ -156,6 +157,7 @@ def score(balance_points: WomensBalancePoints, garment: GarmentAttributes) -> Ve
     reasons.sort(key=lambda r: abs(r.contribution), reverse=True)
     total = sum(r.contribution for r in reasons)
 
+    recommendation: Literal["recommended", "neutral", "avoid", "strong_avoid"]
     if total >= RECOMMENDED_THRESHOLD:
         recommendation = "recommended"
     elif total <= STRONG_AVOID_THRESHOLD:

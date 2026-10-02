@@ -25,9 +25,10 @@ balance points — never a black-box shape label.
 **Test / verify**
 - `uv run pytest` — Python test suite.
 - `uv run ruff check .` — Python lint.
+- `uv run mypy src api` — Python type check.
 - `npx tsc --noEmit -p .` (from `web/`) — frontend typecheck.
 - `npx vitest run` (from `web/`) — frontend tests.
-- `./check.sh` — runs all four; the one gate before calling any change
+- `./check.sh` — runs all five; the one gate before calling any change
   done.
 
 ## Structure
@@ -42,7 +43,7 @@ fit-balance/
 ├── specs/            — active per-feature specs (requirements/plan/validation)
 ├── docs/             — see Folder map below
 ├── CURRENT_STATE.md, README.md, CLAUDE.md
-└── check.sh          — the one gate: pytest, ruff, tsc, vitest
+└── check.sh          — the one gate: pytest, ruff, mypy, tsc, vitest
 ```
 
 **Folder map**
