@@ -78,7 +78,10 @@ in: Measurements
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
       │
       ▼
-out: Verdict
+out: WomensBalancePoints — this is the shared artifact every feature
+     layer below actually takes as input (not `Verdict`: `scoring.py`
+     is a function each layer below calls on its own, as many times as
+     it needs, not a pipeline stage whose output is piped downstream)
       │
       ├─────────────┬─────────────────┬──────────────────────┐
       ▼             ▼                 ▼                      ▼
@@ -86,21 +89,38 @@ out: Verdict
 │ garments.py│ │recommend.py│ │technique_advice.py │ │garment_balance.py  │
 └────────────┘ └────────────┘ └────────────────────┘ └────────────────────┘
    Phase 6         Phase 7           Phase 9                Phase 8
-in: item_ids/  in: WomensBalance in: WomensBalance      in: WomensBalance
-  WomensBalance  Points            Points                 Points + item_id
-  Points
+in: item_ids   in: WomensBalance in: WomensBalance      in: WomensBalance
+  (catalog       Points            Points                 Points + item_id
+  lookup only)
+calls
+scoring.score()?
+  no              yes, once per     no — reads            yes, once for
+                   candidate         AXIS_RULES/            the one item
+                                     axis_value/
+                                     signed_level
+                                     directly instead
+                                     of a combined
+                                     Verdict
 out: tuple[    out: list[        out: list[             out:
   list[          OutfitRecom-      DimensionAdvice]       GarmentBalance
   GarmentItem],  mendation]                                Advice
-  GarmentAttri-
-  butes] /
+  GarmentAttri-  (.verdict is                               (.verdict is
+  butes] /        a Verdict)                                 a Verdict)
   list[Attri-
   butedReason]
+      │             │                 │                      │
+GET /garments  POST /recommend-  POST /technique-        POST /balance-
+                 outfits           recommendations         garment
       │             │                 │                      │
       └─────────────┴─────────┬───────┴──────────────────────┘
                               ▼
                    ┌─────────────────────────┐
                    │      api/main.py        │
+                   │  (also calls            │
+                   │  scoring.score()        │
+                   │  directly, for          │
+                   │  POST /score and        │
+                   │  POST /score-outfit)    │
                    └─────────────────────────┘
                             Phase 4
                               │
@@ -112,7 +132,15 @@ out: tuple[    out: list[        out: list[             out:
               Phase 3                Phase 5
 ```
 
-Everything below `api/main.py` only ever calls `scoring.score()` or
-reads `AXIS_RULES` — no feature layer re-derives a verdict
-independently, and no shape label ever enters this path, only the
-signed axes.
+Every feature layer that needs a verdict calls the same
+`scoring.score()` itself — `recommend.py` once per candidate outfit,
+`garment_balance.py` once for the one item it's given — rather than
+reimplementing the scoring logic or receiving a pre-computed `Verdict`
+from upstream. `garments.py` never touches scoring at all (pure
+catalog lookup); `technique_advice.py` reads `AXIS_RULES`/`axis_value`/
+`signed_level` directly instead of producing a combined `Verdict`, by
+design (see CURRENT_STATE.md's "Technique recommendations" section).
+`api/main.py` itself also calls `scoring.score()` directly for `/score`
+and `/score-outfit` — those two endpoints don't go through any of the
+four feature-layer boxes above. No shape label ever enters this path,
+only the signed axes.
