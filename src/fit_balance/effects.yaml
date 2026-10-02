@@ -1,8 +1,8 @@
 # Garment technique -> visual effects it produces. A fact about the
-# technique, independent of who wears it (NOTES.md "Core architecture").
+# technique, independent of who wears it (CURRENT_STATE.md "Core architecture").
 # The first 7 techniques below are used by the 5 worked examples in
-# NOTES.md; techniques added after that back the manual garment catalog
-# (garments.yaml) — see NOTES.md's "Garment catalog" section.
+# CURRENT_STATE.md; techniques added after that back the manual garment catalog
+# (garments.yaml) — see CURRENT_STATE.md's "Garment catalog" section.
 
 sheath_bodycon:
   - clings_to_waist

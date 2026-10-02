@@ -1,6 +1,6 @@
-"""The 5 worked examples from NOTES.md, now asserting on the full verdict.
+"""The 5 worked examples from CURRENT_STATE.md, now asserting on the full verdict.
 
-This is the point where NOTES.md's "apple + bodycon" regression — a rule
+This is the point where CURRENT_STATE.md's "apple + bodycon" regression — a rule
 change silently flipping a previously-correct verdict — becomes impossible
 to reintroduce unnoticed.
 """
@@ -51,7 +51,7 @@ def test_example_5_pear_fuller_oversized_skinny_is_avoid():
     garment = GarmentAttributes(techniques=["oversized_top", "skinny_straight"])
     verdict = score(bp, garment)
     assert verdict.recommendation == "avoid"
-    # NOTES.md / decision 0011: oversized_top no longer carries
+    # CURRENT_STATE.md / decision 0011: oversized_top no longer carries
     # adds_volume_top (a boxy, uniformly loose cut doesn't specifically
     # widen the top the way structured/padded shoulders would — it just
     # reads as bulk, already covered by adds_bulk). skinny_straight's
@@ -63,7 +63,7 @@ def test_example_5_pear_fuller_oversized_skinny_is_avoid():
 
 
 def test_clings_to_hip_is_a_known_fact_not_yet_scored():
-    """NOTES.md known gap: clings_to_hip is too coarse (doesn't distinguish
+    """CURRENT_STATE.md known gap: clings_to_hip is too coarse (doesn't distinguish
     hip- from waist/midsection-clinging) to score confidently in v0 — it's
     in effects.yaml but intentionally absent from scoring.AXIS_RULES."""
     bp = compute_womens_balance_points(HOURGLASS_BALANCED)

@@ -1,7 +1,7 @@
 """Tests for the outfit-recommendation ranking layer (recommend.py).
 
 Presentation-layer work sitting on top of the untouched scoring engine —
-see NOTES.md's "Outfit recommendations" section. These tests pin the
+see CURRENT_STATE.md's "Outfit recommendations" section. These tests pin the
 enumeration math (which combinations are valid, how many there are for the
 current catalog) and the ranking behavior (sorted, respects limit).
 """

@@ -1,7 +1,7 @@
 """Tests for the manual garment-item catalog (garments.yaml/garments.py).
 
 This is a presentation layer sitting on top of the untouched scoring
-engine — see NOTES.md's "Garment catalog" section. These tests pin the
+engine — see CURRENT_STATE.md's "Garment catalog" section. These tests pin the
 catalog's shape and the two behaviors that matter for correctness: exact-
 technique dedup across items, and the deliberate non-dedup of reasons that
 share an effect tag via different techniques.
@@ -68,7 +68,7 @@ def test_resolve_outfit_raises_for_unknown_item_id():
 
 
 def test_attribution_reuses_worked_example_5():
-    """NOTES.md worked example 5: pear + fuller frame, oversized top +
+    """CURRENT_STATE.md worked example 5: pear + fuller frame, oversized top +
     skinny/straight bottom -> avoid, with both a helping and a hurting
     reason (including oversized_top hiding this body's defined waist). Same
     body, same techniques (via catalog items instead of raw technique
@@ -91,7 +91,7 @@ def test_attribution_lists_both_items_when_tags_overlap():
     """seamed_top (vertical_detail) and slim_trousers (skinny_straight) are
     different techniques that both produce reduces_bulk. score() doesn't
     dedupe reasons by tag, so this deliberately produces TWO reduces_bulk
-    reasons, each attributing to both items — see NOTES.md.
+    reasons, each attributing to both items — see CURRENT_STATE.md.
 
     Uses PEAR_FULLER rather than HOURGLASS_BALANCED: frame_scale_dev needs
     to actually clear the 0.05 imbalance deadzone for reduces_bulk to score

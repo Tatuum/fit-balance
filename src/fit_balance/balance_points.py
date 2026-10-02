@@ -2,7 +2,7 @@ from dataclasses import dataclass, fields
 
 from .schemas import Measurements
 
-# Guessed placeholder, not real anthropometric reference data (NOTES.md
+# Guessed placeholder, not real anthropometric reference data (CURRENT_STATE.md
 # "known gaps") — chosen so avg(...)/height lands near this value for a
 # roughly average build. This ratio is unit-invariant (numerator and
 # denominator scale together), so it holds regardless of the unit used, as
@@ -14,7 +14,7 @@ WOMEN_FRAME_SCALE_BASELINE = 0.50
 # not a rigorous study (same caveat class as the frame-scale baselines
 # above): back waist length ~15.5-16.25in / 39-41cm per ASTM misses sizing
 # (~0.245 x a ~163cm average height); inseam ~0.45-0.46 x height per common
-# sizing guidance. NOTES.md "known gaps": torso (back waist length) and leg
+# sizing guidance. CURRENT_STATE.md "known gaps": torso (back waist length) and leg
 # (inseam) are anchored at very different landmarks and are NEVER close in
 # raw magnitude on a real body (back waist length is structurally about
 # half of inseam) — a raw (torso-leg)/max(...) ratio is dominated by that
@@ -33,7 +33,7 @@ LEG_HEIGHT_RATIO_BASELINE = 0.455
 # axes below where 0 is neutral in both directions; waist_definition has its
 # own asymmetric threshold instead (scoring.py's AXIS_RULES reference=0.15)
 # and is deliberately left out here — the two aren't the same kind of thing
-# (see NOTES.md).
+# (see CURRENT_STATE.md).
 IMBALANCE_DEADZONE = 0.05
 DEADZONE_AXES = frozenset(
     {"shoulder_hip_balance", "bust_hip_balance", "torso_leg_balance", "frame_scale_dev"}
@@ -43,7 +43,7 @@ DEADZONE_AXES = frozenset(
 # deviation into a small severity level (0 = within the deadzone / no
 # deadzone, 1 = "notable", 2 = "pronounced") instead of summing raw,
 # differently-scaled axis values directly — see docs/adr/0010. A
-# starting proposal verified against all 5 NOTES.md worked examples, not
+# starting proposal verified against all 5 CURRENT_STATE.md worked examples, not
 # derived from external data — same judgment-call category as
 # IMBALANCE_DEADZONE and waist_definition's 0.15 reference already are.
 PRONOUNCED_THRESHOLD = 0.15
@@ -54,7 +54,7 @@ class WomensBalancePoints:
     # + = shoulder wider than hip (broad-shoulder build), − = hip wider than
     # shoulder. Distinguishes a broad-shoulder/narrow-hip build from a
     # top-heavy-by-bust build that would otherwise look identical on
-    # bust_hip_balance alone (NOTES.md "known gaps"). Feeds top_hip_balance
+    # bust_hip_balance alone (CURRENT_STATE.md "known gaps"). Feeds top_hip_balance
     # (max of this and bust_hip_balance, decision 0009) — structured_shoulder
     # and puff_sleeve (decision 0012) react to it that way — and also has
     # its own dedicated AXIS_RULES entry, narrows_shoulder (decision 0013),
@@ -101,7 +101,7 @@ def compute_womens_balance_points(
         # undercount a broad-shouldered, less-busty build. Whichever of the
         # two is actually wider drives the "how fuller does the top read"
         # signal; falls back to bust only when bust genuinely exceeds
-        # shoulder (see NOTES.md).
+        # shoulder (see CURRENT_STATE.md).
         frame_scale_dev=(max(m.shoulder, m.bust) + m.waist + m.hip) / 3 / m.height
         - frame_scale_baseline,
     )

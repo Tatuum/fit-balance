@@ -1,6 +1,6 @@
 # Manual garment-item catalog: user-facing item -> slot + the effects.yaml
 # technique(s) it maps to. This is the layer that keeps raw technique keys
-# off the UI and out of any API response (see garments.py and NOTES.md's
+# off the UI and out of any API response (see garments.py and CURRENT_STATE.md's
 # "Garment catalog" section).
 
 sheath_dress:

@@ -4,12 +4,12 @@ import type { BalancePoints } from '../lib/types'
  * Plain-language read of every balance point — no numeric scale, just
  * "Axis: status" with a colored dot. Green means nothing notable here
  * (balanced, or waist_definition reading as a defined asset); the muted dot
- * means this axis has a descriptive trait, which per NOTES.md is not a
+ * means this axis has a descriptive trait, which per CURRENT_STATE.md is not a
  * problem to fix for any axis but waist_definition — no good/bad judgment
  * is baked into the color itself, only "notable vs not."
  *
  * shoulder_hip_balance and bust_hip_balance are combined into one "Top vs
- * hip" row rather than shown separately: NOTES.md documents them as
+ * hip" row rather than shown separately: CURRENT_STATE.md documents them as
  * deliberately distinct balance points (a broad-shoulder/narrow-hip build
  * reads differently from a top-heavy-by-bust one, and bust_hip_balance
  * alone would conflate them), but showing "shoulder wider than hip" right
@@ -86,7 +86,7 @@ export function mainConcernBadgeText(axis: SingleAxis, balanced: boolean): strin
 const AXIS_META: Record<SingleAxis, AxisMeta> = {
   waist_definition: {
     label: 'Waist definition',
-    // NOTES.md documents this axis's own zero point loosely — "~0/− = no
+    // CURRENT_STATE.md documents this axis's own zero point loosely — "~0/− = no
     // natural cinch" — so literal 0 isn't the practically meaningful
     // threshold, and it isn't a symmetric deadzone either (favorable is
     // one-directional). Matches scoring.py's AXIS_RULES reference for

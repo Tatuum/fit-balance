@@ -32,16 +32,16 @@ class _AxisRule:
 # For each effect tag: which balance-point axis it interacts with, and how.
 # contribution = weight * signed_level(balance_point_value, reference, axis)
 # — a small integer severity level (see signed_level below), not a flat
-# category match (NOTES.md "Core architecture" #3) and not the raw,
+# category match (CURRENT_STATE.md "Core architecture" #3) and not the raw,
 # differently-scaled balance-point value either (docs/adr/0010).
 # reference defaults to 0 (the formula's own neutral point);
-# waist_definition's tags use 0.15 instead, since NOTES.md's formula comment
+# waist_definition's tags use 0.15 instead, since CURRENT_STATE.md's formula comment
 # ("~0/− = no natural cinch") implies the practically meaningful cinch
 # threshold sits above literal zero.
 #
 # A tag present in effects.yaml but absent here is a known fact about the
 # technique that isn't wired into scoring yet. clings_to_hip is deliberately
-# left out: NOTES.md's "known gaps" flags it as too coarse (it doesn't
+# left out: CURRENT_STATE.md's "known gaps" flags it as too coarse (it doesn't
 # distinguish hip-clinging, fine for most shapes, from waist/midsection-
 # clinging, bad for an undefined waist) to score confidently in v0.
 AXIS_RULES: dict[str, _AxisRule] = {
@@ -86,7 +86,7 @@ AXIS_RULES: dict[str, _AxisRule] = {
     # top-heaviness actually comes from broad shoulders, not one that's
     # top-heavy from a fuller bust with balanced shoulders (those would
     # otherwise look identical through top_hip_balance's max()). Decision
-    # 0013 — closes the shoulder_hip_balance gap NOTES.md flagged since
+    # 0013 — closes the shoulder_hip_balance gap CURRENT_STATE.md flagged since
     # decision 0002.
     "narrows_shoulder": _AxisRule(axis="shoulder_hip_balance", weight=1),
 }

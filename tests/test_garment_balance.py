@@ -2,7 +2,7 @@
 
 Presentation layer on top of the untouched scoring engine — reuses
 resolve_outfit/score/recommend_techniques unchanged, no new AXIS_RULES
-logic. See NOTES.md's "Single-garment balance advice" section and
+logic. See CURRENT_STATE.md's "Single-garment balance advice" section and
 docs/plans/single-garment-balance-advice.md.
 """
 

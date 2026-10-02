@@ -1,4 +1,4 @@
-"""The 5 worked examples from NOTES.md, encoded as regression tests.
+"""The 5 worked examples from CURRENT_STATE.md, encoded as regression tests.
 
 The garment + verdict parts of each example are tested separately in
 test_scoring.py; this file covers only the balance-point layer.

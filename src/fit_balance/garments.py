@@ -73,7 +73,7 @@ def resolve_outfit(item_ids: list[str]) -> tuple[list[GarmentItem], GarmentAttri
     happen to share it) — but two *different* technique keys that happen to
     produce the same effect tag (e.g. vertical_detail and skinny_straight
     both -> reduces_bulk) are NOT deduplicated here; scoring.score() treats
-    them as independent contributions. See NOTES.md's "Garment catalog"
+    them as independent contributions. See CURRENT_STATE.md's "Garment catalog"
     section for why this is a deliberate, tested v1 choice, not an
     oversight.
     """
@@ -91,7 +91,7 @@ def resolve_outfit(item_ids: list[str]) -> tuple[list[GarmentItem], GarmentAttri
 class AttributedReason(BaseModel):
     """A Reason plus which selected item(s) produced it. Attribution
     only — "here's what's working against you" — not a replacement
-    suggestion; see NOTES.md."""
+    suggestion; see CURRENT_STATE.md."""
 
     tag: str
     axis: str

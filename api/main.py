@@ -70,7 +70,7 @@ class ScoreOutfitRequest(BaseModel):
 class OutfitVerdict(BaseModel):
     # Duplicated from schemas.Verdict.recommendation rather than imported —
     # schemas.py is the engine surface and stays untouched by this
-    # presentation-layer feature (see NOTES.md). Keep these four strings
+    # presentation-layer feature (see CURRENT_STATE.md). Keep these four strings
     # byte-for-byte identical to schemas.Verdict's Literal if either changes.
     recommendation: Literal["recommended", "neutral", "avoid", "strong_avoid"]
     score: int
@@ -170,7 +170,7 @@ class DimensionAdviceResponse(BaseModel):
 class TechniqueRecommendationsResponse(BaseModel):
     balance_points: dict[str, float]
     # Deliberately no main_concern here: this endpoint reports each
-    # dimension independently, on purpose (see NOTES.md's "Technique
+    # dimension independently, on purpose (see CURRENT_STATE.md's "Technique
     # recommendations" section) — a "which axis matters most" field would
     # contradict that.
     dimensions: list[DimensionAdviceResponse]

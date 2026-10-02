@@ -4,7 +4,7 @@ import type { Measurements } from './types'
  * Turns real measurements into a to-scale silhouette — every width and
  * length is derived directly from the entered cm values (via one shared
  * scale factor), not from balance-point ratios. No photorealism, per
- * NOTES.md, but the proportions are the user's actual proportions, not an
+ * CURRENT_STATE.md, but the proportions are the user's actual proportions, not an
  * exaggerated schematic. Every function here is pure (no DOM, no React) so
  * the mapping from measurements to shape is unit-testable on its own,
  * independent of how it's eventually rendered.

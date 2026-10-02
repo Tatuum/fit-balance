@@ -8,7 +8,7 @@ import type { Measurements, TechniqueRecommendationsResponse } from './lib/types
 import './App.css'
 
 // Measurement method for each field. torso/leg follow the convention
-// documented in NOTES.md's "known gaps" (ISO 8559 / tailoring practice):
+// documented in CURRENT_STATE.md's "known gaps" (ISO 8559 / tailoring practice):
 // back waist length and inseam, anchored at different landmarks — they are
 // not meant to sum to height.
 const MEASUREMENT_HELP: Record<keyof Measurements, string> = {

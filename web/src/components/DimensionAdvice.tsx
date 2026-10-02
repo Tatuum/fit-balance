@@ -2,7 +2,7 @@ import type { DimensionAdvice as DimensionAdviceData } from '../lib/types'
 
 /**
  * Renders each of the 4 scored dimensions independently, never combined
- * into one verdict -- see NOTES.md's "Technique recommendations" section
+ * into one verdict -- see CURRENT_STATE.md's "Technique recommendations" section
  * for why: summing/comparing across differently-scaled axes is exactly
  * the problem this feature avoids by never doing it. `pronounced` is a
  * per-dimension highlight, not a cross-dimension ranking -- any number of

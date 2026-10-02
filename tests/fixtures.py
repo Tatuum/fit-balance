@@ -1,7 +1,7 @@
-"""Shared Measurements fixtures for the 5 worked examples in NOTES.md, plus
+"""Shared Measurements fixtures for the 5 worked examples in CURRENT_STATE.md, plus
 fixtures for garments-layer decisions (e.g. decision 0012) below them.
 
-NOTES.md expresses each example as a shape/frame label (e.g. "shape≈apple,
+CURRENT_STATE.md expresses each example as a shape/frame label (e.g. "shape≈apple,
 torso_leg=long_torso") rather than raw measurements. Each constant below is a
 concrete Measurements set (in centimeters) chosen to produce the balance-point
 signs implied by that label.
@@ -35,7 +35,7 @@ APPLE_LONG_TORSO = Measurements(
 )
 
 # Examples 3 & 4: shape≈rectangle, torso_leg=long_torso, height=petite
-# (NOTES.md pairs the same body with two different garments — same fixture,
+# (CURRENT_STATE.md pairs the same body with two different garments — same fixture,
 # different GarmentAttributes in each test.)
 # shoulder≈87: balanced with bust/hip, consistent with rectangle's
 # "same all over" proportions. torso=48/leg=54: notably above/below this
@@ -53,7 +53,7 @@ PEAR_FULLER = Measurements(
     shoulder=89.0, bust=91.4, waist=76.2, hip=106.7, torso=39.2, leg=72.8, height=160.0
 )
 
-# Not one of the 5 NOTES.md worked examples above — added for decision
+# Not one of the 5 CURRENT_STATE.md worked examples above — added for decision
 # 0012's test_garments.py case, the first real (non-synthetic) verdict to
 # exercise adds_volume_top. shoulder=100/hip=88 gives shoulder_hip_balance
 # ≈0.12 (clears the 0.05 deadzone, level 1), while bust=84/hip=88 keeps
