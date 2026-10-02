@@ -39,7 +39,7 @@ shape classifier or another renderer.
 ## Example
 
 ```
-Body:    shape ≈ apple, long torso
+Body:    little natural waist definition, long torso
 Garment: sheath bodycon + belted natural waist
 Verdict: avoid
 Reasons: − clings to a hip that isn't the frame's strength
