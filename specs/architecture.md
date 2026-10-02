@@ -9,6 +9,8 @@
 - `PyYAML` — loads `effects.yaml` (technique → effect-tag data)
 - `pytest` — encodes the worked examples as regression tests
 - `ruff` — lint + format
+- `mypy` — type check (staged strictness: lenient on undecorated defs,
+  strict on return types)
 - `Typer` + `rich` — CLI
 - `FastAPI` — API layer, pairs directly with `pydantic`
 

@@ -67,7 +67,7 @@ This is one of five worked examples encoded as regression tests — see
 ## Tech stack
 
 - **Engine / CLI / API:** Python, [uv](https://docs.astral.sh/uv/),
-  Pydantic, Typer, FastAPI, pytest, ruff
+  Pydantic, Typer, FastAPI, pytest, ruff, mypy
 - **Web:** React, TypeScript, Vite, vitest
 
 ## Project layout
@@ -98,6 +98,7 @@ fit-balance/
 uv sync
 uv run pytest              # run the test suite
 uv run ruff check .        # lint
+uv run mypy src api        # type check
 uv run fit-balance --help  # CLI: score a garment against a set of measurements
 uv run uvicorn api.main:app --reload   # start the API on :8000
 ```
@@ -115,7 +116,7 @@ npm run test     # vitest
 **Everything, gated in one script:**
 
 ```bash
-./check.sh   # pytest + ruff + tsc --noEmit + vitest — the bar for "done"
+./check.sh   # pytest + ruff + mypy + tsc --noEmit + vitest — the bar for "done"
 ```
 
 ## Status
