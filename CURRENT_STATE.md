@@ -7,6 +7,13 @@ alternatives, superseded values, the reasoning behind a specific number
 engine-level design decision, referenced from the relevant section
 below.
 
+Sections below are ordered by dependency, not build date: intro →
+engine core → engine tests/caveats → presentation-layer features, each
+appearing after whatever it reuses (e.g. "Technique recommendations"
+before "Single-garment balance advice", which calls it, even though
+single-garment advice shipped first) → Avatar last, since rendering has
+no engine dependency → "Build order" closes the doc as a status index.
+
 ## Pitch
 
 An explainable styling recommendation engine. Not a black-box "you're a
@@ -279,6 +286,9 @@ directly against `shoulder_hip_balance` (0013).
   dropped the manual picker — the per-dimension technique advice took
   over as the web UI's proactive guidance instead of a ranked outfit
   list.
+- Kept intentionally, not orphaned: this is the backend half of Phase
+  11 (`specs/roadmap.md`), parked with no frontend caller until a UI
+  concept surfaces this without reintroducing the picker's clutter.
 - No engine change — `balance_points.py`, `scoring.py`, and
   `effects.yaml` stay untouched. So this did not get a `docs/adr/`
   entry, only this section (same precedent as the garment-catalog
@@ -439,7 +449,9 @@ unwired.**
   table, tests) is untouched, just not currently exercised by any
   caller. Reconnecting it would need a new source for the tags (e.g.
   the "Technique recommendations" section's per-dimension advice), not
-  resurrecting the removed outfit picker.
+  resurrecting the removed outfit picker. Kept intentionally, same
+  Phase 11 status as "Outfit recommendations" above — parked, not
+  abandoned.
 - Only covers tags with an obvious width-based reading: tags about
   torso/leg length (`elongates_leg`, `shortens_torso`, etc.) aren't
   represented, since those need a keypoint-position shift, not a width

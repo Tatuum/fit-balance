@@ -41,7 +41,10 @@ from.
 - [x] **Phase 10 — Discrete severity-level scoring**, replacing
   continuous cross-axis summation. (docs/plans/0007, ADR 0010)
 - [~] **Phase 11 — Hourglass silhouette goal:** ranked outfits +
-  corrected overlay avatar. Spike-quality, unwired. (docs/plans/0009)
+  corrected overlay avatar. Backend (`/recommend-outfits`) and the
+  avatar overlay spike are kept intentionally, not abandoned — parked
+  with no frontend UI until there's a UI concept that adds this
+  without cluttering the main flow. (docs/plans/0009)
 - [ ] **Phase 12 — Real, LLM-classified garment catalog**, replacing
   the hand-authored `garments.yaml`. Deferred. (docs/plans/0003)
 - [~] **Phase 13 — Personal-fit spike:** photo + self-reported tags,
