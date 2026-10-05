@@ -158,9 +158,14 @@ straight to Implement).
      the core pitch is affected (rare).
    - `specs/roadmap.md` — tick `[x]` if this closes out a roadmap
      phase.
-   - `docs/project_docs/*.md` — stage write-ups and companion
-     diagrams, if stage-worthy or if they describe the specific
-     function/module touched.
+   - `docs/project_docs/architecture-overview.md` and
+     `main-logic-overview.md` — **always check, not optional**, on any
+     engine change: they diagram `balance_points.py`/`scoring.py`'s
+     actual functions, classes, and call patterns by name, so any
+     renamed/moved/added function goes stale here immediately. (Missed
+     twice on decision 0015 before this line existed.)
+   - `docs/project_docs/*.md` (other files) — stage write-ups, if
+     stage-worthy.
 
    `specs/` folders are never deleted, same as `docs/adr/`.
 
