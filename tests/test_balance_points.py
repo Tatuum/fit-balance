@@ -22,7 +22,9 @@ from tests.fixtures import (
 
 def test_hourglass_balanced_frame():
     bp = compute_womens_balance_points(HOURGLASS_BALANCED)
-    assert abs(bp.shoulder_hip_balance) < 0.05, "hourglass: shoulder and hip should be near-balanced"
+    assert abs(bp.shoulder_hip_balance) < 0.05, (
+        "hourglass: shoulder and hip should be near-balanced"
+    )
     assert abs(bp.bust_hip_balance) < 0.05, "hourglass: bust and hip should be near-balanced"
     assert bp.waist_definition > 0.2, "hourglass: waist should read as a defined asset"
     assert abs(bp.torso_leg_balance) < 0.05, "hourglass: torso/leg at baseline, no long/short trait"

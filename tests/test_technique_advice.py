@@ -98,10 +98,16 @@ def test_pear_oversized_top_is_flagged_avoid_on_two_independent_dimensions():
     advice = _advice_by_axis(bp)
 
     waist_avoid_items = {
-        i.id for r in advice["waist_definition"].recommendations if r.direction == "-" for i in r.items
+        i.id
+        for r in advice["waist_definition"].recommendations
+        if r.direction == "-"
+        for i in r.items
     }
     frame_avoid_items = {
-        i.id for r in advice["frame_scale_dev"].recommendations if r.direction == "-" for i in r.items
+        i.id
+        for r in advice["frame_scale_dev"].recommendations
+        if r.direction == "-"
+        for i in r.items
     }
     assert "oversized_top" in waist_avoid_items
     assert "oversized_top" in frame_avoid_items

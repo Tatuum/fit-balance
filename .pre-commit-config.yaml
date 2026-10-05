@@ -1,0 +1,33 @@
+# docs/adr/ and docs/plans/ are immutable historical records (see
+# CLAUDE.md) — never auto-reformatted, even for trailing whitespace.
+exclude: ^docs/(adr|plans)/
+
+repos:
+  # Basic file hygiene (all file types)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  # Ruff - Python linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  # Mypy - type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.0
+    hooks:
+      - id: mypy
+        args: [src, api]
+        pass_filenames: false
+        additional_dependencies:
+          - pydantic>=2
+          - typer>=0.12
+          - rich>=13
+          - fastapi>=0.115
+          - types-PyYAML

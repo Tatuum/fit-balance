@@ -154,18 +154,27 @@ def test_technique_recommendations_endpoint_matches_pear_dimensions():
 def test_balance_garment_endpoint_matches_engine_call():
     response = client.post(
         "/balance-garment",
-        json={"measurements": BROAD_SHOULDER_NARROW_HIP.model_dump(), "item_id": "structured_blazer"},
+        json={
+            "measurements": BROAD_SHOULDER_NARROW_HIP.model_dump(),
+            "item_id": "structured_blazer",
+        },
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["item"] == {"id": "structured_blazer", "label": "Structured blazer with built-up shoulders", "slot": "outerwear"}
+    assert body["item"] == {
+        "id": "structured_blazer",
+        "label": "Structured blazer with built-up shoulders",
+        "slot": "outerwear",
+    }
     assert body["verdict"]["recommendation"] == "avoid"
 
     bp = compute_womens_balance_points(BROAD_SHOULDER_NARROW_HIP)
     advice = suggest_balance(bp, "structured_blazer")
     assert body["verdict"]["score"] == advice.verdict.score
     assert [d["axis"] for d in body["suggestions"]] == [d.axis for d in advice.suggestions]
-    suggested_item_ids = {i["id"] for d in body["suggestions"] for r in d["recommendations"] for i in r["items"]}
+    suggested_item_ids = {
+        i["id"] for d in body["suggestions"] for r in d["recommendations"] for i in r["items"]
+    }
     engine_item_ids = {i.id for d in advice.suggestions for r in d.recommendations for i in r.items}
     assert suggested_item_ids == engine_item_ids
 
