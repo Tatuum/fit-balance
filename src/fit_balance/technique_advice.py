@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from .balance_points import WomensBalancePoints
+from .balance_points import WomensBalancePoints, quantize
 from .garments import GarmentItem, list_items
-from .scoring import AXIS_RULES, EFFECTS_TABLE, axis_value, signed_level
+from .scoring import AXIS_RULES, EFFECTS_TABLE, axis_level, axis_value
 
 # The 4 reported dimensions, independent of each other — no cross-axis
 # combination or ranking, so none of the raw-magnitude-comparability
@@ -64,17 +64,19 @@ class DimensionAdvice:
 def recommend_techniques(balance_points: WomensBalancePoints) -> list[DimensionAdvice]:
     """For each of the 4 scored dimensions: which effect tags would help or
     hurt this body, and which catalog items use them — independent of any
-    specific chosen outfit or combination. Every tag sharing an axis also
-    shares that axis's reference (AXIS_RULES), so the severity level only
-    needs computing once per dimension; which side a tag lands on is purely
-    its weight's sign against that one level. A level of 0 (axis inside its
-    deadzone) leaves every tag on that axis empty on both sides — "no
-    strong trait" falls out naturally, no special-casing needed."""
+    specific chosen outfit or combination. Every tag sharing an axis shares
+    that axis's quantized severity level (balance_points.quantize(),
+    decision 0015), computed once per body rather than once per dimension;
+    which side a tag lands on is purely its weight's sign against that one
+    level. A level of 0 (axis inside its deadzone) leaves every tag on that
+    axis empty on both sides — "no strong trait" falls out naturally, no
+    special-casing needed."""
+    quantized = quantize(balance_points)
     advice = []
     for axis, label in DIMENSIONS:
         value = axis_value(balance_points, axis)
         tags_on_axis = [(tag, rule) for tag, rule in AXIS_RULES.items() if rule.axis == axis]
-        level = signed_level(value, tags_on_axis[0][1].reference, axis) if tags_on_axis else 0
+        level = axis_level(quantized, axis)
 
         recommendations = []
         for tag, rule in tags_on_axis:

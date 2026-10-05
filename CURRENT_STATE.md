@@ -81,24 +81,31 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
 - `frame_scale_dev` takes `max(shoulder, bust)` rather than bust alone:
   bust size is confounded by breast tissue independent of actual
   frame/width.
-- "Main concern" = whichever balance point has the largest absolute
-  magnitude. It skips `shoulder_hip_balance`/`bust_hip_balance`/
-  `torso_leg_balance`/`frame_scale_dev` values under 0.05
-  (`balance_points.IMBALANCE_DEADZONE`) — those four are neutral at 0 in
-  both directions, so a value that small is measurement noise, not a
-  real proportion difference. `main_concern()` returns `None` if
-  nothing clears it.
-- `waist_definition` has no deadzone — its own asymmetric threshold
-  (0.15, in `scoring.py`'s `AXIS_RULES`) already serves that purpose,
-  for a different reason: one direction is favorable, not "0 is
-  neutral both ways." A favorable-sign value (e.g. high
+- "Main concern(s)" = every balance point sharing the single highest
+  quantized severity level (`balance_points.quantize()`/`quantize_axis()`
+  — decision [0015](docs/adr/0015-quantized-main-concern.md)), returned
+  as a list rather than one arbitrarily-picked axis — a genuine tie
+  between two or more axes is surfaced, not broken. Quantization skips
+  `shoulder_hip_balance`/`bust_hip_balance`/`torso_leg_balance`/
+  `frame_scale_dev` deviations under 0.05 (`balance_points.IMBALANCE_DEADZONE`)
+  — those four are neutral at 0 in both directions, so a value that
+  small is measurement noise, not a real proportion difference.
+  `main_concern()` returns `[]` if nothing clears.
+- `waist_definition` has no deadzone — its own asymmetric reference
+  point (`balance_points.AXIS_REFERENCE`, 0.15) already serves that
+  purpose, for a different reason: one direction is favorable, not "0
+  is neutral both ways." A favorable-sign value (e.g. high
   `waist_definition`) is an **asset**, not a concern — surface it as a
-  strength to build around, not a problem to fix.
-- The CLI (`cli.py`) honors this at the label level: when
-  `main_concern()` names a favorable `waist_definition`, it shows "(key
-  asset)" instead of "(main concern)" — a favorable value labeled as a
-  concern reads as self-contradictory. Presentation-only fix —
-  `main_concern()`'s own selection logic is unchanged. The web
+  strength to build around, not a problem to fix. One consequence: since
+  `waist_definition` has no deadzone, it can never quantize to a level
+  of exactly 0, not even at its own reference point — so `main_concern()`
+  returning `[]` is possible in principle but essentially never happens
+  for a real body; `waist_definition` almost always has something to
+  say, as either an asset or a concern.
+- The CLI (`cli.py`) honors the asset/concern distinction at the label
+  level: when `main_concern()` names a favorable `waist_definition`, it
+  shows "(key asset)" instead of "(main concern)" — a favorable value
+  labeled as a concern reads as self-contradictory. The web
   `BalancePointsChart` component has the same honoring logic and its
   own tests, but `App.tsx` no longer renders it, since the frontend was
   simplified down to measurements/silhouette/technique-advice (see
@@ -111,6 +118,9 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
   `frame_scale_dev` uses `max(shoulder, bust)`.
 - [0007](docs/adr/0007-imbalance-deadzone.md) — the 0.05 deadzone on
   `main_concern()`'s four symmetric axes.
+- [0015](docs/adr/0015-quantized-main-concern.md) — `main_concern()`
+  compares quantized severity levels instead of raw magnitude, and
+  surfaces ties instead of picking one.
 
 Menswear support (a parallel `chest_waist_balance`/`chest_hip_balance`
 formula set) was scaffolded in stage 1 but never wired into any test,
@@ -171,14 +181,6 @@ worked examples and tests, not by restoring the old code as-is.
   `shoulder_hip_balance` entry, only the combined `top_hip_balance`.
   Necklines/sleeves beyond scoop/structured/puff (halter, raglan) are
   still unmodeled.
-- `WomensBalancePoints.main_concern()` still picks the axis with the
-  largest *raw* magnitude to name as "the" main concern. That's the
-  same cross-axis comparability problem decision
-  [0010](docs/adr/0010-discrete-severity-level-scoring.md) fixed for
-  scoring — left unfixed here since it touches the CLI,
-  `BalancePointsChart.tsx`, and its own tests, none of which were in
-  scope for that change. A future decision could apply the same
-  severity-level concept to it.
 
 ## Worked examples (now automated tests)
 
@@ -311,14 +313,15 @@ directly against `shoulder_hip_balance` (0013).
   important" axis would contradict the point of reporting dimensions
   independently.
 - Leans on a structural fact already true of `AXIS_RULES`: every tag
-  sharing an axis also shares that axis's `reference`. A dimension's
-  severity level is computed once (via `scoring.py`'s now-public
-  `signed_level`/`axis_value`, promoted from private helpers only
-  `score()` used before) and reused for every tag on that axis. Which
-  side a tag lands on is purely its `weight`'s sign against that one
-  level. A level of `0` (axis inside its deadzone) leaves every tag on
-  that axis empty on both sides — how "no strong trait" falls out for
-  a body with no real torso/leg skew, with no special-casing needed.
+  sharing an axis also shares that axis's quantized severity level
+  (`balance_points.quantize()`, decision
+  [0015](docs/adr/0015-quantized-main-concern.md)). A dimension's level
+  is computed once (via `scoring.py`'s `axis_level()`) and reused for
+  every tag on that axis. Which side a tag lands on is purely its
+  `weight`'s sign against that one level. A level of `0` (axis inside
+  its deadzone) leaves every tag on that axis empty on both sides — how
+  "no strong trait" falls out for a body with no real torso/leg skew,
+  with no special-casing needed.
 - Each dimension also carries `notable: bool` and `direction: "+" |
   "-" | None` (the axis's own signed severity level, `!= 0`), plus
   `pronounced: bool` (that same level's magnitude `== 2`) — a
@@ -358,12 +361,18 @@ directly against `shoulder_hip_balance` (0013).
 **History / rationale**
 
 - Deliberately supersedes an earlier explored (and shipped-then-not)
-  direction of fixing `WomensBalancePoints.main_concern()` itself to
-  be level-based. That path needed a tie-break policy and ran into a
-  latent-bug/reference-point rabbit hole for no real gain, once
-  per-dimension independence made a single winner unnecessary.
-  `main_concern()` itself stays exactly as documented in "Known gaps"
-  above — untouched.
+  direction of fixing `WomensBalancePoints.main_concern()` itself to be
+  level-based: that attempt stalled on needing a tie-break policy and a
+  latent-bug/reference-point rabbit hole (`waist_definition` never
+  quantizing to level 0), for no real gain here, since per-dimension
+  independence already made a single winner unnecessary for *this*
+  feature. Decision [0015](docs/adr/0015-quantized-main-concern.md)
+  later did fix `main_concern()` itself, by resolving those same two
+  snags directly — surfacing ties as a list instead of needing a
+  tie-break policy, and documenting the never-quite-0 `waist_definition`
+  behavior as a real, deliberate fact rather than a blocker. This
+  section's design (no `main_concern` field at all here) is unaffected
+  either way.
 
 ## Single-garment balance advice (v1)
 

@@ -37,7 +37,7 @@ export interface BalancePoints {
 
 export interface ScoreResponse {
   balance_points: BalancePoints
-  main_concern: string | null
+  main_concern: string[]
   verdict: Verdict
 }
 
@@ -61,7 +61,7 @@ export interface OutfitVerdict {
 
 export interface ScoreOutfitResponse {
   balance_points: BalancePoints
-  main_concern: string | null
+  main_concern: string[]
   verdict: OutfitVerdict
 }
 
@@ -73,7 +73,7 @@ export interface RecommendedOutfit {
 
 export interface RecommendOutfitsResponse {
   balance_points: BalancePoints
-  main_concern: string | null
+  main_concern: string[]
   recommendations: RecommendedOutfit[]
 }
 
@@ -100,7 +100,7 @@ export interface TechniqueRecommendationsResponse {
 
 export interface BalanceGarmentResponse {
   balance_points: BalancePoints
-  main_concern: string | null
+  main_concern: string[]
   item: GarmentSummary
   verdict: Verdict
   suggestions: DimensionAdvice[]

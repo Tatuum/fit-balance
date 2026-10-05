@@ -3,7 +3,12 @@ from fastapi.testclient import TestClient
 from api.main import app
 from fit_balance.balance_points import compute_womens_balance_points
 from fit_balance.garment_balance import suggest_balance
-from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, HOURGLASS_BALANCED, PEAR_FULLER
+from tests.fixtures import (
+    APPLE_LONG_TORSO,
+    BROAD_SHOULDER_NARROW_HIP,
+    HOURGLASS_BALANCED,
+    PEAR_FULLER,
+)
 
 client = TestClient(app)
 
@@ -19,7 +24,7 @@ def test_score_endpoint_matches_engine_for_example_1():
     assert response.status_code == 200
     body = response.json()
     assert body["verdict"]["recommendation"] == "recommended"
-    assert body["main_concern"] == "waist_definition"
+    assert body["main_concern"] == ["waist_definition"]
     assert set(body["balance_points"]) == {
         "shoulder_hip_balance",
         "bust_hip_balance",
@@ -27,6 +32,22 @@ def test_score_endpoint_matches_engine_for_example_1():
         "torso_leg_balance",
         "frame_scale_dev",
     }
+
+
+def test_score_endpoint_surfaces_a_main_concern_tie():
+    """APPLE_LONG_TORSO's main_concern() is a genuine 3-way tie (decision
+    0015) -- confirms the API serializes the list shape correctly, not
+    just a single value."""
+    response = client.post(
+        "/score",
+        json={
+            "measurements": APPLE_LONG_TORSO.model_dump(),
+            "garment": {"techniques": ["sheath_bodycon", "belted_natural_waist"]},
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["main_concern"] == ["waist_definition", "torso_leg_balance", "frame_scale_dev"]
 
 
 def test_score_endpoint_rejects_missing_fields():

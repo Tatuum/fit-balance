@@ -108,14 +108,15 @@ const AXIS_META: Record<SingleAxis, AxisMeta> = {
 
 interface BalancePointsChartProps {
   balancePoints: BalancePoints
-  mainConcern: string | null
+  mainConcern: string[]
 }
 
 export function BalancePointsChart({ balancePoints, mainConcern }: BalancePointsChartProps) {
   const shoulderHip = balancePoints.shoulder_hip_balance
   const bustHip = balancePoints.bust_hip_balance
   const topVsHipBalanced = isBalanced(shoulderHip) && isBalanced(bustHip)
-  const topVsHipIsMainConcern = mainConcern === 'shoulder_hip_balance' || mainConcern === 'bust_hip_balance'
+  const topVsHipIsMainConcern =
+    mainConcern.includes('shoulder_hip_balance') || mainConcern.includes('bust_hip_balance')
 
   return (
     <div className="balance-chart">
@@ -132,7 +133,7 @@ export function BalancePointsChart({ balancePoints, mainConcern }: BalancePoints
       {SINGLE_AXIS_ORDER.map((axis) => {
         const value = balancePoints[axis]
         const meta = AXIS_META[axis]
-        const isMainConcern = axis === mainConcern
+        const isMainConcern = mainConcern.includes(axis)
         const balanced = meta.isBalanced(value)
         const statusText = meta.describe(value, balanced)
         const badgeText = isMainConcern ? mainConcernBadgeText(axis, balanced) : null
