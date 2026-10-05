@@ -36,7 +36,7 @@ def test_score_endpoint_matches_engine_for_example_1():
 
 def test_score_endpoint_surfaces_a_main_concern_tie():
     """APPLE_LONG_TORSO's main_concern() is a genuine 3-way tie (decision
-    0014) -- confirms the API serializes the list shape correctly, not
+    0015) -- confirms the API serializes the list shape correctly, not
     just a single value."""
     response = client.post(
         "/score",

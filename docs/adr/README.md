@@ -30,3 +30,4 @@ to know what was tried, rejected, or superseded.
 | [0012](0012-garment-catalog-vocabulary-expansion.md) | Expand garment catalog with realistic garment types and techniques | Accepted |
 | [0013](0013-narrows-shoulder-effect.md) | narrows_shoulder: a dedicated shoulder_hip_balance effect | Accepted |
 | [0014](0014-remove-menswear-support.md) | Remove menswear support | Accepted |
+| [0015](0015-quantized-main-concern.md) | Quantized main_concern(), ties surfaced instead of broken | Accepted |

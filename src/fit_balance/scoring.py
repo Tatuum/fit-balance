@@ -32,7 +32,7 @@ class _AxisRule:
 # Quantization — including waist_definition's 0.15 reference point, since
 # CURRENT_STATE.md's formula comment ("~0/− = no natural cinch") implies the
 # practically meaningful cinch threshold sits above literal zero — happens
-# once, upstream, in balance_points.quantize() (decision 0014); this table
+# once, upstream, in balance_points.quantize() (decision 0015); this table
 # only needs each tag's axis and direction.
 #
 # A tag present in effects.yaml but absent here is a known fact about the
@@ -97,7 +97,7 @@ STRONG_AVOID_THRESHOLD = -3
 # measurement, so it's computed on demand from the two real fields instead
 # of being a field itself (which would double-count with them for
 # main_concern()). quantize-then-max equals max-then-quantize here (decision
-# 0014): quantize_axis() is monotonic, and shoulder_hip_balance/
+# 0015): quantize_axis() is monotonic, and shoulder_hip_balance/
 # bust_hip_balance already share the same deadzone/reference treatment, so
 # taking the max of their two already-quantized levels (axis_level below)
 # gives the identical result scoring always wanted for this derived axis.

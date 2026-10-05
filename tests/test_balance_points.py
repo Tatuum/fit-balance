@@ -51,7 +51,7 @@ def test_apple_long_torso():
     bp = compute_womens_balance_points(APPLE_LONG_TORSO)
     assert bp.waist_definition < 0.15, "apple: little to no natural waist"
     assert bp.torso_leg_balance > 0.1, "torso_leg=long_torso"
-    # Decision 0014: main_concern() now compares quantize_axis() levels
+    # Decision 0015: main_concern() now compares quantize_axis() levels
     # instead of raw magnitude. Before, torso_leg_balance (0.1239 raw) won
     # outright over waist_definition (0.0929 raw) by sheer raw number, with
     # frame_scale_dev (0.0687 raw) not even close. Quantized, all three
@@ -96,7 +96,7 @@ def test_main_concern_is_a_subset_of_the_five_axes(measurements):
 def test_main_concern_is_never_empty_because_waist_definition_has_no_neutral_point():
     """All four zero-neutral axes sit inside the 0.05 deadzone, but
     waist_definition = 0.0 isn't silence — it's a real, pronounced (level
-    -2) fact: this body has zero natural waist cinch. Decision 0014:
+    -2) fact: this body has zero natural waist cinch. Decision 0015:
     main_concern() can no longer return an empty list for a body like this,
     because quantize_axis() can never bring waist_definition down to level
     0, not even at its own 0.15 reference point (see quantize_axis()'s
@@ -116,7 +116,7 @@ def test_main_concern_ignores_small_deviations_on_the_four_zero_neutral_axes():
     even though it's the largest raw number present -- shoulder_hip_balance
     (0.04) stays excluded. waist_definition is set to its own 0.15
     reference point, the mildest value it can ever take, specifically to
-    show it still surfaces regardless (decision 0014) -- there's no value
+    show it still surfaces regardless (decision 0015) -- there's no value
     that silences it, so it's the sole result here even though its raw
     deviation from 0.15 is exactly 0."""
     bp = WomensBalancePoints(
@@ -161,7 +161,7 @@ def test_main_concern_leaves_waist_definition_without_a_deadzone():
 def test_main_concern_surfaces_a_genuine_tie():
     """Two axes landing on the same highest cleared severity level (2,
     "pronounced") both come back, instead of one being arbitrarily
-    preferred (decision 0014). waist_definition is deliberately set to its
+    preferred (decision 0015). waist_definition is deliberately set to its
     own 0.15 reference point -- its mildest possible level, 1 -- so it
     doesn't join this tie: level 1 loses to the two axes at level 2."""
     bp = WomensBalancePoints(
@@ -209,5 +209,5 @@ def test_quantize_axis_waist_definition_has_no_deadzone():
 def test_quantize_axis_waist_definition_at_its_own_reference_is_still_level_one():
     """Even a deviation of exactly 0 isn't level 0 for waist_definition --
     see quantize_axis()'s docstring: this axis has no neutral point at
-    all, not even at its own reference (decision 0014)."""
+    all, not even at its own reference (decision 0015)."""
     assert quantize_axis(0.15, "waist_definition") == 1

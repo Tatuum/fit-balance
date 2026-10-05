@@ -66,7 +66,7 @@ def recommend_techniques(balance_points: WomensBalancePoints) -> list[DimensionA
     hurt this body, and which catalog items use them — independent of any
     specific chosen outfit or combination. Every tag sharing an axis shares
     that axis's quantized severity level (balance_points.quantize(),
-    decision 0014), computed once per body rather than once per dimension;
+    decision 0015), computed once per body rather than once per dimension;
     which side a tag lands on is purely its weight's sign against that one
     level. A level of 0 (axis inside its deadzone) leaves every tag on that
     axis empty on both sides — "no strong trait" falls out naturally, no

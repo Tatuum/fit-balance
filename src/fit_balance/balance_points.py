@@ -53,7 +53,7 @@ PRONOUNCED_THRESHOLD = 0.15
 # practically meaningful cinch threshold sits at 0.15, not 0 (CURRENT_STATE.md's
 # formula comment, "~0/− = no natural cinch"); every other axis is already
 # 0-neutral by construction, so it's left out here and quantize_axis()
-# falls back to 0.0. Moved here from scoring.py's AXIS_RULES (decision 0014)
+# falls back to 0.0. Moved here from scoring.py's AXIS_RULES (decision 0015)
 # so quantization happens once, at the source, instead of being recomputed
 # per effect tag — see quantize() below.
 AXIS_REFERENCE: dict[str, float] = {"waist_definition": 0.15}
@@ -74,7 +74,7 @@ def quantize_axis(value: float, axis: str) -> int:
     own reference point: every possible value reads as either some degree
     of defined-waist asset or some degree of undefined-waist concern, with
     no neutral middle. That's a deliberate property of this one axis, not
-    a bug — see decision 0014.
+    a bug — see decision 0015.
     """
     reference = AXIS_REFERENCE.get(axis, 0.0)
     deviation = value - reference
@@ -104,7 +104,7 @@ class WomensBalancePoints:
     def main_concern(self) -> list[str]:
         """Every balance point sharing the single highest cleared severity
         level (quantize_axis() above) — empty if nothing clears, one name
-        for a clear winner, two or more on a genuine tie. Decision 0014:
+        for a clear winner, two or more on a genuine tie. Decision 0015:
         ties are surfaced rather than broken, since picking one via raw
         magnitude had the same cross-axis comparability problem decision
         0010 fixed for scoring (comparing differently-scaled raw floats
@@ -136,7 +136,7 @@ class QuantizedBalancePoints:
     discrete severity level. The shared comparison basis for main_concern()
     above and scoring.py's axis-rule lookups, so both compare the same
     discrete levels instead of main_concern() comparing raw, differently-
-    scaled magnitudes directly — see decision 0014."""
+    scaled magnitudes directly — see decision 0015."""
 
     shoulder_hip_balance: int
     bust_hip_balance: int
