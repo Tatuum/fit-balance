@@ -31,6 +31,14 @@ balance points — never a black-box shape label.
 - `./check.sh` — runs all five; the one gate before calling any change
   done.
 
+**Automated gates**
+- `.pre-commit-config.yaml` — local, runs on every `git commit`: file
+  hygiene, `ruff`/`ruff-format`, `mypy`. Installed via `uv run
+  pre-commit install` (one-time per clone).
+- `.github/workflows/ci.yml` — remote, runs on push/PR to `main`:
+  lint/type-check/test (Python) + typecheck/test (web), mirroring
+  `check.sh`.
+
 ## Structure
 
 ```
@@ -42,6 +50,7 @@ fit-balance/
 ├── tests/            — pytest, mirrors src/
 ├── specs/            — active per-feature specs (requirements/plan/validation)
 ├── docs/             — see Folder map below
+├── .github/workflows/ci.yml, .pre-commit-config.yaml — automated gates
 ├── CURRENT_STATE.md, README.md, CLAUDE.md
 └── check.sh          — the one gate: pytest, ruff, mypy, tsc, vitest
 ```
@@ -135,7 +144,9 @@ straight to Implement).
    specifically — `validation.md` must say so explicitly.
 5. **Before merging:** run `changelog` — writes `CHANGELOG.md` from
    `git log`.
-6. One commit per decision. Merge to `main`, delete the branch.
+6. One commit per decision. Push the branch, open a PR (`gh pr
+   create`), let CI run (`.github/workflows/ci.yml`). Merge via `gh pr
+   merge`, delete both the local and remote branch.
 7. **Close out — sweep for staleness**, not just `CURRENT_STATE.md`:
    - `CURRENT_STATE.md` — always; current-state text for whatever the
      feature touched.

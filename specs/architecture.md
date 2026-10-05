@@ -13,6 +13,10 @@
   strict on return types)
 - `Typer` + `rich` — CLI
 - `FastAPI` — API layer, pairs directly with `pydantic`
+- `pre-commit` — local gate on every commit (hygiene, `ruff`/
+  `ruff-format`, `mypy`)
+- GitHub Actions (`.github/workflows/ci.yml`) — remote gate on
+  push/PR to `main`, mirroring `check.sh`
 
 ## Web
 

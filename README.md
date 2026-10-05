@@ -63,6 +63,10 @@ This is one of five worked examples encoded as regression tests — see
   green.
 - **`CURRENT_STATE.md` is the living source of truth** for the current architecture
   and formulas; this README is the front door, not the spec.
+- **CI + pre-commit gate every change.** `.github/workflows/ci.yml`
+  runs lint/type-check/test (Python) and typecheck/test (web) on every
+  push/PR to `main`; `.pre-commit-config.yaml` runs the equivalent
+  Python checks locally on every commit.
 
 ## Tech stack
 
@@ -96,6 +100,7 @@ fit-balance/
 
 ```bash
 uv sync
+uv run pre-commit install  # one-time: installs the local commit gate
 uv run pytest              # run the test suite
 uv run ruff check .        # lint
 uv run mypy src api        # type check
