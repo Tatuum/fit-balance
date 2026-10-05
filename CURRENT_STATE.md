@@ -45,8 +45,9 @@ reasons are editable data, not a trained model's opinion.
    the internal model: those are lossy, mutually-overlapping, and
    produce arbitrary label flips right at category boundaries. A shape
    *label* can still be shown to the user, but only as a display string
-   derived from whichever balance point dominates. Never used for
-   scoring.
+   derived from whichever balance point(s) dominate — possibly more than
+   one, on a tie (decision [0015](docs/adr/0015-quantized-main-concern.md)).
+   Never used for scoring.
 2. **Effects table** — maps a garment technique (e.g. `high_rise`,
    `sheath_bodycon`) to the visual effects it produces (e.g.
    `elongates_leg`, `clings_to_hip`). This is a fact about the

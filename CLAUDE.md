@@ -136,9 +136,22 @@ straight to Implement).
 5. **Before merging:** run `changelog` — writes `CHANGELOG.md` from
    `git log`.
 6. One commit per decision. Merge to `main`, delete the branch.
-7. **Close out:** update `CURRENT_STATE.md` (and `docs/project_docs/` if
-   stage-worthy). `specs/` folders are never deleted, same as
-   `docs/adr/`.
+7. **Close out — sweep for staleness**, not just `CURRENT_STATE.md`:
+   - `CURRENT_STATE.md` — always; current-state text for whatever the
+     feature touched.
+   - `README.md` — tech stack/tooling list, example output, or any
+     wording that assumes the old behavior.
+   - `specs/architecture.md` — only if stack, tooling, or layering
+     changed.
+   - `specs/mission.md` — only if "the one rule that doesn't bend" or
+     the core pitch is affected (rare).
+   - `specs/roadmap.md` — tick `[x]` if this closes out a roadmap
+     phase.
+   - `docs/project_docs/*.md` — stage write-ups and companion
+     diagrams, if stage-worthy or if they describe the specific
+     function/module touched.
+
+   `specs/` folders are never deleted, same as `docs/adr/`.
 
 ## Agent skills
 
