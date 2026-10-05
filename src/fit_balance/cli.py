@@ -2,16 +2,15 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .balance_points import compute_womens_balance_points
+from .balance_points import AXIS_REFERENCE, compute_womens_balance_points
 from .schemas import GarmentAttributes, Measurements
-from .scoring import AXIS_RULES
 from .scoring import score as score_garment
 
 # Same "is this waist_definition value actually favorable" threshold
-# AXIS_RULES's defines_waist/clings_to_waist rules and BalancePointsChart.tsx's
-# AXIS_META.waist_definition.isBalanced use — reused here rather than
-# duplicated, since cli.py and scoring.py are both Python.
-_WAIST_DEFINITION_ASSET_THRESHOLD = AXIS_RULES["defines_waist"].reference
+# AXIS_REFERENCE and BalancePointsChart.tsx's AXIS_META.waist_definition.isBalanced
+# use — reused here rather than duplicated, since cli.py and balance_points.py
+# are both Python.
+_WAIST_DEFINITION_ASSET_THRESHOLD = AXIS_REFERENCE["waist_definition"]
 
 app = typer.Typer(add_completion=False, help="Validate fit-balance scoring rules on real inputs.")
 console = Console()
@@ -84,10 +83,10 @@ def score(
     balance_table = Table(show_header=True, header_style="bold", title="Balance points")
     balance_table.add_column("Axis")
     balance_table.add_column("Value", justify="right")
-    main_concern = balance_points.main_concern()
+    main_concerns = balance_points.main_concern()
     for axis_name in _AXES:
         value = getattr(balance_points, axis_name)
-        if axis_name != main_concern:
+        if axis_name not in main_concerns:
             label = axis_name
         elif axis_name == "waist_definition" and value >= _WAIST_DEFINITION_ASSET_THRESHOLD:
             # A favorable waist_definition is an asset, not a concern — see

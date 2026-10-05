@@ -37,7 +37,7 @@ class ScoreRequest(BaseModel):
 
 class ScoreResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str | None
+    main_concern: list[str]
     verdict: Verdict
 
 
@@ -79,7 +79,7 @@ class OutfitVerdict(BaseModel):
 
 class ScoreOutfitResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str | None
+    main_concern: list[str]
     verdict: OutfitVerdict
 
 
@@ -121,7 +121,7 @@ class RecommendedOutfit(BaseModel):
 
 class RecommendOutfitsResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str | None
+    main_concern: list[str]
     recommendations: list[RecommendedOutfit]
 
 
@@ -221,7 +221,7 @@ class BalanceGarmentRequest(BaseModel):
 
 class BalanceGarmentResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str | None
+    main_concern: list[str]
     item: GarmentSummary
     # Reused directly from schemas, like /score does — a single item's own
     # verdict needs no per-item attribution (see OutfitVerdict above).

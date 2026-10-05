@@ -19,7 +19,7 @@ def test_score_endpoint_matches_engine_for_example_1():
     assert response.status_code == 200
     body = response.json()
     assert body["verdict"]["recommendation"] == "recommended"
-    assert body["main_concern"] == "waist_definition"
+    assert body["main_concern"] == ["waist_definition"]
     assert set(body["balance_points"]) == {
         "shoulder_hip_balance",
         "bust_hip_balance",

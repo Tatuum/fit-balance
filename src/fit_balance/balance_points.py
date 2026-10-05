@@ -31,22 +31,57 @@ LEG_HEIGHT_RATIO_BASELINE = 0.455
 # "near-balanced" threshold test_balance_points.py's worked-example
 # assertions already use (e.g. "abs(...) < 0.05"). Applies only to the four
 # axes below where 0 is neutral in both directions; waist_definition has its
-# own asymmetric threshold instead (scoring.py's AXIS_RULES reference=0.15)
-# and is deliberately left out here — the two aren't the same kind of thing
-# (see CURRENT_STATE.md).
+# own asymmetric threshold instead (AXIS_REFERENCE below, 0.15) and is
+# deliberately left out here — the two aren't the same kind of thing (see
+# CURRENT_STATE.md).
 IMBALANCE_DEADZONE = 0.05
 DEADZONE_AXES = frozenset(
     {"shoulder_hip_balance", "bust_hip_balance", "torso_leg_balance", "frame_scale_dev"}
 )
 
-# Second magnitude-band boundary, used by scoring.py to quantize a raw axis
-# deviation into a small severity level (0 = within the deadzone / no
-# deadzone, 1 = "notable", 2 = "pronounced") instead of summing raw,
+# Second magnitude-band boundary, used by quantize_axis() below to quantize
+# a raw axis deviation into a small severity level (0 = within the deadzone
+# / no deadzone, 1 = "notable", 2 = "pronounced") instead of summing raw,
 # differently-scaled axis values directly — see docs/adr/0010. A
 # starting proposal verified against all 5 CURRENT_STATE.md worked examples, not
 # derived from external data — same judgment-call category as
 # IMBALANCE_DEADZONE and waist_definition's 0.15 reference already are.
 PRONOUNCED_THRESHOLD = 0.15
+
+# Per-axis reference point quantize_axis() measures deviation from — each
+# axis's own "neutral," not always literal 0. waist_definition's
+# practically meaningful cinch threshold sits at 0.15, not 0 (CURRENT_STATE.md's
+# formula comment, "~0/− = no natural cinch"); every other axis is already
+# 0-neutral by construction, so it's left out here and quantize_axis()
+# falls back to 0.0. Moved here from scoring.py's AXIS_RULES (decision 0014)
+# so quantization happens once, at the source, instead of being recomputed
+# per effect tag — see quantize() below.
+AXIS_REFERENCE: dict[str, float] = {"waist_definition": 0.15}
+
+
+def quantize_axis(value: float, axis: str) -> int:
+    """Quantizes a raw axis deviation into a small severity level — 0
+    (within the deadzone, or for axes with none), 1 ("notable"), or 2
+    ("pronounced") — sign preserved. Raw, differently-scaled axis values
+    aren't safely comparable (decision 0010); a small integer level is, by
+    construction.
+
+    waist_definition has no deadzone (it's not in DEADZONE_AXES, so
+    `deadzone` below is 0.0) — matches decision 0007's reasoning (a
+    favorable-direction threshold, not "0 is neutral both ways"). Since
+    `magnitude` (an absolute value) can never be less than 0.0, this means
+    waist_definition can never quantize to level 0, not even exactly at its
+    own reference point: every possible value reads as either some degree
+    of defined-waist asset or some degree of undefined-waist concern, with
+    no neutral middle. That's a deliberate property of this one axis, not
+    a bug — see decision 0014.
+    """
+    reference = AXIS_REFERENCE.get(axis, 0.0)
+    deviation = value - reference
+    deadzone = IMBALANCE_DEADZONE if axis in DEADZONE_AXES else 0.0
+    magnitude = abs(deviation)
+    level = 0 if magnitude < deadzone else 1 if magnitude < PRONOUNCED_THRESHOLD else 2
+    return level if deviation >= 0 else -level
 
 
 @dataclass(frozen=True)
@@ -66,23 +101,57 @@ class WomensBalancePoints:
     torso_leg_balance: float
     frame_scale_dev: float
 
-    def _magnitude(self, name: str) -> float:
-        value: float = abs(getattr(self, name))
-        if name in DEADZONE_AXES and value < IMBALANCE_DEADZONE:
-            return 0.0
-        return value
+    def main_concern(self) -> list[str]:
+        """Every balance point sharing the single highest cleared severity
+        level (quantize_axis() above) — empty if nothing clears, one name
+        for a clear winner, two or more on a genuine tie. Decision 0014:
+        ties are surfaced rather than broken, since picking one via raw
+        magnitude had the same cross-axis comparability problem decision
+        0010 fixed for scoring (comparing differently-scaled raw floats
+        directly isn't meaningful — quantize_axis()'s discrete levels are).
 
-    def main_concern(self) -> str | None:
-        """Name of the balance point with the largest absolute magnitude, or
-        None if nothing clears the deadzone — a body with no axis reading as
-        a real imbalance and no natural waist definition either.
+        waist_definition can never contribute a level of exactly 0 (see
+        quantize_axis()'s docstring), so this can only be empty when every
+        *other* axis is also silent — the four zero-neutral axes inside
+        their deadzone — while waist_definition itself sits at its own
+        mildest possible level, ±1. In practice this means the result is
+        essentially never empty for a real body; waist_definition always
+        has something to say.
 
-        A favorable-sign value (e.g. high waist_definition) is an asset, not
-        a concern — callers should check the sign before treating this as a
-        problem to fix.
+        A favorable-sign name (e.g. a high waist_definition) is an asset,
+        not a concern — callers should check that axis's sign before
+        treating a returned name as a problem to fix.
         """
-        name = max((f.name for f in fields(self)), key=self._magnitude)
-        return name if self._magnitude(name) > 0 else None
+        levels = quantize(self)
+        magnitudes = {f.name: abs(getattr(levels, f.name)) for f in fields(levels)}
+        peak = max(magnitudes.values())
+        if peak == 0:
+            return []
+        return [name for name, magnitude in magnitudes.items() if magnitude == peak]
+
+
+@dataclass(frozen=True)
+class QuantizedBalancePoints:
+    """WomensBalancePoints' five axes, each reduced to quantize_axis()'s
+    discrete severity level. The shared comparison basis for main_concern()
+    above and scoring.py's axis-rule lookups, so both compare the same
+    discrete levels instead of main_concern() comparing raw, differently-
+    scaled magnitudes directly — see decision 0014."""
+
+    shoulder_hip_balance: int
+    bust_hip_balance: int
+    waist_definition: int
+    torso_leg_balance: int
+    frame_scale_dev: int
+
+
+def quantize(balance_points: WomensBalancePoints) -> QuantizedBalancePoints:
+    return QuantizedBalancePoints(
+        **{
+            f.name: quantize_axis(getattr(balance_points, f.name), f.name)
+            for f in fields(balance_points)
+        }
+    )
 
 
 def compute_womens_balance_points(
