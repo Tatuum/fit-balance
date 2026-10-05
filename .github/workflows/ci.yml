@@ -19,7 +19,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
       - name: Run ruff check
         run: uv run ruff check .
@@ -36,7 +36,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
       - name: Run mypy
         run: uv run mypy src api
@@ -53,7 +53,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
       - name: Run pytest
         run: uv run pytest
