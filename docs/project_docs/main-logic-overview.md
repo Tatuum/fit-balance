@@ -49,6 +49,22 @@ class WomensBalancePoints:
     frame_scale_dev: float
 ```
 
+`balance_points.quantize()` reduces each of those five raw floats to a
+small severity level (`QuantizedBalancePoints`, same five axes, each an
+`int`) — the shared comparison basis `main_concern()` and `scoring.py`
+both read instead of comparing raw magnitudes directly (decision
+[0015](../adr/0015-quantized-main-concern.md)):
+
+```python
+@dataclass(frozen=True)
+class QuantizedBalancePoints:
+    shoulder_hip_balance: int
+    bust_hip_balance: int
+    waist_definition: int
+    torso_leg_balance: int
+    frame_scale_dev: int
+```
+
 ## Pipeline
 
 ```
@@ -97,7 +113,7 @@ scoring.score()?
   no              yes, once per     no — reads            yes, once for
                    candidate         AXIS_RULES/            the one item
                                      axis_value/
-                                     signed_level
+                                     axis_level
                                      directly instead
                                      of a combined
                                      Verdict
@@ -138,8 +154,12 @@ Every feature layer that needs a verdict calls the same
 reimplementing the scoring logic or receiving a pre-computed `Verdict`
 from upstream. `garments.py` never touches scoring at all (pure
 catalog lookup); `technique_advice.py` reads `AXIS_RULES`/`axis_value`/
-`signed_level` directly instead of producing a combined `Verdict`, by
+`axis_level` directly instead of producing a combined `Verdict`, by
 design (see CURRENT_STATE.md's "Technique recommendations" section).
+`axis_level` reads the already-quantized level off
+`balance_points.quantize()`'s output — the old `signed_level`, which
+computed that same level from a raw value and a reference, moved into
+`balance_points.py` and was renamed `quantize_axis()` (decision 0015).
 `api/main.py` itself also calls `scoring.score()` directly for `/score`
 and `/score-outfit` — those two endpoints don't go through any of the
 four feature-layer boxes above. No shape label ever enters this path,
