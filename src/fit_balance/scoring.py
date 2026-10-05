@@ -4,12 +4,7 @@ from typing import Literal, cast
 
 import yaml
 
-from .balance_points import (
-    DEADZONE_AXES,
-    IMBALANCE_DEADZONE,
-    PRONOUNCED_THRESHOLD,
-    WomensBalancePoints,
-)
+from .balance_points import QuantizedBalancePoints, WomensBalancePoints, quantize
 from .schemas import GarmentAttributes, Reason, Verdict
 
 _EFFECTS_PATH = Path(__file__).parent / "effects.yaml"
@@ -27,18 +22,18 @@ EFFECTS_TABLE = load_effects_table()
 class _AxisRule:
     axis: str
     weight: int
-    reference: float = 0.0
 
 
 # For each effect tag: which balance-point axis it interacts with, and how.
-# contribution = weight * signed_level(balance_point_value, reference, axis)
-# — a small integer severity level (see signed_level below), not a flat
-# category match (CURRENT_STATE.md "Core architecture" #3) and not the raw,
-# differently-scaled balance-point value either (docs/adr/0010).
-# reference defaults to 0 (the formula's own neutral point);
-# waist_definition's tags use 0.15 instead, since CURRENT_STATE.md's formula comment
-# ("~0/− = no natural cinch") implies the practically meaningful cinch
-# threshold sits above literal zero.
+# contribution = weight * axis_level(quantized_balance_points, axis) — a
+# small integer severity level (see axis_level/quantize_axis below), not a
+# flat category match (CURRENT_STATE.md "Core architecture" #3) and not the
+# raw, differently-scaled balance-point value either (docs/adr/0010).
+# Quantization — including waist_definition's 0.15 reference point, since
+# CURRENT_STATE.md's formula comment ("~0/− = no natural cinch") implies the
+# practically meaningful cinch threshold sits above literal zero — happens
+# once, upstream, in balance_points.quantize() (decision 0014); this table
+# only needs each tag's axis and direction.
 #
 # A tag present in effects.yaml but absent here is a known fact about the
 # technique that isn't wired into scoring yet. clings_to_hip is deliberately
@@ -46,15 +41,15 @@ class _AxisRule:
 # distinguish hip-clinging, fine for most shapes, from waist/midsection-
 # clinging, bad for an undefined waist) to score confidently in v0.
 AXIS_RULES: dict[str, _AxisRule] = {
-    "defines_waist": _AxisRule(axis="waist_definition", weight=1, reference=0.15),
-    "clings_to_waist": _AxisRule(axis="waist_definition", weight=1, reference=0.15),
+    "defines_waist": _AxisRule(axis="waist_definition", weight=1),
+    "clings_to_waist": _AxisRule(axis="waist_definition", weight=1),
     # Mirrors defines_waist/clings_to_waist with the opposite sign: a boxy,
     # unshaped silhouette (oversized_top) doesn't just fail to define the
     # waist, it obscures whatever natural definition is already there. Only
     # a real cost once waist_definition clears the same 0.15 "there's
     # something worth showing" threshold those two use — hiding a waist
     # that was never defined to begin with isn't a loss.
-    "hides_waist": _AxisRule(axis="waist_definition", weight=-1, reference=0.15),
+    "hides_waist": _AxisRule(axis="waist_definition", weight=-1),
     "elongates_leg": _AxisRule(axis="torso_leg_balance", weight=1),
     "shortens_torso": _AxisRule(axis="torso_leg_balance", weight=1),
     "elongates_torso": _AxisRule(axis="torso_leg_balance", weight=-1),
@@ -101,48 +96,41 @@ STRONG_AVOID_THRESHOLD = -3
 # shoulder or bust actually reads wider against hip, not one specific
 # measurement, so it's computed on demand from the two real fields instead
 # of being a field itself (which would double-count with them for
-# main_concern()). Same "0 is neutral both ways" shape as shoulder_hip_balance
-# and bust_hip_balance, so it gets the same deadzone treatment.
+# main_concern()). quantize-then-max equals max-then-quantize here (decision
+# 0014): quantize_axis() is monotonic, and shoulder_hip_balance/
+# bust_hip_balance already share the same deadzone/reference treatment, so
+# taking the max of their two already-quantized levels (axis_level below)
+# gives the identical result scoring always wanted for this derived axis.
 _TOP_HIP_BALANCE_AXIS = "top_hip_balance"
-_SCORING_DEADZONE_AXES = DEADZONE_AXES | {_TOP_HIP_BALANCE_AXIS}
 
 
 def axis_value(balance_points: WomensBalancePoints, axis: str) -> float:
+    """The raw, continuous value for one axis — display only (e.g.
+    technique_advice.DimensionAdvice.value). Not used for scoring itself;
+    see axis_level below for the quantized equivalent score() reads."""
     if axis == _TOP_HIP_BALANCE_AXIS:
         return max(balance_points.shoulder_hip_balance, balance_points.bust_hip_balance)
     return cast(float, getattr(balance_points, axis))
 
 
-def signed_level(value: float, reference: float, axis: str) -> int:
-    """Quantizes a raw axis deviation into a small severity level — 0
-    (within the deadzone, or for axes with none), 1 ("notable"), or 2
-    ("pronounced") — sign preserved. Raw, differently-scaled axis values
-    aren't safely comparable when summed across axes; a small integer level
-    is, by construction (docs/adr/0010).
-
-    Same deadzone WomensBalancePoints.main_concern() uses for the four
-    zero-neutral axes: below it, that axis isn't a real imbalance, so no
-    technique should get credit or blame against it. waist_definition isn't
-    in _SCORING_DEADZONE_AXES, so it gets no deadzone here either — matches
-    decision 0007's reasoning (a favorable-direction threshold, not "0 is
-    neutral both ways").
-    """
-    deviation = value - reference
-    deadzone = IMBALANCE_DEADZONE if axis in _SCORING_DEADZONE_AXES else 0.0
-    magnitude = abs(deviation)
-    level = 0 if magnitude < deadzone else 1 if magnitude < PRONOUNCED_THRESHOLD else 2
-    return level if deviation >= 0 else -level
+def axis_level(quantized: QuantizedBalancePoints, axis: str) -> int:
+    """The quantized severity level for one axis — what score() and
+    technique_advice.py actually compare/sum, pre-computed once per body by
+    balance_points.quantize() rather than recomputed per effect tag."""
+    if axis == _TOP_HIP_BALANCE_AXIS:
+        return max(quantized.shoulder_hip_balance, quantized.bust_hip_balance)
+    return cast(int, getattr(quantized, axis))
 
 
 def score(balance_points: WomensBalancePoints, garment: GarmentAttributes) -> Verdict:
+    quantized = quantize(balance_points)
     reasons: list[Reason] = []
     for technique in garment.techniques:
         for tag in EFFECTS_TABLE.get(technique, []):
             rule = AXIS_RULES.get(tag)
             if rule is None:
                 continue
-            value = axis_value(balance_points, rule.axis)
-            contribution = rule.weight * signed_level(value, rule.reference, rule.axis)
+            contribution = rule.weight * axis_level(quantized, rule.axis)
             if contribution == 0:
                 continue
             reasons.append(
