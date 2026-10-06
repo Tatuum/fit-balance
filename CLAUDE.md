@@ -38,6 +38,10 @@ balance points — never a black-box shape label.
 - `.github/workflows/ci.yml` — remote, runs on push/PR to `main`:
   lint/type-check/test (Python) + typecheck/test (web), mirroring
   `check.sh`.
+- GitHub branch protection on `main` — all 4 CI checks required to
+  pass, enforced for admins too, no direct pushes allowed. Makes the
+  CI gate mandatory rather than advisory. Configured in the GitHub web
+  UI (Settings → Branches), not a file in this repo.
 
 ## Structure
 
@@ -133,6 +137,12 @@ for phase-by-phase build status.
   green. That suite encodes all 5 worked examples.
 
 ## Workflow
+
+`main` is branch-protected on GitHub (required status checks: `lint`,
+`type-check`, `test`, `web`; enforced for admins too) — **direct
+pushes to `main` are rejected outright**, even trivial one-line fixes.
+Every change, trivial or not, needs step 6's branch-and-PR path; only
+the spec (steps 1–2) is skippable for a trivial change.
 
 Every non-trivial change gets a spec before code (trivial changes skip
 straight to Implement).
