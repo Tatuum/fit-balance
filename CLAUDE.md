@@ -57,17 +57,23 @@ fit-balance/
 
 **Folder map**
 
-`CURRENT_STATE.md` — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
+Entries marked **(core)** are the staleness-check set — swept at
+Workflow step 7 and by the `doc-audit` skill. Say "check core docs"
+(or "check important docs") to run a full sweep on demand, any time.
+
+`README.md` **(core)** — front door: stack, example, getting started.
+
+`CURRENT_STATE.md` **(core)** — source of truth. Read it before any design decision. Architecture and formulas live there, not here.
 
 `specs/` — architecture/mission/stack/roadmap docs, plus active
 per-feature specs.
-- `architecture.md` — stack decisions (Tech stack section), layering
+- `architecture.md` **(core)** — stack decisions (Tech stack section), layering
   (High-level architecture section), and future direction. Read by
   the `feature-spec` skill before drafting every spec, and again for
   its architecture-fit check after `plan.md` is drafted.
-- `mission.md` — the *why* behind Purpose above. Read by the
+- `mission.md` **(core)** — the *why* behind Purpose above. Read by the
   `feature-spec` skill before drafting every spec.
-- `roadmap.md` — phase list; `feature-spec` finds the next incomplete
+- `roadmap.md` **(core)** — phase list; `feature-spec` finds the next incomplete
   phase here to branch and scaffold.
 - `YYYY-MM-DD-<slug>/{requirements,plan,validation}.md` — one dated
   folder per feature, written by the `feature-spec` skill (see Agent
@@ -84,6 +90,13 @@ historical record, same as `docs/adr/`.
 
 `docs/project_docs/` — human-readable, per-stage write-ups.
 - The clean tier meant to be reread, not the dense engine detail.
+- `architecture-overview.md` **(core)** — diagram of the layering +
+  frameworks table.
+- `main-logic-overview.md` **(core — always check on any engine
+  change)** — diagram of the engine's actual functions/classes by
+  name; a rename/move/add stales it immediately.
+- Other files here (stage write-ups) — not core; check if
+  stage-worthy.
 
 `docs/agents/` — behavioral conventions an agent actually follows in
 this repo (how to explore domain docs before working in an area).
@@ -147,27 +160,13 @@ straight to Implement).
 6. One commit per decision. Push the branch, open a PR (`gh pr
    create`), let CI run (`.github/workflows/ci.yml`). Merge via `gh pr
    merge`, delete both the local and remote branch.
-7. **Close out — sweep for staleness**, not just `CURRENT_STATE.md`:
-   - `CURRENT_STATE.md` — always; current-state text for whatever the
-     feature touched.
-   - `README.md` — tech stack/tooling list, example output, or any
-     wording that assumes the old behavior.
-   - `specs/architecture.md` — only if stack, tooling, or layering
-     changed.
-   - `specs/mission.md` — only if "the one rule that doesn't bend" or
-     the core pitch is affected (rare).
-   - `specs/roadmap.md` — tick `[x]` if this closes out a roadmap
-     phase.
-   - `docs/project_docs/architecture-overview.md` and
-     `main-logic-overview.md` — **always check, not optional**, on any
-     engine change: they diagram `balance_points.py`/`scoring.py`'s
-     actual functions, classes, and call patterns by name, so any
-     renamed/moved/added function goes stale here immediately. (Missed
-     twice on decision 0015 before this line existed.)
-   - `docs/project_docs/*.md` (other files) — stage write-ups, if
-     stage-worthy.
-
-   `specs/` folders are never deleted, same as `docs/adr/`.
+7. **Close out — sweep the Folder map's `(core)` docs for staleness**,
+   not just `CURRENT_STATE.md`. `CURRENT_STATE.md` and the two
+   `docs/project_docs/` diagrams always get checked; the rest only if
+   this feature actually touched what they cover (see each entry's
+   note above). Run `doc-audit` for this, or do it inline for a small,
+   obviously-scoped change. `specs/` folders are never deleted, same
+   as `docs/adr/`.
 
 ## Agent skills
 
@@ -176,4 +175,5 @@ straight to Implement).
 | `feature-spec` (`AskUserQuestion`: Scope/Decisions/Context) | `specs/roadmap.md`, `specs/mission.md`, `specs/architecture.md` (read once in full — used both for guidance and the later architecture-fit check) | `specs/YYYY-MM-DD-<slug>/{requirements,plan,validation}.md`. See `.claude/skills/feature-spec/SKILL.md`. |
 | `new-decision` | `docs/adr/*.md` (next number) | `docs/adr/NNNN-slug.md`, `docs/adr/README.md`; updates `CURRENT_STATE.md`'s current-state text. |
 | `changelog` | `git log` | `CHANGELOG.md`; run before merging a branch. See `.claude/skills/changelog/SKILL.md`. |
+| `doc-audit` | `CLAUDE.md`'s Folder map (for the `(core)`-marked list), then each core doc + the code it describes | Nothing — reports staleness findings only. Run at Workflow step 7, or on demand ("check core docs"). See `.claude/skills/doc-audit/SKILL.md`. |
 | `/domain-modeling` | — | `docs/adr/` (same pre-existing convention as `new-decision` — not overridden), plus a thin `CONTEXT.md` that grows lazily alongside it. See `docs/agents/domain.md`. |
