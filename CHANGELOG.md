@@ -1,6 +1,18 @@
 # Changelog
 
+## 2026-10-06
+- Document that main is now branch-protected (#1)
+- Add doc-audit skill, mark core docs in the Folder map instead of a separate list
+
 ## 2026-10-05
+- Fix CI: install the api dependency group too
+- Workflow: make the two engine-diagram docs an explicit, mandatory check
+- Sync project docs with recent engine/tooling changes
+- Document CI/pre-commit, adopt PR-based merge workflow
+- Add CI workflow and pre-commit gate
+- Workflow: codify the post-implementation doc-staleness sweep
+- Merge branch 'fix-quantized-main-concern'
+- Add CHANGELOG.md
 - Add ADR 0015, fix decision-number refs, update CURRENT_STATE.md
 - Web: consume main_concern as a list
 - API: test the main_concern tie case
