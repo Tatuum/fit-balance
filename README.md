@@ -63,10 +63,12 @@ This is one of five worked examples encoded as regression tests — see
   green.
 - **`CURRENT_STATE.md` is the living source of truth** for the current architecture
   and formulas; this README is the front door, not the spec.
-- **CI + pre-commit gate every change.** `.github/workflows/ci.yml`
+- **CI + pre-commit gate every change, enforced.** `.github/workflows/ci.yml`
   runs lint/type-check/test (Python) and typecheck/test (web) on every
   push/PR to `main`; `.pre-commit-config.yaml` runs the equivalent
-  Python checks locally on every commit.
+  Python checks locally on every commit. GitHub branch protection on
+  `main` requires all 4 CI checks to pass before merging — no direct
+  pushes, not even for the repo admin.
 
 ## Tech stack
 

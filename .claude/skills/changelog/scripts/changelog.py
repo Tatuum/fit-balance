@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """Maintain CHANGELOG.md from git commit history."""
 
+import re
 import subprocess
 import sys
 from collections import defaultdict
-from datetime import datetime
 from pathlib import Path
 
 
-def git_log(since_date=None):
-    """Return commits as {date: [subject, ...]} ordered newest-first."""
+def git_log():
+    """Return commits as {date: [subject, ...]}, newest-first overall and
+    newest-first within each date, ordered newest-first."""
     cmd = ["git", "log", "--format=%ad|%s", "--date=short"]
-    if since_date:
-        cmd.append(f"--after={since_date}")
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
     by_date = defaultdict(list)
     for line in result.stdout.strip().splitlines():
@@ -22,17 +21,21 @@ def git_log(since_date=None):
     return by_date
 
 
-def last_date_in_changelog(path):
-    """Return the first ## YYYY-MM-DD heading found, or None."""
-    for line in path.read_text().splitlines():
-        if line.startswith("## "):
-            candidate = line[3:].strip()
-            try:
-                datetime.strptime(candidate, "%Y-%m-%d")  # noqa: DTZ007 (format check only)
-                return candidate
-            except ValueError:
-                continue
-    return None
+def parse_existing(text):
+    """Parse an existing CHANGELOG.md into {date: [subject, ...]}, same
+    shape/order as git_log(), by reading its own `## YYYY-MM-DD` / `- ...`
+    structure back out -- so merging never depends on date granularity."""
+    by_date = defaultdict(list)
+    current = None
+    for line in text.splitlines():
+        heading = re.match(r"^## (\d{4}-\d{2}-\d{2})\s*$", line)
+        if heading:
+            current = heading.group(1)
+            continue
+        bullet = re.match(r"^- (.+)$", line)
+        if bullet and current:
+            by_date[current].append(bullet.group(1).strip())
+    return by_date
 
 
 def render_sections(by_date):
@@ -56,22 +59,39 @@ def main():
         changelog.write_text("".join(content))
         total = sum(len(v) for v in by_date.values())
         print(f"Created CHANGELOG.md with {total} entries across {len(by_date)} date(s).")
-    else:
-        last = last_date_in_changelog(changelog)
-        by_date = git_log(since_date=last)
-        # --after is exclusive, but drop last date if present to be safe
-        by_date.pop(last, None)
-        if not by_date:
-            print("No new commits since last entry — CHANGELOG.md is up to date.")
-            sys.exit(0)
-        existing = changelog.read_text()
-        lines = existing.splitlines(keepends=True)
-        # Insert new sections after the title line
-        insert_at = 1 if lines and lines[0].startswith("# ") else 0
-        updated = "".join(lines[:insert_at] + render_sections(by_date) + lines[insert_at:])
-        changelog.write_text(updated)
-        total = sum(len(v) for v in by_date.values())
-        print(f"Added {total} new entries to CHANGELOG.md.")
+        return
+
+    existing_by_date = parse_existing(changelog.read_text())
+    all_commits = git_log()
+
+    # For each date, the changelog's existing entries should be a suffix of
+    # git log's current (newest-first) list for that date -- new commits
+    # land at the front over time. Whatever's left over at the front is
+    # new. This catches commits made *after* a prior run on the same date,
+    # which comparing whole dates (the previous approach) missed entirely.
+    new_by_date = defaultdict(list)
+    found_new = False
+    for date, current in all_commits.items():
+        recorded = existing_by_date.get(date, [])
+        new_count = len(current) - len(recorded)
+        if new_count > 0:
+            new_by_date[date] = current[:new_count]
+            found_new = True
+
+    if not found_new:
+        print("No new commits since last entry — CHANGELOG.md is up to date.")
+        sys.exit(0)
+
+    merged = defaultdict(list)
+    for date, subjects in new_by_date.items():
+        merged[date] = subjects + existing_by_date.get(date, [])
+    for date, subjects in existing_by_date.items():
+        if date not in merged:
+            merged[date] = subjects
+
+    changelog.write_text("# Changelog\n" + "".join(render_sections(merged)))
+    total = sum(len(v) for v in new_by_date.values())
+    print(f"Added {total} new entries to CHANGELOG.md.")
 
 
 if __name__ == "__main__":
