@@ -7,38 +7,39 @@ per-library rationale behind each choice. If this ever looks out of
 sync with that file, it wins.
 
 ```
-                    ┌─────────────────────────────┐
- phases 1-3         │   fit_balance (Python lib)   │
- (library, no UI)   │                              │
-                    │  schemas.py   — pydantic:    │
-                    │    Measurements, Garment,     │
-                    │    Verdict, Reason             │
-                    │  balance_points.py — pure fns │
-                    │    (women's v0)                │
-                    │  effects.yaml — technique →    │
-                    │    effect-tag data             │
-                    │  scoring.py — (verdict,        │
-                    │    reasons[]) = score(...)     │
-                    │  cli.py — Typer CLI            │
-                    └──────────────┬───────────────┘
-                                   │ imported directly, no network
-                    ┌──────────────┴───────────────┐
- phase 4            │   api/ — FastAPI service       │
- (API)              │   reuses schemas.py models      │
-                    │   as request/response bodies    │
-                    └──────────────┬───────────────┘
-                                   │ JSON over HTTP
-                    ┌──────────────┴───────────────┐
- phase 5            │   web/ — React + TS (Vite)     │
- (web avatar)       │   form → API → parametric SVG   │
-                    │   avatar rendered from verdict  │
-                    └───────────────────────────────┘
+                    ┌───────────────────────────────────┐
+ phases 1-3         │   fit_balance (Python lib)        │
+ (library, no UI)   │                                   │
+                    │  schemas.py — pydantic models     │
+                    │  cli.py — Typer CLI               │
+                    │ ┌─────────────────────────────┐   │
+                    │ │ ENGINE (scoring core)       │   │
+                    │ │ balance_points.py           │   │
+                    │ │ effects.yaml                │   │
+                    │ │ scoring.py                  │   │
+                    │ └─────────────────────────────┘   │
+                    └─────────────────┬─────────────────┘
+                                      │ imported directly, no network
+                    ┌─────────────────┴─────────────────┐
+ phase 4            │   api/ — FastAPI service          │
+ (API)              │   reuses schemas.py models        │
+                    │   as request/response bodies      │
+                    └─────────────────┬─────────────────┘
+                                      │ JSON over HTTP
+                    ┌─────────────────┴─────────────────┐
+ phase 5            │   web/ — React + TS (Vite)        │
+ (web avatar)       │   form → API → parametric SVG     │
+                    │   avatar rendered from verdict    │
+                    └───────────────────────────────────┘
 ```
 
-Three layers, one direction of dependency: `fit_balance` (the engine)
-→ `api/` → `web/`. The engine has zero UI/network dependencies —
-everything above it is a consumer, not a dependency, so it's fully
-usable and testable on its own.
+Three layers, one direction of dependency: `fit_balance` (the library)
+→ `api/` → `web/`. Within `fit_balance`, the engine is only the
+scoring core (`balance_points.py`, `effects.yaml`, `scoring.py`) —
+`schemas.py` and `cli.py` are thin wrappers around it, not part of it.
+The library has zero UI/network dependencies — everything above it is
+a consumer, not a dependency, so it's fully usable and testable on its
+own.
 
 ## Frameworks & libraries
 

@@ -79,19 +79,21 @@ undefined waist).
 class _AxisRule:
     axis: str
     weight: int
-    reference: float = 0.0
 ```
 
-Each entry says: which balance-point axis this tag interacts with, its
-sign (`weight`: does this tag help when the axis is positive or
-negative), and the neutral point to measure deviation from
-(`reference`, default `0.0`).
+Each entry says: which balance-point axis this tag interacts with, and
+its sign (`weight`: does this tag help when the axis's quantized level
+is positive or negative). There's no per-tag reference point anymore —
+decision [0015](../adr/0015-quantized-main-concern.md) moved
+quantization (including `waist_definition`'s `0.15` reference)
+upstream into `balance_points.py`, so the reference has already been
+applied by the time `score()` reads an axis's level.
 
 ```python
 AXIS_RULES = {
-    "defines_waist":   _AxisRule(axis="waist_definition", weight=1, reference=0.15),
-    "clings_to_waist": _AxisRule(axis="waist_definition", weight=1, reference=0.15),
-    "hides_waist":     _AxisRule(axis="waist_definition", weight=-1, reference=0.15),
+    "defines_waist":   _AxisRule(axis="waist_definition", weight=1),
+    "clings_to_waist": _AxisRule(axis="waist_definition", weight=1),
+    "hides_waist":     _AxisRule(axis="waist_definition", weight=-1),
     "elongates_leg":   _AxisRule(axis="torso_leg_balance", weight=1),
     "shortens_torso":  _AxisRule(axis="torso_leg_balance", weight=1),
     "elongates_torso": _AxisRule(axis="torso_leg_balance", weight=-1),
@@ -104,21 +106,38 @@ AXIS_RULES = {
 }
 ```
 
-`waist_definition`'s tags use `reference=0.15` instead of `0.0`:
-CURRENT_STATE.md's formula comment ("~0/− = no natural cinch") implies the
-practically meaningful cinch threshold sits above literal zero, so
-"defines/clings/hides waist" only score once there's a waist worth
-talking about.
+`waist_definition`'s tags still only score once there's a waist worth
+talking about — CURRENT_STATE.md's formula comment ("~0/− = no natural
+cinch") implies the practically meaningful cinch threshold sits above
+literal zero — but that `0.15` reference now lives in
+`balance_points.AXIS_REFERENCE`, not here.
 
-`top_hip_balance` isn't a stored `WomensBalancePoints` field. It's
-computed on demand by `axis_value()`:
+`top_hip_balance` isn't a stored `WomensBalancePoints` field. There are
+two parallel helpers for it — one raw, one quantized:
 
 ```python
 def axis_value(balance_points, axis):
     if axis == "top_hip_balance":
         return max(balance_points.shoulder_hip_balance, balance_points.bust_hip_balance)
     return getattr(balance_points, axis)
+
+
+def axis_level(quantized, axis):
+    if axis == "top_hip_balance":
+        return max(quantized.shoulder_hip_balance, quantized.bust_hip_balance)
+    return getattr(quantized, axis)
 ```
+
+`axis_value()` is the raw float — display only (e.g.
+`technique_advice.DimensionAdvice.value`), not read by `score()`
+anymore. `axis_level()` is the quantized equivalent `score()` actually
+reads, against a `QuantizedBalancePoints` computed once per body by
+`balance_points.quantize()` rather than recomputed per tag. Taking the
+`max()` of the two axes' *already-quantized* levels gives the same
+result as quantizing their raw `max()` — `quantize_axis()` is
+monotonic and both source axes share the same deadzone/reference
+treatment (verified against all 5 worked examples, decision
+[0015](../adr/0015-quantized-main-concern.md)).
 
 `adds_volume_top`/`adds_volume_bottom` care about whichever of
 shoulder or bust actually reads wider against hip, not one specific
@@ -131,38 +150,35 @@ broad shoulders specifically, not one that's top-heavy from bust with
 balanced shoulders (decision
 [0013](../adr/0013-narrows-shoulder-effect.md)).
 
-### 4. `signed_level()` — quantizing a deviation into a severity level
+### 4. Quantization happens upstream, in `balance_points.py`
 
-```python
-def signed_level(value, reference, axis) -> int:
-    deviation = value - reference
-    deadzone = IMBALANCE_DEADZONE if axis in _SCORING_DEADZONE_AXES else 0.0
-    magnitude = abs(deviation)
-    level = 0 if magnitude < deadzone else 1 if magnitude < PRONOUNCED_THRESHOLD else 2
-    return level if deviation >= 0 else -level
-```
+`scoring.py` used to have its own `signed_level()` doing deviation →
+severity-level quantization per tag. Decision
+[0015](../adr/0015-quantized-main-concern.md) moved that logic
+(renamed `quantize_axis()`) to `balance_points.py` as the single
+shared basis both `WomensBalancePoints.main_concern()` and `score()`
+below compare against — see
+[phase1-balance-points.md](phase1-balance-points.md)'s section 4 for
+how it buckets a deviation into `-2, -1, 0, 1, or 2`, including the
+deadzone and `waist_definition`'s reference-point exception.
 
-Turns a raw axis deviation into `-2, -1, 0, 1, or 2` — sign-preserved.
-`0` means "within the deadzone" (same `IMBALANCE_DEADZONE = 0.05`
-phase 1's `main_concern()` uses, plus `top_hip_balance` added to that
-deadzone set); `1` is "notable," `2` is "pronounced" once magnitude
-clears `PRONOUNCED_THRESHOLD = 0.15`. `waist_definition` isn't in the
-deadzone axis set, so it gets no deadzone here either — same reasoning
-as decision [0007](../adr/0007-imbalance-deadzone.md): it's a
-favorable-direction threshold, not "0 is neutral both ways."
+`score()` now calls `balance_points.quantize()` once per body to get a
+`QuantizedBalancePoints`, then reads each tag's already-quantized
+level via `axis_level()` (above) instead of recomputing a deviation
+per tag against a reference pulled off `AXIS_RULES`.
 
 ### 5. `score()` — putting it together
 
 ```python
 def score(balance_points, garment) -> Verdict:
+    quantized = quantize(balance_points)
     reasons = []
     for technique in garment.techniques:
         for tag in EFFECTS_TABLE.get(technique, []):
             rule = AXIS_RULES.get(tag)
             if rule is None:
                 continue
-            value = axis_value(balance_points, rule.axis)
-            contribution = rule.weight * signed_level(value, rule.reference, rule.axis)
+            contribution = rule.weight * axis_level(quantized, rule.axis)
             if contribution == 0:
                 continue
             reasons.append(Reason(tag=tag, axis=rule.axis,
@@ -174,11 +190,11 @@ def score(balance_points, garment) -> Verdict:
     ...
 ```
 
-For every technique on the garment, look up its effect tags, look up
-each tag's axis rule, compute that axis's severity level against the
-body's balance points, and multiply by the rule's weight. Zero
-contributions (deadzone, or no rule for that tag) are dropped —
-they'd just be noise in the reasons list. Reasons are sorted
+`balance_points.quantize()` runs once per body. For every technique on
+the garment, look up its effect tags, look up each tag's axis rule,
+read that axis's already-quantized level, and multiply by the rule's
+weight. Zero contributions (deadzone, or no rule for that tag) are
+dropped — they'd just be noise in the reasons list. Reasons are sorted
 strongest-first so the most decisive factors surface at the top of a
 verdict.
 

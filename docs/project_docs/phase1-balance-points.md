@@ -84,27 +84,35 @@ from real anthropometric data yet (see "Gotchas" below).
 
 ### 4. `main_concern()`
 
-`_magnitude()` is what `main_concern()` uses to pick which of the five
-balance points to call out as the body's biggest deviation.
+`quantize_axis()` turns one axis's raw signed deviation into a small
+discrete severity level — `0` (inside its deadzone, or an axis with
+none), `1` ("notable"), `2` ("pronounced") — sign preserved. Raw,
+differently-scaled axis values aren't safely comparable (decision
+[0010](../adr/0010-discrete-severity-level-scoring.md)); a shared
+discrete level is, by construction.
 
-Each balance point is a signed value — e.g. `shoulder_hip_balance` can
-be +0.3 (shoulders wider) or −0.3 (hips wider). To find "which axis
-deviates the most from neutral," you need the absolute value: −0.3 and
-+0.3 are equally far from 0, but a plain `max()` on the signed values
-would always favor positive numbers and miss a strongly negative one.
+`quantize_axis(value, axis)`:
+1. Looks up the axis's reference point — `0.0` for four axes, `0.15`
+   for `waist_definition` (its favorable-direction cinch threshold,
+   not "0 is neutral both ways").
+2. Takes the deviation from that reference, then buckets its absolute
+   value against a deadzone (`0.05` for the four zero-neutral axes,
+   `0.0` for `waist_definition` — so it can never quantize to level
+   `0`) and the pronounced boundary (`0.15`) into level 0/1/2, sign
+   preserved.
 
-So `_magnitude(name)`:
-1. Takes `abs()` of that axis's value.
-2. If the axis is one of the four deadzone axes and that absolute
-   value is under `0.05`, returns `0.0` instead — treating a tiny
-   deviation as measurement noise, not a real imbalance.
+`quantize()` applies that to all five axes. `main_concern()` then
+returns every axis name tied at the single highest level — one name
+for a clear winner, two or more on a genuine tie, `[]` if even the
+peak is `0` (decision
+[0015](../adr/0015-quantized-main-concern.md): picking one winner by
+raw magnitude had the same cross-axis comparability problem decision
+0010 fixed for scoring, so ties are now surfaced via the same discrete
+levels instead of broken via raw magnitude).
 
-`main_concern()` then does `max(fields, key=self._magnitude)` — picks
-whichever axis has the largest magnitude — and returns `None` if even
-the winner's magnitude is `0` (nothing cleared the deadzone).
-`waist_definition` isn't part of that deadzone check — it's asymmetric
-(favorable one direction, not "0 is neutral both ways"), so it uses its
-own threshold in `scoring.py` instead.
+A favorable-sign name (e.g. a high `waist_definition`) is an asset, not
+a concern — callers should check that axis's sign before treating a
+returned name as a problem to fix.
 
 ### Testing / verification
 
@@ -121,9 +129,3 @@ scoring doesn't exist at this stage). Any future change to
 - `frame_scale` and `torso_leg` baselines (`0.50`/`0.45`/`0.245`/`0.455`)
   are guessed placeholders, not real anthropometric reference data —
   see CURRENT_STATE.md "Known gaps."
-- `WomensBalancePoints.main_concern()` picks the axis with the largest
-  *raw* magnitude — the same cross-axis comparability problem that
-  `scoring.py`'s severity-level scoring (decision
-  [0010](../adr/0010-discrete-severity-level-scoring.md)) later fixed
-  for verdicts, left unfixed here since it touches the CLI and web
-  chart too.
