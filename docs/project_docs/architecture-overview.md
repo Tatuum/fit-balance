@@ -52,6 +52,7 @@ usable and testable on its own.
 | Type check | `mypy` | Staged strictness (lenient on undecorated defs, strict on return types); added once the codebase was type-hinted heavily enough to be worth verifying |
 | Local commit gate | `pre-commit` | File hygiene + `ruff`/`ruff-format`/`mypy` on every `git commit` — catches issues before they're even pushed |
 | Remote gate | GitHub Actions (`.github/workflows/ci.yml`) | Lint/type-check/test (Python) + typecheck/test (web) on every push/PR to `main`, mirroring `check.sh` — adapted from a sibling project's CI setup |
+| Branch protection | GitHub branch protection on `main` | Requires all 4 CI checks to pass before merging, enforced for admins too — makes the CI gate mandatory, not advisory; no direct pushes to `main` |
 | CLI (phase 3) | `Typer` + `rich` | Type-hint-driven CLI reusing the pydantic models directly; `rich` for a readable verdict/reasons table |
 | API (phase 4) | `FastAPI` | Pairs directly with pydantic (already in use) and gets OpenAPI docs for free |
 | Frontend (phase 5) | `React` + `TypeScript` + `Vite` | SVG avatar is a natural fit for React's component model; Vite keeps tooling minimal |

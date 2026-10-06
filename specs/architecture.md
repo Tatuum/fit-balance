@@ -17,6 +17,8 @@
   `ruff-format`, `mypy`)
 - GitHub Actions (`.github/workflows/ci.yml`) — remote gate on
   push/PR to `main`, mirroring `check.sh`
+- GitHub branch protection on `main` — requires all 4 CI checks to
+  pass before merging, enforced for admins too; no direct pushes
 
 ## Web
 
