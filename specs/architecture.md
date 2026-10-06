@@ -49,9 +49,14 @@ Three layers, one direction of dependency:
 
 ## Key property
 
-- The engine (`fit_balance`) has zero UI/network dependencies.
-- Everything above it (API, web) is a consumer, not a dependency — the
-  engine is fully usable and testable independent of either.
+- The `fit_balance` library has zero UI/network dependencies.
+- Within it, the engine (`balance_points.py`, `effects.yaml`,
+  `scoring.py`) is the scoring core; `schemas.py` and `cli.py` are
+  thin wrappers around it (see CLAUDE.md's Main logic section — an
+  "engine change" means an edit to those three files specifically).
+- Everything above the library (API, web) is a consumer, not a
+  dependency — the library is fully usable and testable independent of
+  either.
 - A `feature-spec` architecture-fit check uses this section to decide
   which layer a new feature belongs to and whether it crosses a
   boundary (e.g. business logic leaking into a layer meant to stay
