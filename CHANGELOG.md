@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026-10-07
+- Remove the CLI: unused, duplicated by the API (#9)
+- Update CHANGELOG.md for PRs #6 and #7 (#8)
 - Document changelog script's incremental-update assumption (#7)
 - Fix phase3-cli.md: Typer collapses the single-command invocation (#6)
 - Fix README's Example reasons to match score()'s real output
