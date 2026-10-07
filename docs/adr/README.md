@@ -31,3 +31,4 @@ to know what was tried, rejected, or superseded.
 | [0013](0013-narrows-shoulder-effect.md) | narrows_shoulder: a dedicated shoulder_hip_balance effect | Accepted |
 | [0014](0014-remove-menswear-support.md) | Remove menswear support | Accepted |
 | [0015](0015-quantized-main-concern.md) | Quantized main_concern(), ties surfaced instead of broken | Accepted |
+| [0016](0016-second-garment-vocabulary-expansion.md) | Second garment vocabulary expansion (9 techniques, 8 catalog items) | Accepted |

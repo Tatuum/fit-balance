@@ -32,11 +32,15 @@ def test_pear_waist_definition_seeks_belted_and_fitted_avoids_oversized():
         "peplum_dress",
         "wrap_top",
         "wrap_dress",
+        "maxi_wrap_skirt",
+        "fit_and_flare_dress",
+        "corset_top",
     }
     assert by_tag["clings_to_waist"].direction == "+"
     assert {i.id for i in by_tag["clings_to_waist"].items} == {
         "sheath_dress",
         "belted_sheath_dress",
+        "ruched_dress",
     }
     assert by_tag["hides_waist"].direction == "-"
     assert {i.id for i in by_tag["hides_waist"].items} == {
@@ -63,6 +67,7 @@ def test_pear_horizontal_balance_seeks_top_volume_avoids_added_bottom_volume():
     assert {i.id for i in by_tag["adds_volume_top"].items} == {
         "structured_blazer",
         "puff_sleeve_top",
+        "off_shoulder_top",
     }
     assert by_tag["adds_volume_bottom"].direction == "-"
     assert {i.id for i in by_tag["adds_volume_bottom"].items} == {
@@ -72,6 +77,7 @@ def test_pear_horizontal_balance_seeks_top_volume_avoids_added_bottom_volume():
         "a_line_dress",
         "peplum_top",
         "peplum_dress",
+        "fit_and_flare_dress",
     }
 
 
@@ -87,6 +93,7 @@ def test_pear_frame_scale_seeks_slimming_avoids_bulk():
         "oversized_top",
         "oversized_jacket",
         "bomber_jacket",
+        "cape_coat",
     }
 
 

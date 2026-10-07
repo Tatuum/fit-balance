@@ -70,3 +70,33 @@ pencil_skirt:
 # shoulder_hip_balance rather than the derived top_hip_balance.
 scoop_neck:
   - narrows_shoulder
+
+# Techniques below added by decision 0016 — a second vocabulary-expansion
+# pass. All reuse existing effect tags; none require new scoring.py rules.
+cowl_neck:
+  - elongates_torso
+
+halter_neck:
+  - narrows_shoulder
+
+off_shoulder:
+  - adds_volume_top
+
+fit_and_flare:
+  - defines_waist
+  - adds_volume_bottom
+
+corset_boned:
+  - defines_waist
+
+maxi_length:
+  - elongates_leg
+
+midi_length:
+  - shortens_leg
+
+cape_silhouette:
+  - adds_bulk
+
+ruched_side:
+  - clings_to_waist

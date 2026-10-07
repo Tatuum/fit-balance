@@ -168,3 +168,21 @@ def test_narrows_shoulder_distinguishes_shoulder_from_bust_driven_top_heaviness(
     _, blazer_garment = resolve_outfit(["structured_blazer"])
     blazer_verdict = score(bp, blazer_garment)
     assert blazer_verdict.recommendation == "avoid"
+
+
+def test_fit_and_flare_fires_two_tags_on_two_different_axes():
+    """Decision 0016: fit_and_flare is the first catalog technique to pair
+    defines_waist (waist_definition) with adds_volume_bottom
+    (top_hip_balance) from one single technique, rather than two separate
+    techniques on one item. On PEAR_FULLER, the two reasons land on opposite
+    sides (waist_definition favorable, top_hip_balance already hip-heavy) and
+    cancel to a net-zero score -- neither reason is dropped, they just
+    offset."""
+    _, garment = resolve_outfit(["fit_and_flare_dress"])
+    assert garment.techniques == ["fit_and_flare"]
+
+    bp = compute_womens_balance_points(PEAR_FULLER)
+    verdict = score(bp, garment)
+    by_tag = {r.tag: r.contribution for r in verdict.reasons}
+    assert by_tag == {"defines_waist": 1, "adds_volume_bottom": -1}
+    assert verdict.recommendation == "neutral"
