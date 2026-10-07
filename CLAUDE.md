@@ -9,15 +9,13 @@ balance points — never a black-box shape label.
 ## Primary stack
 
 - Python (`uv`, `pydantic`, `pytest`, `ruff`, `FastAPI`) for the
-  engine/CLI/API.
+  engine/API.
 - React + TypeScript + Vite for the web frontend.
 - See `specs/architecture.md` for the full architecture.
 
 ## Run & test
 
 **Run**
-- CLI: `uv run fit-balance --help` — score a garment against a set of
-  measurements.
 - API: `uv run uvicorn api.main:app --reload` — starts on `:8000`.
 - Web: `npm run dev` (from `web/`) — dev server, expects the API on
   `:8000`.
@@ -48,7 +46,7 @@ balance points — never a black-box shape label.
 ```
 fit-balance/
 ├── src/fit_balance/  — the engine (balance_points.py, effects.yaml,
-│                       scoring.py) + schemas.py, cli.py, garments.py
+│                       scoring.py) + schemas.py, garments.py
 ├── api/              — FastAPI, a thin layer over the engine
 ├── web/              — React + TS frontend
 ├── tests/            — pytest, mirrors src/
@@ -115,12 +113,12 @@ concepts).
 - Scoring core: `balance_points.py`, `effects.yaml`, `scoring.py`.
 - Turns a body's balance points and a garment's attributes into a
   verdict.
-- CLI, API, and web are thin layers on top of it.
+- API and web are thin layers on top of it.
 - **An engine change** is any edit to those three files.
 
 ## Build order
 
-The engine, CLI, API, and web app are shipped. See `specs/roadmap.md`
+The engine, API, and web app are shipped. See `specs/roadmap.md`
 for phase-by-phase build status.
 
 ## Standing rules (from CURRENT_STATE.md)

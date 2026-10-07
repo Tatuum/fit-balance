@@ -8,10 +8,9 @@ sync with that file, it wins.
 
 ```
                     ┌───────────────────────────────────┐
- phases 1-3         │   fit_balance (Python lib)        │
+ phases 1-2         │   fit_balance (Python lib)        │
  (library, no UI)   │                                   │
                     │  schemas.py — pydantic models     │
-                    │  cli.py — Typer CLI               │
                     │ ┌─────────────────────────────┐   │
                     │ │ ENGINE (scoring core)       │   │
                     │ │ balance_points.py           │   │
@@ -36,7 +35,7 @@ sync with that file, it wins.
 Three layers, one direction of dependency: `fit_balance` (the library)
 → `api/` → `web/`. Within `fit_balance`, the engine is only the
 scoring core (`balance_points.py`, `effects.yaml`, `scoring.py`) —
-`schemas.py` and `cli.py` are thin wrappers around it, not part of it.
+`schemas.py` is a thin wrapper around it, not part of it.
 The library has zero UI/network dependencies — everything above it is
 a consumer, not a dependency, so it's fully usable and testable on its
 own.
@@ -54,11 +53,10 @@ own.
 | Local commit gate | `pre-commit` | File hygiene + `ruff`/`ruff-format`/`mypy` on every `git commit` — catches issues before they're even pushed |
 | Remote gate | GitHub Actions (`.github/workflows/ci.yml`) | Lint/type-check/test (Python) + typecheck/test (web) on every push/PR to `main`, mirroring `check.sh` — adapted from a sibling project's CI setup |
 | Branch protection | GitHub branch protection on `main` | Requires all 4 CI checks to pass before merging, enforced for admins too — makes the CI gate mandatory, not advisory; no direct pushes to `main` |
-| CLI (phase 3) | `Typer` + `rich` | Type-hint-driven CLI reusing the pydantic models directly; `rich` for a readable verdict/reasons table |
 | API (phase 4) | `FastAPI` | Pairs directly with pydantic (already in use) and gets OpenAPI docs for free |
 | Frontend (phase 5) | `React` + `TypeScript` + `Vite` | SVG avatar is a natural fit for React's component model; Vite keeps tooling minimal |
 | Multimodal LLM API (future development, not yet a committed phase) | TBD — a vision-capable LLM, called directly, no orchestration framework | Garment-photo tag extraction, grounded explanation generation, tool-calling assistant |
 | Database (future development, not yet a committed phase) | `SQLite` (Postgres later if needed) | Persists closet items — tags + verdict only, no images, no vector store. Single user for now, no accounts; a file-based DB avoids running a server for that |
 
 - Phase 4+ libraries are not installed until their phase begins —
-  phases 1–3 have zero web dependencies.
+  phases 1–2 have zero web dependencies.

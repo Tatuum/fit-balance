@@ -6,12 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2",
     "pyyaml>=6",
-    "typer>=0.12",
-    "rich>=13",
 ]
-
-[project.scripts]
-fit-balance = "fit_balance.cli:app"
 
 [dependency-groups]
 dev = [
@@ -47,6 +42,3 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-
-[tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["typer.Option", "typer.Argument"]

@@ -103,15 +103,14 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
   returning `[]` is possible in principle but essentially never happens
   for a real body; `waist_definition` almost always has something to
   say, as either an asset or a concern.
-- The CLI (`cli.py`) honors the asset/concern distinction at the label
-  level: when `main_concern()` names a favorable `waist_definition`, it
-  shows "(key asset)" instead of "(main concern)" — a favorable value
-  labeled as a concern reads as self-contradictory. The web
-  `BalancePointsChart` component has the same honoring logic and its
-  own tests, but `App.tsx` no longer renders it, since the frontend was
-  simplified down to measurements/silhouette/technique-advice (see
-  "Technique recommendations" below). It's dead UI-wiring-wise, not
-  dead code.
+- The web `BalancePointsChart` component honors the asset/concern
+  distinction at the label level: when `main_concern()` names a
+  favorable `waist_definition`, it shows "(key asset)" instead of
+  "(main concern)" — a favorable value labeled as a concern reads as
+  self-contradictory. It has its own tests, but `App.tsx` no longer
+  renders it, since the frontend was simplified down to
+  measurements/silhouette/technique-advice (see "Technique
+  recommendations" below). It's dead UI-wiring-wise, not dead code.
 
 **History / rationale**
 
@@ -125,7 +124,7 @@ frame_scale_dev    = avg(max(shoulder,bust),waist,hip)/height - baseline    # + 
 
 Menswear support (a parallel `chest_waist_balance`/`chest_hip_balance`
 formula set) was scaffolded in stage 1 but never wired into any test,
-CLI flag, API endpoint, or frontend code. Removed as unused clutter —
+API endpoint, or frontend code. Removed as unused clutter —
 decision [0014](docs/adr/0014-remove-menswear-support.md). Reintroduce
 only with an actual need, as a fresh formula-design pass with its own
 worked examples and tests, not by restoring the old code as-is.
@@ -189,8 +188,7 @@ Rule changes had, at least once, silently broken an earlier-correct
 worked example — an "apple + bodycon" regression happened this way.
 Hand-verifying by re-reading doesn't scale. These 5 are now encoded as
 regression tests in `tests/test_balance_points.py` (balance-point
-layer) and `tests/test_scoring.py` (full verdict), and manually
-reproduced via the CLI (`uv run fit-balance ...`). All 5 pass and match
+layer) and `tests/test_scoring.py` (full verdict). All 5 pass and match
 the verdicts below.
 
 ```
@@ -220,8 +218,8 @@ input.
   `GarmentAttributes` (de-duplicated by exact technique key), calls
   `scoring.score()` unchanged.
 - Not currently surfaced in `web/` (the manual per-slot picker was
-  removed in the frontend simplification) — reachable via the CLI or
-  a direct API call.
+  removed in the frontend simplification) — reachable via a direct
+  API call.
 - `attribute_reasons()` attributes each negative reason back to the
   item(s) that produced it. Attribution only — not a substitution
   suggestion (deferred).
@@ -498,15 +496,11 @@ layout.
 2. **Done.** `effects.yaml` + scoring function returning `(verdict,
    reasons[])`. `src/fit_balance/effects.yaml`, `src/fit_balance/scoring.py`,
    `tests/test_scoring.py`.
-3. **Done.** CLI to type in measurements + a garment's attributes and
-   get verdict + reasons. Confirmed the rules *feel* right on all 5
-   worked examples. `src/fit_balance/cli.py` (`uv run fit-balance
-   ...`).
-4. **Done.** FastAPI `/score` endpoint (`api/main.py`) + a React/TS
+3. **Done.** FastAPI `/score` endpoint (`api/main.py`) + a React/TS
    parametric SVG avatar (`web/`, pure geometry in
    `web/src/lib/avatarGeometry.ts`) — no photorealism, per the
    original plan.
-5. **Not started.** Garment-photo → attribute extraction via pose
+4. **Not started.** Garment-photo → attribute extraction via pose
    estimation + segmentation. "Upload a real item, tell me if it suits
    me" is now handled a different way: a private per-user photo-upload
    closet using a multimodal LLM call (not CV) to extract technique

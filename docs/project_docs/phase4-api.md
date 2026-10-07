@@ -1,7 +1,7 @@
 # Phase 4 — FastAPI `/score` endpoint
 
-Exposes the engine over HTTP so scoring stops being CLI-only. A thin
-pass-through to `score()` — no new logic lives here.
+Exposes the engine over HTTP. A thin pass-through to `score()` — no
+new logic lives here.
 
 **Files:** `api/main.py`
 
@@ -17,8 +17,8 @@ class ScoreResponse(BaseModel):
     verdict: Verdict
 ```
 
-The handler does exactly what the CLI does — call
-`compute_womens_balance_points()` then `score()` — and reuses
+The handler calls `compute_womens_balance_points()` then `score()`
+directly — and reuses
 `schemas.py`'s `Measurements`, `GarmentAttributes`, and `Verdict`
 unchanged as the request/response bodies, so there's no second copy of
 those shapes to drift out of sync with the engine. `balance_points` is
