@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-07
+- Fix README's Example reasons to match score()'s real output
 - Second garment vocabulary expansion: 9 techniques, 8 catalog items
 
 ## 2026-10-06

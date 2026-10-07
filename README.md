@@ -42,8 +42,8 @@ shape classifier or another renderer.
 Body:    little natural waist definition, long torso
 Garment: sheath bodycon + belted natural waist
 Verdict: avoid
-Reasons: − clings to a hip that isn't the frame's strength
-         − a natural-waist belt sits at the wrong point on a long torso
+Reasons: − clings to a waist this body doesn't have (no natural cinch to grip)
+         − a waist-defining belt with nothing to define
 ```
 
 This is one of five worked examples encoded as regression tests — see
