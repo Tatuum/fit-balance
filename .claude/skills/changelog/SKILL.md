@@ -45,3 +45,7 @@ Where `<skill-dir>` is the directory containing this skill. Claude Code exposes 
 - Run from the **project root** (same directory as `.git/`)
 - Commit subjects come directly from `git log`; clean them up manually if needed
 - The script is idempotent: re-running when nothing is new prints a message and exits without modifying the file
+- **Known limitation:** the incremental-update path diffs by position, assuming recorded
+  entries for a date are always a suffix of git log's current list for that date. Reword a
+  bullet in place freely — but deleting or reordering a bullet within an already-recorded
+  date breaks that assumption and will duplicate/drop entries on the next run.
