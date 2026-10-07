@@ -16,15 +16,10 @@ from.
   `(verdict, reasons[])`. Verified: `pytest` passes with all 5 worked
   examples green; `ruff check` clean.
   (docs/project_docs/phase2-scoring.md)
-- [x] **Phase 3 — CLI + notebook-style validation.** Typer CLI to
-  confirm the rules feel right on real inputs before any web/image
-  work starts. Verified: manually ran the CLI against each worked
-  example and confirmed output matched the expected verdict in
-  CURRENT_STATE.md. (docs/project_docs/phase3-cli.md)
 - [x] **Phase 4 — FastAPI `/score` endpoint.** Reuses the pydantic
   models unchanged as request/response bodies. Verified: `POST /score`
-  via curl/HTTPie returns the same verdict as the CLI for the same
-  inputs (schema reuse guarantees this).
+  via curl/HTTPie returns the same verdict as calling `score()`
+  directly for the same inputs (schema reuse guarantees this).
   (docs/project_docs/phase4-api.md)
 - [x] **Phase 5 — React/TS web app + parametric SVG avatar.**
   Measurement/garment form → API → geometry-only avatar. Verified:

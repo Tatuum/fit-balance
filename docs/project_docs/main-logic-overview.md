@@ -137,15 +137,14 @@ GET /garments  POST /recommend-  POST /technique-        POST /balance-
                    │  directly, for          │
                    │  POST /score and        │
                    │  POST /score-outfit)    │
-                   └─────────────────────────┘
+                   └────────────┬────────────┘
                             Phase 4
-                              │
-                   ┌──────────┴──────────┐
-                   ▼                     ▼
-            ┌────────────┐        ┌────────────┐
-            │   cli.py   │        │    web/    │
-            └────────────┘        └────────────┘
-              Phase 3                Phase 5
+                                 │
+                                 ▼
+                          ┌────────────┐
+                          │    web/    │
+                          └────────────┘
+                             Phase 5
 ```
 
 Every feature layer that needs a verdict calls the same

@@ -3,7 +3,7 @@
 Turns a body's raw tape-measure numbers into a small set of continuous,
 signed ratios — no shape category (pear/hourglass/apple) anywhere in
 the logic. This is the pure-function foundation everything else in the
-engine (scoring, CLI, API) builds on.
+engine (scoring, API) builds on.
 
 **Files:** `src/fit_balance/schemas.py`, `src/fit_balance/balance_points.py`,
 `tests/test_balance_points.py`

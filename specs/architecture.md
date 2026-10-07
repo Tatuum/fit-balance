@@ -1,6 +1,6 @@
 # Tech stack
 
-## Engine / CLI / API
+## Engine / API
 
 - Python, managed with `uv`
 - `pydantic` — schemas (`Measurements`, `GarmentAttributes`,
@@ -11,7 +11,6 @@
 - `ruff` — lint + format
 - `mypy` — type check (staged strictness: lenient on undecorated defs,
   strict on return types)
-- `Typer` + `rich` — CLI
 - `FastAPI` — API layer, pairs directly with `pydantic`
 - `pre-commit` — local gate on every commit (hygiene, `ruff`/
   `ruff-format`, `mypy`)
@@ -36,12 +35,12 @@
 
 Three layers, one direction of dependency:
 
-- **`fit_balance`** (Python lib, phases 1–3) — `schemas.py` (pydantic:
+- **`fit_balance`** (Python lib, phases 1–2) — `schemas.py` (pydantic:
   `Measurements`, `GarmentAttributes`, `Verdict`, `Reason`),
   `balance_points.py` (pure functions, women's v0), `effects.yaml`
   (technique → effect-tag data), `scoring.py` (`(verdict, reasons[]) =
-  score(...)`), `cli.py` (Typer CLI). Imported directly by the layer
-  above — no network boundary.
+  score(...)`). Imported directly by the layer above — no network
+  boundary.
 - **`api/`** (FastAPI service, phase 4) — reuses `schemas.py` models
   unchanged as request/response bodies. Talks to `web/` over JSON/HTTP.
 - **`web/`** (React + TS/Vite, phase 5) — form → API → parametric SVG
@@ -51,9 +50,9 @@ Three layers, one direction of dependency:
 
 - The `fit_balance` library has zero UI/network dependencies.
 - Within it, the engine (`balance_points.py`, `effects.yaml`,
-  `scoring.py`) is the scoring core; `schemas.py` and `cli.py` are
-  thin wrappers around it (see CLAUDE.md's Main logic section — an
-  "engine change" means an edit to those three files specifically).
+  `scoring.py`) is the scoring core; `schemas.py` is a thin wrapper
+  around it (see CLAUDE.md's Main logic section — an "engine change"
+  means an edit to those three files specifically).
 - Everything above the library (API, web) is a consumer, not a
   dependency — the library is fully usable and testable independent of
   either.

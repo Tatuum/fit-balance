@@ -72,8 +72,8 @@ This is one of five worked examples encoded as regression tests — see
 
 ## Tech stack
 
-- **Engine / CLI / API:** Python, [uv](https://docs.astral.sh/uv/),
-  Pydantic, Typer, FastAPI, pytest, ruff, mypy
+- **Engine / API:** Python, [uv](https://docs.astral.sh/uv/),
+  Pydantic, FastAPI, pytest, ruff, mypy
 - **Web:** React, TypeScript, Vite, vitest
 
 ## Project layout
@@ -98,7 +98,7 @@ fit-balance/
 
 ## Getting started
 
-**Engine, CLI, API** (requires [uv](https://docs.astral.sh/uv/)):
+**Engine, API** (requires [uv](https://docs.astral.sh/uv/)):
 
 ```bash
 uv sync
@@ -106,7 +106,6 @@ uv run pre-commit install  # one-time: installs the local commit gate
 uv run pytest              # run the test suite
 uv run ruff check .        # lint
 uv run mypy src api        # type check
-uv run fit-balance --help  # CLI: score a garment against a set of measurements
 uv run uvicorn api.main:app --reload   # start the API on :8000
 ```
 
@@ -128,7 +127,7 @@ npm run test     # vitest
 
 ## Status
 
-The core engine, CLI, API, and web app are shipped and tested.
+The core engine, API, and web app are shipped and tested.
 AI-assisted features (photo-upload closet, grounded explanations, a
 personal RAG corpus, a conversational assistant) aren't committed yet
 — see [`specs/roadmap.md`](specs/roadmap.md) for phase-by-phase status
