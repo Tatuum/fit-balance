@@ -10,9 +10,12 @@ or API work.
 
 ### 1. The `score` command
 
-A single Typer command, `fit-balance score`, installed as the
-project's console-script entry point (`fit-balance =
-"fit_balance.cli:app"` in `pyproject.toml`). Body measurements are
+A single Typer command, installed as the project's console-script
+entry point (`fit-balance = "fit_balance.cli:app"` in
+`pyproject.toml`). Typer collapses a single-command app so the
+command name isn't typed — the CLI is invoked as `uv run fit-balance
+--shoulder ... -t ...`, not `fit-balance score ...`. Body measurements
+are
 individual required float options (`--shoulder`, `--bust`, `--waist`,
 `--hip`, `--torso`, `--leg`, `--height`, all in cm); garment techniques
 are a repeatable option:
@@ -81,7 +84,7 @@ also use.
 ### Testing / verification
 
 No automated CLI tests. Verification was manual: running `uv run
-fit-balance score ...` against each of the 5 CURRENT_STATE.md worked examples
+fit-balance ...` against each of the 5 CURRENT_STATE.md worked examples
 and confirming the printed recommendation and reasons matched what
 `tests/test_scoring.py` already asserts — the CLI is a display layer
 over `score()`, which the phase 1–2 test suites cover directly.
