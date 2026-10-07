@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026-10-07
+- Document changelog script's incremental-update assumption (#7)
+- Fix phase3-cli.md: Typer collapses the single-command invocation (#6)
 - Fix README's Example reasons to match score()'s real output
 - Second garment vocabulary expansion: 9 techniques, 8 catalog items
 
