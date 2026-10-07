@@ -1,6 +1,11 @@
 # Changelog
 
+## 2026-10-07
+- Second garment vocabulary expansion: 9 techniques, 8 catalog items
+
 ## 2026-10-06
+- Fix stale docs: reconcile "engine" definition, update post-0015 scoring docs (#3)
+- doc-audit fixes: branch protection mentions + changelog script bug (#2)
 - Document that main is now branch-protected (#1)
 - Add doc-audit skill, mark core docs in the Folder map instead of a separate list
 
