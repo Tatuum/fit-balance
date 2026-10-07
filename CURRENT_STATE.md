@@ -240,7 +240,13 @@ added) `high_rise`, `low_rise`, `wide_leg`, `cropped_ankle_length`,
 longer carries `adds_volume_top` (0006, 0011) · `structured_shoulder`,
 `puff_sleeve`, `peplum`, `wrap_style`, `v_neck`, `a_line`,
 `pencil_skirt` (0012) · `scoop_neck` → `narrows_shoulder`, scored
-directly against `shoulder_hip_balance` (0013).
+directly against `shoulder_hip_balance` (0013) · `cowl_neck`,
+`halter_neck`, `off_shoulder`, `fit_and_flare`, `corset_boned`,
+`maxi_length`, `midi_length`, `cape_silhouette`, `ruched_side` — all
+reused-tag techniques, no new `AXIS_RULES` entries (0016).
+`clings_to_hip` is still the one unscored tag (see "Known gaps"
+below); footwear isn't modeled (no 5th catalog slot) — `platform_sole`
+was considered and dropped for 0016, not added.
 
 **History / rationale**
 
@@ -257,6 +263,10 @@ directly against `shoulder_hip_balance` (0013).
 - [0013](docs/adr/0013-narrows-shoulder-effect.md) — `scoop_neck`, the
   first technique to need a genuinely new `AXIS_RULES` entry rather
   than a reused tag. Further vocabulary growth stays case-by-case.
+- [0016](docs/adr/0016-second-garment-vocabulary-expansion.md) — a
+  second realism pass: 9 more reused-tag techniques, 8 more catalog
+  items. `fit_and_flare` is the first single technique to fire two
+  tags on two different axes at once.
 
 ## Outfit recommendations (ranking layer, v1)
 

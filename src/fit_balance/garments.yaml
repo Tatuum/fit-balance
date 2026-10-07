@@ -149,3 +149,44 @@ scoop_neck_top:
   label: Scoop-neck top
   slot: top
   techniques: [scoop_neck]
+
+# Items below added by decision 0016 — a second vocabulary-expansion pass.
+cowl_neck_top:
+  label: Cowl-neck top
+  slot: top
+  techniques: [cowl_neck]
+
+off_shoulder_top:
+  label: Off-shoulder top
+  slot: top
+  techniques: [off_shoulder]
+
+corset_top:
+  label: Corset-boned top
+  slot: top
+  techniques: [corset_boned]
+
+maxi_wrap_skirt:
+  label: Maxi wrap skirt
+  slot: bottom
+  techniques: [wrap_style, maxi_length]
+
+fit_and_flare_dress:
+  label: Fit-and-flare dress
+  slot: dress
+  techniques: [fit_and_flare]
+
+halter_midi_dress:
+  label: Halter midi dress
+  slot: dress
+  techniques: [halter_neck, midi_length]
+
+ruched_dress:
+  label: Ruched-side dress
+  slot: dress
+  techniques: [ruched_side]
+
+cape_coat:
+  label: Cape coat
+  slot: outerwear
+  techniques: [cape_silhouette]
