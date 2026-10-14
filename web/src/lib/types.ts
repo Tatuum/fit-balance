@@ -8,10 +8,6 @@ export interface Measurements {
   height: number
 }
 
-export interface GarmentAttributes {
-  techniques: string[]
-}
-
 export interface Reason {
   tag: string
   axis: string
@@ -33,12 +29,6 @@ export interface BalancePoints {
   waist_definition: number
   torso_leg_balance: number
   frame_scale_dev: number
-}
-
-export interface ScoreResponse {
-  balance_points: BalancePoints
-  main_concern: string[]
-  verdict: Verdict
 }
 
 export type Slot = 'top' | 'bottom' | 'dress' | 'outerwear'
