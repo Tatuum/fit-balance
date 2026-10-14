@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import Literal, cast
 
 import yaml
-from pydantic import BaseModel
 
-from .schemas import GarmentAttributes, Reason
-from .scoring import EFFECTS_TABLE
+from .schemas import GarmentAttributes
 
 Slot = Literal["top", "bottom", "dress", "outerwear"]
 
@@ -24,9 +22,9 @@ GARMENTS_TABLE = load_garments_table()
 @dataclass(frozen=True)
 class GarmentItem:
     """A user-facing catalog entry — id/label/slot are safe to expose over
-    the API; techniques is the internal detail that resolve_outfit() and
-    attribute_reasons() need but that must never reach an API response
-    (see api/main.py's GarmentSummary, which omits it)."""
+    the API; techniques is the internal detail that resolve_outfit() needs
+    but that must never reach an API response (see api/main.py's
+    GarmentSummary, which omits it)."""
 
     id: str
     label: str
@@ -86,32 +84,3 @@ def resolve_outfit(item_ids: list[str]) -> tuple[list[GarmentItem], GarmentAttri
                 seen.add(technique)
                 techniques.append(technique)
     return items, GarmentAttributes(techniques=techniques)
-
-
-class AttributedReason(BaseModel):
-    """A Reason plus which selected item(s) produced it. Attribution
-    only — "here's what's working against you" — not a replacement
-    suggestion; see CURRENT_STATE.md."""
-
-    tag: str
-    axis: str
-    contribution: int
-    direction: Literal["+", "-"]
-    item_ids: list[str]
-
-
-def attribute_reasons(reasons: list[Reason], items: list[GarmentItem]) -> list[AttributedReason]:
-    """For each Reason, name every selected item with a technique that
-    produces that reason's tag. Lists ALL responsible items, not just one —
-    honest when two items share a technique, or two different techniques
-    happen to produce the same tag, rather than picking one arbitrarily.
-    """
-    attributed = []
-    for reason in reasons:
-        item_ids = [
-            item.id
-            for item in items
-            if any(reason.tag in EFFECTS_TABLE.get(t, []) for t in item.techniques)
-        ]
-        attributed.append(AttributedReason(**reason.model_dump(), item_ids=item_ids))
-    return attributed

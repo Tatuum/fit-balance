@@ -99,45 +99,42 @@ out: WomensBalancePoints — this is the shared artifact every feature
      is a function each layer below calls on its own, as many times as
      it needs, not a pipeline stage whose output is piped downstream)
       │
-      ├─────────────┬─────────────────┬──────────────────────┐
-      ▼             ▼                 ▼                      ▼
-┌────────────┐ ┌────────────┐ ┌────────────────────┐ ┌────────────────────┐
-│ garments.py│ │recommend.py│ │technique_advice.py │ │garment_balance.py  │
-└────────────┘ └────────────┘ └────────────────────┘ └────────────────────┘
-   Phase 6         Phase 7           Phase 9                Phase 8
-in: item_ids   in: WomensBalance in: WomensBalance      in: WomensBalance
-  (catalog       Points            Points                 Points + item_id
+      ├─────────────┬──────────────────────┐
+      ▼             ▼                      ▼
+┌────────────┐ ┌────────────────────┐ ┌────────────────────┐
+│ garments.py│ │technique_advice.py │ │garment_balance.py  │
+└────────────┘ └────────────────────┘ └────────────────────┘
+   Phase 6           Phase 9                Phase 8
+in: item_ids   in: WomensBalance      in: WomensBalance
+  (catalog       Points                 Points + item_id
   lookup only)
 calls
 scoring.score()?
-  no              yes, once per     no — reads            yes, once for
-                   candidate         AXIS_RULES/            the one item
-                                     axis_value/
-                                     axis_level
-                                     directly instead
-                                     of a combined
-                                     Verdict
-out: tuple[    out: list[        out: list[             out:
-  list[          OutfitRecom-      DimensionAdvice]       GarmentBalance
-  GarmentItem],  mendation]                                Advice
-  GarmentAttri-  (.verdict is                               (.verdict is
-  butes] /        a Verdict)                                 a Verdict)
-  list[Attri-
-  butedReason]
-      │             │                 │                      │
-GET /garments  POST /recommend-  POST /technique-        POST /balance-
-                 outfits           recommendations         garment
-      │             │                 │                      │
-      └─────────────┴─────────┬───────┴──────────────────────┘
-                              ▼
-                   ┌─────────────────────────┐
-                   │      api/main.py        │
-                   │  (also calls            │
-                   │  scoring.score()        │
-                   │  directly, for          │
-                   │  POST /score and        │
-                   │  POST /score-outfit)    │
-                   └────────────┬────────────┘
+  no              no — reads            yes, once for
+                    AXIS_RULES/          the one item
+                    axis_value/
+                    axis_level
+                    directly instead
+                    of a combined
+                    Verdict
+out: tuple[    out: list[             out:
+  list[          DimensionAdvice]       GarmentBalance
+  GarmentItem],                          Advice
+  GarmentAttri-                          (.verdict is
+  butes]                                  a Verdict)
+      │             │                      │
+GET /garments  POST /technique-        POST /balance-
+                 recommendations         garment
+      │             │                      │
+      └─────────────┴───────┬──────────────┘
+                            ▼
+                 ┌─────────────────────────┐
+                 │      api/main.py        │
+                 │  (also calls            │
+                 │  scoring.score()        │
+                 │  directly, for          │
+                 │  POST /score)           │
+                 └────────────┬────────────┘
                             Phase 4
                                  │
                                  ▼
@@ -148,11 +145,10 @@ GET /garments  POST /recommend-  POST /technique-        POST /balance-
 ```
 
 Every feature layer that needs a verdict calls the same
-`scoring.score()` itself — `recommend.py` once per candidate outfit,
-`garment_balance.py` once for the one item it's given — rather than
-reimplementing the scoring logic or receiving a pre-computed `Verdict`
-from upstream. `garments.py` never touches scoring at all (pure
-catalog lookup); `technique_advice.py` reads `AXIS_RULES`/`axis_value`/
+`scoring.score()` itself — `garment_balance.py` once for the one item
+it's given — rather than reimplementing the scoring logic or receiving
+a pre-computed `Verdict` from upstream. `garments.py` never touches
+scoring at all (pure catalog lookup); `technique_advice.py` reads `AXIS_RULES`/`axis_value`/
 `axis_level` directly instead of producing a combined `Verdict`, by
 design (see CURRENT_STATE.md's "Technique recommendations" section).
 `axis_level` reads the already-quantized level off
@@ -160,6 +156,6 @@ design (see CURRENT_STATE.md's "Technique recommendations" section).
 computed that same level from a raw value and a reference, moved into
 `balance_points.py` and was renamed `quantize_axis()` (decision 0015).
 `api/main.py` itself also calls `scoring.score()` directly for `/score`
-and `/score-outfit` — those two endpoints don't go through any of the
-four feature-layer boxes above. No shape label ever enters this path,
+— that endpoint doesn't go through any of the three feature-layer
+boxes above. No shape label ever enters this path,
 only the signed axes.

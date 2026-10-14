@@ -49,34 +49,6 @@ export interface GarmentSummary {
   slot: Slot
 }
 
-export interface AttributedReason extends Reason {
-  item_ids: string[]
-}
-
-export interface OutfitVerdict {
-  recommendation: Recommendation
-  score: number
-  reasons: AttributedReason[]
-}
-
-export interface ScoreOutfitResponse {
-  balance_points: BalancePoints
-  main_concern: string[]
-  verdict: OutfitVerdict
-}
-
-export interface RecommendedOutfit {
-  item_ids: string[]
-  labels: string[]
-  verdict: OutfitVerdict
-}
-
-export interface RecommendOutfitsResponse {
-  balance_points: BalancePoints
-  main_concern: string[]
-  recommendations: RecommendedOutfit[]
-}
-
 export interface TechniqueExample {
   tag: string
   direction: '+' | '-'

@@ -213,23 +213,19 @@ input.
 
 - `GET /garments` — lists items with real names ("Slim-fitted top",
   "Oversized jacket"); never returns raw `techniques`.
-- `POST /score-outfit` (`api/main.py`) — takes one item per slot
-  (top/bottom/dress/outerwear), resolves their techniques into one
-  `GarmentAttributes` (de-duplicated by exact technique key), calls
-  `scoring.score()` unchanged.
-- Not currently surfaced in `web/` (the manual per-slot picker was
-  removed in the frontend simplification) — reachable via a direct
-  API call.
-- `attribute_reasons()` attributes each negative reason back to the
-  item(s) that produced it. Attribution only — not a substitution
-  suggestion (deferred).
+- `resolve_outfit()` (`garments.py`) resolves chosen item ids into one
+  `GarmentAttributes` (techniques de-duplicated by exact technique
+  key) for `scoring.score()`, which stays unchanged. Used by the
+  single-garment balance advice below.
+- The catalog is also where "Technique recommendations" below finds
+  its example garments.
 
 **Known interaction (tested, not fixed):** `scoring.score()` doesn't
 dedupe reasons by tag. Two different techniques producing the same
 effect tag (e.g. `vertical_detail` + `skinny_straight`, both →
 `reduces_bulk`) contribute that tag's axis weight twice, additively.
 Treated as intentional stacking for v1. Pinned by
-`tests/test_garments.py::test_attribution_lists_both_items_when_tags_overlap`.
+`tests/test_garments.py::test_different_techniques_with_the_same_effect_tag_stack_not_dedupe`.
 Revisit only if real usage shows surprising totals.
 
 **Technique vocabulary, current:** original 7 keys, plus (in order
@@ -266,55 +262,15 @@ was considered and dropped for 0016, not added.
   items. `fit_and_flare` is the first single technique to fire two
   tags on two different axes at once.
 
-## Outfit recommendations (ranking layer, v1)
-
-**Current state**
-
-- `src/fit_balance/recommend.py`: a ranking layer on top of the
-  garment catalog. `POST /recommend-outfits` (`api/main.py`) takes
-  `measurements` (+ optional `limit`, default 5), returns the
-  top-scoring outfits across every valid combination the catalog can
-  produce.
-- `enumerate_outfit_combinations()` builds candidate `item_ids` lists
-  from `garments.list_items()`; `recommend_outfits()` scores each via
-  the *unchanged* `garments.resolve_outfit()` + `scoring.score()`,
-  sorts by `verdict.score` descending, slices to `limit`.
-- Valid combinations: **dress XOR (top + bottom), with outerwear
-  optional on either branch**. Top-alone, bottom-alone, and
-  top+dress/bottom+dress are never enumerated. With the current
-  catalog (7 dress / 9 top / 8 bottom / 5 outerwear items, after
-  decisions 0012/0013) that's exactly 474 candidates — cheap enough to
-  score fresh on every request with a plain nested loop, no caching.
-- No dedup/near-duplicate suppression (e.g. the same top paired with
-  several jackets could fill multiple slots of the top 5) — accepted
-  as v1-simplicity, consistent with the catalog's own tag-overlap
-  stacking choice. Revisit only if real usage shows an unhelpful list.
-- Ranks whole candidate outfits — a different, broader thing than the
-  single-item "replacement suggestion" still deferred in "Garment
-  catalog" above (fixing one reason within an outfit already picked).
-  Endpoint and tests intact. The web UI's "Recommended for you" panel
-  that called it was removed in the same frontend simplification that
-  dropped the manual picker — the per-dimension technique advice took
-  over as the web UI's proactive guidance instead of a ranked outfit
-  list.
-- Kept intentionally, not orphaned: this is the backend half of Phase
-  11 (`specs/roadmap.md`), parked with no frontend caller until a UI
-  concept surfaces this without reintroducing the picker's clutter.
-- No engine change — `balance_points.py`, `scoring.py`, and
-  `effects.yaml` stay untouched. So this did not get a `docs/adr/`
-  entry, only this section (same precedent as the garment-catalog
-  feature above).
-
 ## Technique recommendations (independent per-dimension, v1)
 
 **Current state**
 
 - `src/fit_balance/technique_advice.py`'s `recommend_techniques()`
-  answers a different question than the outfit-ranking layer above.
-  Not "which whole outfit scores best," but "for each of the 4 scored
-  dimensions (`waist_definition`, `top_hip_balance`,
-  `torso_leg_balance`, `frame_scale_dev`), which garment techniques
-  help, which hurt, and which catalog items use them" — reported per
+  answers "for each of the 4 scored dimensions (`waist_definition`,
+  `top_hip_balance`, `torso_leg_balance`, `frame_scale_dev`), which
+  garment techniques help, which hurt, and which catalog items use
+  them" — reported per
   dimension, **never combined into one verdict**. `POST
   /technique-recommendations` (`api/main.py`) takes just
   `measurements` and returns a `DimensionAdviceResponse` per axis.
@@ -365,7 +321,7 @@ was considered and dropped for 0016, not added.
 - No engine change (`balance_points.py`/`scoring.py`/`effects.yaml`
   untouched, only `AXIS_RULES`/`EFFECTS_TABLE` read), so no
   `docs/adr/` entry, only this section — same presentation-layer
-  precedent as the two sections above.
+  precedent as the garment-catalog section above.
 
 **History / rationale**
 
@@ -388,26 +344,21 @@ was considered and dropped for 0016, not added.
 **Current state**
 
 - `src/fit_balance/garment_balance.py`'s `suggest_balance(balance_points,
-  item_id)` answers a third, narrower question than the two features
-  above. Not "which whole outfit scores best" (outfit recommendations).
-  Not "which techniques generally help/hurt, body-wide" (technique
-  recommendations). But "I'm set on wearing *this specific* item —
-  what does it do to my silhouette, and what else (in a different
-  slot) would offset whatever it hurts."
+  item_id)` answers a narrower question than technique
+  recommendations above. Not "which techniques generally help/hurt,
+  body-wide," but "I'm set on wearing *this specific* item — what does
+  it do to my silhouette, and what else (in a different slot) would
+  offset whatever it hurts."
 - `POST /balance-garment` (`api/main.py`) takes `measurements` + one
-  `item_id` and returns that item's own `Verdict` (no attribution
-  needed — there's only one item), plus `suggestions`: a list of
+  `item_id` and returns that item's own `Verdict`, plus `suggestions`: a list of
   `DimensionAdvice` restricted to the axes where this item scored a
   negative reason, `recommendations` filtered to the "seek"
   (opposite-sign) side, and `items` filtered to exclude the chosen
   item's own slot.
-- Deliberately sits between two things named elsewhere as out of
-  scope. It is **not** the single-item *replacement* suggestion the
-  "Garment catalog" section above defers ("recommending a specific
-  replacement item is explicitly deferred") — nothing here proposes
-  swapping the chosen item, only complementing it. And it is **not**
-  full outfit recommendation (`recommend.py`) — it only ever reasons
-  about the one item the user already committed to.
+- Deliberately **not** a single-item *replacement* suggestion —
+  nothing here proposes swapping the chosen item, only complementing
+  it. It only ever reasons about the one item the user already
+  committed to.
 - One consequence of reusing `recommend_techniques()` as-is: a
   negative reason on an axis that function doesn't report — currently
   only `shoulder_hip_balance` (`narrows_shoulder`, decision 0013; see
@@ -415,17 +366,16 @@ was considered and dropped for 0016, not added.
   produces no suggestion for that reason. Same documented gap, not a
   special case here.
 - The "other slot" filter is a deliberate v1 simplification too: it's
-  `item.slot != suggestion.slot`, not the full
-  dress-XOR-(top+bottom) valid-outfit-shape logic
-  `enumerate_outfit_combinations()` uses, since this feature only ever
-  proposes one complementary item at a time.
+  `item.slot != suggestion.slot`, with no check that the result forms
+  a valid outfit, since this feature only ever proposes one
+  complementary item at a time.
 - The web UI's `GarmentBalance.tsx` renders the item's own
   verdict/reasons next to a second `Avatar` — driven by **all** of the
-  item's reason tags, not just the positive ones. Unlike the old
-  removed picker's curated "your recommended outfit" avatar, the point
-  here is showing the item's real effect, good and bad. It reuses
+  item's reason tags, not just the positive ones, since the point is
+  showing the item's real effect, good and bad. It reuses
   `DimensionAdvice.tsx` wholesale for the suggestions list.
-- Same presentation-layer precedent as the three features above:
+- Same presentation-layer precedent as the garment catalog and
+  technique recommendations above:
   `resolve_outfit()`, `score()`, and `recommend_techniques()` are
   reused completely unchanged, no new `AXIS_RULES`/`effects.yaml`
   logic. So no `docs/adr/` entry, only this section.
@@ -452,24 +402,16 @@ was considered and dropped for 0016, not added.
 - Purely a rendering concern — `balance_points.py`, `scoring.py`, and
   `effects.yaml` are untouched.
 
-**Garment-corrected overlay — prototype, not finished, and currently
-unwired.**
+**Garment-corrected overlay — prototype, not finished.**
 
 - `Avatar` can take an `effectTags` prop and draws a second dashed
   outline on top of the body silhouette, nudging specific widths per
   tag via `avatarGeometry.ts`'s `applyEffectAdjustments()` and a
   hand-tuned `EFFECT_WIDTH_ADJUSTMENTS` table (e.g. `defines_waist` →
   waist ×0.8, `adds_volume_top` → shoulder/bust ×1.15).
-- It previously drew off a scored outfit's positive reasons. Since the
-  frontend simplification removed the manual outfit-scoring flow
-  (`result` in `App.tsx`) that fed it, `App.tsx` now renders `Avatar`
-  with no `effectTags` at all — the capability (prop, adjustment
-  table, tests) is untouched, just not currently exercised by any
-  caller. Reconnecting it would need a new source for the tags (e.g.
-  the "Technique recommendations" section's per-dimension advice), not
-  resurrecting the removed outfit picker. Kept intentionally, same
-  Phase 11 status as "Outfit recommendations" above — parked, not
-  abandoned.
+- `GarmentBalance.tsx` passes the chosen item's reason tags (positive
+  and negative) as `effectTags`. `App.tsx`'s main `Avatar` passes none,
+  so it draws the plain silhouette only.
 - Only covers tags with an obvious width-based reading: tags about
   torso/leg length (`elongates_leg`, `shortens_torso`, etc.) aren't
   represented, since those need a keypoint-position shift, not a width

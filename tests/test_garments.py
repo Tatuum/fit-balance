@@ -10,13 +10,7 @@ share an effect tag via different techniques.
 import pytest
 
 from fit_balance.balance_points import compute_womens_balance_points
-from fit_balance.garments import (
-    CATALOG,
-    UnknownGarmentItemError,
-    attribute_reasons,
-    list_items,
-    resolve_outfit,
-)
+from fit_balance.garments import CATALOG, UnknownGarmentItemError, list_items, resolve_outfit
 from fit_balance.scoring import AXIS_RULES, EFFECTS_TABLE, score
 from tests.fixtures import BROAD_SHOULDER_NARROW_HIP, BUST_DRIVEN_TOP_HEAVY, PEAR_FULLER
 
@@ -67,47 +61,36 @@ def test_resolve_outfit_raises_for_unknown_item_id():
         resolve_outfit(["not_a_real_item"])
 
 
-def test_attribution_reuses_worked_example_5():
+def test_catalog_items_reproduce_worked_example_5():
     """CURRENT_STATE.md worked example 5: pear + fuller frame, oversized top +
     skinny/straight bottom -> avoid, with both a helping and a hurting
     reason (including oversized_top hiding this body's defined waist). Same
     body, same techniques (via catalog items instead of raw technique
-    strings), plus attribution pinned to the right item."""
-    items, garment = resolve_outfit(["oversized_top", "slim_trousers"])
+    strings)."""
+    _, garment = resolve_outfit(["oversized_top", "slim_trousers"])
     assert garment.techniques == ["oversized_top", "skinny_straight"]
 
     bp = compute_womens_balance_points(PEAR_FULLER)
     verdict = score(bp, garment)
     assert verdict.recommendation == "avoid"
 
-    attributed = attribute_reasons(verdict.reasons, items)
-    by_tag = {r.tag: r.item_ids for r in attributed}
-    assert by_tag["adds_bulk"] == ["oversized_top"]
-    assert by_tag["reduces_bulk"] == ["slim_trousers"]
-    assert by_tag["hides_waist"] == ["oversized_top"]
 
-
-def test_attribution_lists_both_items_when_tags_overlap():
+def test_different_techniques_with_the_same_effect_tag_stack_not_dedupe():
     """seamed_top (vertical_detail) and slim_trousers (skinny_straight) are
     different techniques that both produce reduces_bulk. score() doesn't
     dedupe reasons by tag, so this deliberately produces TWO reduces_bulk
-    reasons, each attributing to both items — see CURRENT_STATE.md.
+    reasons — see CURRENT_STATE.md.
 
     Uses PEAR_FULLER rather than HOURGLASS_BALANCED: frame_scale_dev needs
     to actually clear the 0.05 imbalance deadzone for reduces_bulk to score
     at all (HOURGLASS_BALANCED's frame_scale_dev ≈ 0.013 sits inside it)."""
-    items, garment = resolve_outfit(["seamed_top", "slim_trousers"])
+    _, garment = resolve_outfit(["seamed_top", "slim_trousers"])
     assert garment.techniques == ["vertical_detail", "skinny_straight"]
 
     bp = compute_womens_balance_points(PEAR_FULLER)
     verdict = score(bp, garment)
     reduces_bulk_reasons = [r for r in verdict.reasons if r.tag == "reduces_bulk"]
     assert len(reduces_bulk_reasons) == 2
-
-    attributed = attribute_reasons(verdict.reasons, items)
-    for reason in attributed:
-        if reason.tag == "reduces_bulk":
-            assert set(reason.item_ids) == {"seamed_top", "slim_trousers"}
 
 
 def test_catalog_has_no_empty_technique_lists():
@@ -127,16 +110,13 @@ def test_structured_blazer_fires_adds_volume_top_for_broad_shoulders():
     since decision 0009 but had no producer since decision 0011 removed
     oversized_top's. A broad-shouldered, narrow-hipped body (shoulder-driven
     top_hip_balance, not bust-driven) should avoid adding more top volume."""
-    items, garment = resolve_outfit(["structured_blazer"])
+    _, garment = resolve_outfit(["structured_blazer"])
     assert garment.techniques == ["structured_shoulder"]
 
     bp = compute_womens_balance_points(BROAD_SHOULDER_NARROW_HIP)
     verdict = score(bp, garment)
     assert verdict.recommendation == "avoid"
-
-    attributed = attribute_reasons(verdict.reasons, items)
-    by_tag = {r.tag: r.item_ids for r in attributed}
-    assert by_tag["adds_volume_top"] == ["structured_blazer"]
+    assert "adds_volume_top" in {r.tag for r in verdict.reasons}
 
 
 def test_scoop_neck_fires_narrows_shoulder_for_broad_shoulders():

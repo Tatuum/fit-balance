@@ -10,12 +10,10 @@ from .technique_advice import DimensionAdvice, recommend_techniques
 @dataclass(frozen=True)
 class GarmentBalanceAdvice:
     """One chosen catalog item's own verdict on this body, plus which
-    OTHER-slot catalog items would counteract its negative reasons. Distinct
-    from two things CURRENT_STATE.md already documents: it's not the single-item
-    *replacement* suggestion ("Garment catalog" section, still deferred) --
-    nothing here proposes swapping the chosen item -- and it's not full
-    *outfit* recommendation (recommend.py) -- it only ever reasons about the
-    one item the user already committed to."""
+    OTHER-slot catalog items would counteract its negative reasons. It's
+    not a single-item *replacement* suggestion -- nothing here proposes
+    swapping the chosen item -- it only ever reasons about the one item
+    the user already committed to."""
 
     item: GarmentItem
     verdict: Verdict
