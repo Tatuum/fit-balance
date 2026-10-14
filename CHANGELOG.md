@@ -1,6 +1,11 @@
 # Changelog
 
+## 2026-10-14
+- Remove unused scoreGarment wrapper and Vite template leftovers
+- Remove outfit scoring and recommendations: no caller since the UI simplification
+
 ## 2026-10-07
+- Update CHANGELOG.md for PRs #8 and #9 (#10)
 - Remove the CLI: unused, duplicated by the API (#9)
 - Update CHANGELOG.md for PRs #6 and #7 (#8)
 - Document changelog script's incremental-update assumption (#7)

@@ -25,21 +25,17 @@ from.
   Measurement/garment form → API → geometry-only avatar. Verified:
   manually loaded the web app and confirmed the avatar updates with
   measurement changes. (docs/project_docs/phase5-avatar.md)
-- [x] **Phase 6 — Manual garment-item catalog + outfit scoring with
-  attribution.** (docs/plans/0001)
-- [x] **Phase 7 — Outfit recommendations.** Ranking layer over the
-  existing outfit scoring. (docs/plans/0002)
+- [x] **Phase 6 — Manual garment-item catalog.** (docs/plans/0001)
 - [x] **Phase 8 — Single-garment "try it on" balance advice.**
   (docs/plans/0005)
 - [x] **Phase 9 — Per-dimension technique recommendations** with
   garment examples. (docs/plans/0006)
 - [x] **Phase 10 — Discrete severity-level scoring**, replacing
   continuous cross-axis summation. (docs/plans/0007, ADR 0010)
-- [~] **Phase 11 — Hourglass silhouette goal:** ranked outfits +
-  corrected overlay avatar. Backend (`/recommend-outfits`) and the
-  avatar overlay spike are kept intentionally, not abandoned — parked
-  with no frontend UI until there's a UI concept that adds this
-  without cluttering the main flow. (docs/plans/0009)
+- [~] **Phase 11 — Corrected overlay avatar (spike).** A dashed
+  outline sketching a garment's effect on the silhouette, drawn in the
+  single-garment panel. Hand-tuned, not yet validated for visual
+  accuracy. (docs/plans/0009)
 - [ ] **Phase 12 — Real, LLM-classified garment catalog**, replacing
   the hand-authored `garments.yaml`. Deferred. (docs/plans/0003)
 - [~] **Phase 13 — Personal-fit spike:** photo + self-reported tags,
