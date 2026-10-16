@@ -4,6 +4,13 @@ import { DimensionAdvice } from './components/DimensionAdvice'
 import { GarmentBalance } from './components/GarmentBalance'
 import { MeasurementGuide } from './components/MeasurementGuide'
 import { getTechniqueRecommendations } from './lib/api'
+import {
+  applyInput,
+  initialFormState,
+  MEASUREMENT_RANGES,
+  parseMeasurement,
+  rangeMessage,
+} from './lib/measurements'
 import type { Measurements, TechniqueRecommendationsResponse } from './lib/types'
 import './App.css'
 
@@ -33,8 +40,13 @@ const DEFAULT_MEASUREMENTS: Measurements = {
   height: 165.1,
 }
 
+const MEASUREMENT_KEYS = Object.keys(DEFAULT_MEASUREMENTS) as (keyof Measurements)[]
+
 function App() {
-  const [measurements, setMeasurements] = useState<Measurements>(DEFAULT_MEASUREMENTS)
+  // `form.measurements` is the last valid set (what the avatar, advice and
+  // GarmentBalance use); `form.drafts` is the text as typed — see FormState.
+  const [form, setForm] = useState(() => initialFormState(DEFAULT_MEASUREMENTS))
+  const { measurements, drafts } = form
   const [techniqueAdvice, setTechniqueAdvice] = useState<TechniqueRecommendationsResponse | null>(
     null,
   )
@@ -56,8 +68,8 @@ function App() {
   }, [measurements])
 
   const updateMeasurement = (key: keyof Measurements) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value)
-    setMeasurements((prev) => ({ ...prev, [key]: value }))
+    const text = e.target.value
+    setForm((prev) => applyInput(prev, key, text))
   }
 
   return (
@@ -73,19 +85,29 @@ function App() {
           <fieldset>
             <legend>Measurements (cm)</legend>
             <MeasurementGuide />
-            {(Object.keys(DEFAULT_MEASUREMENTS) as (keyof Measurements)[]).map((key) => (
-              <label key={key}>
-                <span className="help-icon" title={MEASUREMENT_HELP[key]}>
-                  {key} <span aria-hidden="true">ⓘ</span>
-                </span>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={measurements[key]}
-                  onChange={updateMeasurement(key)}
-                />
-              </label>
-            ))}
+            {MEASUREMENT_KEYS.map((key) => {
+              const invalid = parseMeasurement(key, drafts[key]) === null
+              return (
+                <label key={key}>
+                  <span className="help-icon" title={MEASUREMENT_HELP[key]}>
+                    {key} <span aria-hidden="true">ⓘ</span>
+                  </span>
+                  <span className="field">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min={MEASUREMENT_RANGES[key].min}
+                      max={MEASUREMENT_RANGES[key].max}
+                      value={drafts[key]}
+                      onChange={updateMeasurement(key)}
+                      aria-invalid={invalid}
+                      className={invalid ? 'invalid' : undefined}
+                    />
+                    {invalid && <span className="field-error">{rangeMessage(key)}</span>}
+                  </span>
+                </label>
+              )
+            })}
           </fieldset>
         </div>
 

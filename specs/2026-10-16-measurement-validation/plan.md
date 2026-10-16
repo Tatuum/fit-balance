@@ -31,9 +31,13 @@ and adds form feedback. Dependency direction is unchanged.
     empty string, a non-number, or a value outside the range (inclusive).
 - New `src/lib/measurements.test.ts`: in range, both boundaries, just
   outside each boundary, empty string, non-numeric text, decimals.
-- `src/App.tsx`: add a second state, `drafts`, holding each field's text as
-  typed. `onChange` stores the text in `drafts`, and updates `measurements`
-  only when `parseMeasurement` returns a number. The input shows
+- `lib/measurements.ts` also exports `FormState` (`{ drafts, measurements }`),
+  `initialFormState` and `applyInput(state, key, text)`: the draft always
+  takes the typed text, `measurements` changes only when `parseMeasurement`
+  returns a number, and an invalid edit returns the same `measurements`
+  object so effects do not re-run. Tested in `measurements.test.ts`.
+- `src/App.tsx`: hold one `form` state (`initialFormState`) instead of
+  `measurements` alone, and update it with `applyInput`. The input shows
   `drafts[key]`, carries `min`/`max`, and when its draft is invalid gets
   `aria-invalid` and a short message ("Enter 40–180 cm"). `measurements`
   stays the last valid set, so `Avatar`, the advice effect and
