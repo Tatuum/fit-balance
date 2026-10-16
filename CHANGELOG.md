@@ -1,8 +1,7 @@
 # Changelog
 
 ## 2026-10-14
-- Remove unused scoreGarment wrapper and Vite template leftovers
-- Remove outfit scoring and recommendations: no caller since the UI simplification
+- Remove unused outfit features and frontend leftovers (#11)
 
 ## 2026-10-07
 - Update CHANGELOG.md for PRs #8 and #9 (#10)

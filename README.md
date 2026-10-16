@@ -81,11 +81,11 @@ This is one of five worked examples encoded as regression tests — see
 ```
 fit-balance/
 ├── src/fit_balance/  the engine — balance_points.py, effects.yaml,
-│                     scoring.py, plus garments/recommend/technique_advice
-│                     presentation layers
+│                     scoring.py, plus garments/technique_advice/
+│                     garment_balance presentation layers
 ├── api/              FastAPI app exposing the engine over HTTP
 ├── web/              React + TS frontend (measurements, silhouette,
-│                     technique advice)
+│                     technique advice, single-garment verdicts)
 ├── tests/            pytest suite — includes the 5 worked examples as
 │                     regression tests
 ├── specs/            architecture, mission, stack, and roadmap docs,

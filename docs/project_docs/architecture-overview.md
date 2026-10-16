@@ -27,8 +27,8 @@ sync with that file, it wins.
                                       │ JSON over HTTP
                     ┌─────────────────┴─────────────────┐
  phase 5            │   web/ — React + TS (Vite)        │
- (web avatar)       │   form → API → parametric SVG     │
-                    │   avatar rendered from verdict    │
+ (web avatar)       │   form → API → advice/verdicts;   │
+                    │   SVG avatar drawn from measures  │
                     └───────────────────────────────────┘
 ```
 
@@ -55,8 +55,10 @@ own.
 | Branch protection | GitHub branch protection on `main` | Requires all 4 CI checks to pass before merging, enforced for admins too — makes the CI gate mandatory, not advisory; no direct pushes to `main` |
 | API (phase 4) | `FastAPI` | Pairs directly with pydantic (already in use) and gets OpenAPI docs for free |
 | Frontend (phase 5) | `React` + `TypeScript` + `Vite` | SVG avatar is a natural fit for React's component model; Vite keeps tooling minimal |
+| Frontend tests | `vitest` | Unit tests for the pure frontend code (avatar geometry, garment grouping, chart badge text); run by `check.sh` and CI |
+| Frontend lint | `oxlint` | `npm run lint` in `web/`; run by hand, not part of `check.sh` or CI |
 | Multimodal LLM API (future development, not yet a committed phase) | TBD — a vision-capable LLM, called directly, no orchestration framework | Garment-photo tag extraction, grounded explanation generation, tool-calling assistant |
 | Database (future development, not yet a committed phase) | `SQLite` (Postgres later if needed) | Persists closet items — tags + verdict only, no images, no vector store. Single user for now, no accounts; a file-based DB avoids running a server for that |
 
-- Phase 4+ libraries are not installed until their phase begins —
-  phases 1–2 have zero web dependencies.
+- The `fit_balance` library has zero web dependencies: `FastAPI` and
+  `uvicorn` live in a separate `api` dependency group in `pyproject.toml`.

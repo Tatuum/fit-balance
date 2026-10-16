@@ -74,9 +74,9 @@ const describeBySign = (positive: string, negative: string) => (value: number, b
 /**
  * Text for the badge on whichever row main_concern names. A favorable
  * waist_definition is an asset, not a concern (see balance_points.py's
- * main_concern() docstring, and cli.py's matching special-case) — labeling
- * it "main concern" right next to "an asset" is self-contradictory, so that
- * one case gets its own badge text. Every other axis never carries a
+ * main_concern() docstring) — labeling it "main concern" right next to
+ * "an asset" is self-contradictory, so that one case gets its own badge
+ * text. Every other axis never carries a
  * favorable/asset framing, so it always reads as "main concern".
  */
 export function mainConcernBadgeText(axis: SingleAxis, balanced: boolean): string {

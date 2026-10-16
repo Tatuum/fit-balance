@@ -60,6 +60,7 @@ updates with measurement changes.
 
 - `Avatar.tsx` also accepts an optional `effectTags` prop that draws a
   dashed "corrected line" overlay via `applyEffectAdjustments()`. That
-  overlay is a later, spike-quality addition (Phase 11 — hourglass
-  silhouette goal, unwired) hand-tuned for visual legibility only, not
-  part of what this phase shipped — out of scope for this doc.
+  overlay is a later, spike-quality addition (Phase 11 — corrected
+  overlay avatar, drawn only in the single-garment panel's `Avatar`)
+  hand-tuned for visual legibility only, not part of what this phase
+  shipped — out of scope for this doc.

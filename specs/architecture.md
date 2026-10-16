@@ -22,8 +22,8 @@
 ## Web
 
 - React + TypeScript + Vite
-- Parametric SVG avatar rendered as a pure function of balance-point
-  values — no photorealism, no image assets
+- Parametric SVG avatar drawn to scale from the entered measurements
+  (decision 0004) — no photorealism, no image assets
 
 ## Non-goals
 
@@ -39,12 +39,15 @@ Three layers, one direction of dependency:
   `Measurements`, `GarmentAttributes`, `Verdict`, `Reason`),
   `balance_points.py` (pure functions, women's v0), `effects.yaml`
   (technique → effect-tag data), `scoring.py` (`(verdict, reasons[]) =
-  score(...)`). Imported directly by the layer above — no network
-  boundary.
+  score(...)`). Feature layers built on the engine without changing it:
+  `garments.py` + `garments.yaml` (catalog, phase 6),
+  `garment_balance.py` (phase 8), `technique_advice.py` (phase 9).
+  Imported directly by the layer above — no network boundary.
 - **`api/`** (FastAPI service, phase 4) — reuses `schemas.py` models
   unchanged as request/response bodies. Talks to `web/` over JSON/HTTP.
-- **`web/`** (React + TS/Vite, phase 5) — form → API → parametric SVG
-  avatar rendered from the verdict.
+- **`web/`** (React + TS/Vite, phase 5) — measurements form → API →
+  advice and verdicts, plus a parametric SVG avatar drawn from the
+  measurements.
 
 ## Key property
 

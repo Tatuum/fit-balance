@@ -12,7 +12,8 @@ engine core → engine tests/caveats → presentation-layer features, each
 appearing after whatever it reuses (e.g. "Technique recommendations"
 before "Single-garment balance advice", which calls it, even though
 single-garment advice shipped first) → Avatar last, since rendering has
-no engine dependency → "Build order" closes the doc as a status index.
+no engine dependency → "Build order" closes the doc as a pointer to the
+roadmap.
 
 ## Pitch
 
@@ -429,24 +430,5 @@ was considered and dropped for 0016, not added.
 
 ## Build order — status
 
-See `specs/architecture.md` for the full architecture/stack decisions and per-stage file
-layout.
-
-1. **Done.** Pure-function balance-point calculator + the 5 worked examples
-   as automated tests. `src/fit_balance/balance_points.py`,
-   `tests/test_balance_points.py`.
-2. **Done.** `effects.yaml` + scoring function returning `(verdict,
-   reasons[])`. `src/fit_balance/effects.yaml`, `src/fit_balance/scoring.py`,
-   `tests/test_scoring.py`.
-3. **Done.** FastAPI `/score` endpoint (`api/main.py`) + a React/TS
-   parametric SVG avatar (`web/`, pure geometry in
-   `web/src/lib/avatarGeometry.ts`) — no photorealism, per the
-   original plan.
-4. **Not started.** Garment-photo → attribute extraction via pose
-   estimation + segmentation. "Upload a real item, tell me if it suits
-   me" is now handled a different way: a private per-user photo-upload
-   closet using a multimodal LLM call (not CV) to extract technique
-   tags, reviewed by the user before scoring. See `specs/architecture.md`'s
-   "Future development" section for the early direction (not committed).
-6. **Not started.** Multi-garment outfit parsing for "recreate this
-   inspo look, adjusted for my proportions."
+Phase-by-phase build status lives in `specs/roadmap.md`. See
+`specs/architecture.md` for the architecture and stack decisions.
