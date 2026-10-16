@@ -22,8 +22,8 @@
 ## Web
 
 - React + TypeScript + Vite
-- Parametric SVG avatar rendered as a pure function of balance-point
-  values — no photorealism, no image assets
+- Parametric SVG avatar drawn to scale from the entered measurements
+  (decision 0004) — no photorealism, no image assets
 
 ## Non-goals
 
@@ -43,8 +43,9 @@ Three layers, one direction of dependency:
   boundary.
 - **`api/`** (FastAPI service, phase 4) — reuses `schemas.py` models
   unchanged as request/response bodies. Talks to `web/` over JSON/HTTP.
-- **`web/`** (React + TS/Vite, phase 5) — form → API → parametric SVG
-  avatar rendered from the verdict.
+- **`web/`** (React + TS/Vite, phase 5) — measurements form → API →
+  advice and verdicts, plus a parametric SVG avatar drawn from the
+  measurements.
 
 ## Key property
 

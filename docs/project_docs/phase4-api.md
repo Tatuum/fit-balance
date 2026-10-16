@@ -13,7 +13,7 @@ returns a `ScoreResponse`:
 ```python
 class ScoreResponse(BaseModel):
     balance_points: dict[str, float]
-    main_concern: str | None
+    main_concern: list[str]
     verdict: Verdict
 ```
 

@@ -27,8 +27,8 @@ sync with that file, it wins.
                                       │ JSON over HTTP
                     ┌─────────────────┴─────────────────┐
  phase 5            │   web/ — React + TS (Vite)        │
- (web avatar)       │   form → API → parametric SVG     │
-                    │   avatar rendered from verdict    │
+ (web avatar)       │   form → API → advice/verdicts;   │
+                    │   SVG avatar drawn from measures  │
                     └───────────────────────────────────┘
 ```
 
