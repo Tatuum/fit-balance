@@ -142,6 +142,12 @@ worked examples and tests, not by restoring the old code as-is.
   waist/midsection-clinging (bad for an undefined waist). Found via a
   worked example, not chased further by hand. Better to let real user
   disagreement drive which tags need splitting next.
+- Measurement inputs are range-checked: every `Measurements` field has
+  an inclusive range in `src/fit_balance/schemas.py` (for example height
+  120–230 cm), and out-of-range input is a 422 at the API. The bounds
+  are wide sanity limits chosen by the project owner, not survey data,
+  so they reject typos and impossible values, not unusual bodies.
+  `web/src/lib/measurements.ts` mirrors them for form feedback.
 - `torso_leg` measurement convention (researched via web search against
   ISO 8559 — the international garment-measurement standard — and
   tailoring practice): `torso` = **back waist length** (nape of neck /

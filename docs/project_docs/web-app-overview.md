@@ -8,7 +8,8 @@ around it. The reasoning behind the scoring and advice the page shows
 lives in `CURRENT_STATE.md`, not here.
 
 **Files:** `web/src/App.tsx`, `web/src/components/*.tsx`,
-`web/src/lib/api.ts`, `web/src/lib/types.ts`, `web/src/lib/garments.ts`
+`web/src/lib/api.ts`, `web/src/lib/types.ts`, `web/src/lib/garments.ts`,
+`web/src/lib/measurements.ts`
 
 ### 1. Component tree
 
@@ -17,7 +18,7 @@ lives in `CURRENT_STATE.md`, not here.
 else receives them as props.
 
 ```
-App                        owns: measurements, techniqueAdvice, techniqueAdviceError
+App                        owns: form {measurements, drafts}, techniqueAdvice, techniqueAdviceError
  ├─ MeasurementGuide       static "how to measure" diagram + caption (no props)
  ├─ Avatar                 props: measurements → to-scale silhouette
  ├─ DimensionAdvice        props: dimensions  (from POST /technique-recommendations)
@@ -30,8 +31,10 @@ BalancePointsChart         built and tested, rendered nowhere
 ```
 
 The page has two columns. The left holds a `fieldset` of seven
-`type="number"` inputs (`step="0.1"`), one per field of `Measurements`,
-starting from `DEFAULT_MEASUREMENTS` in `App.tsx`. The right holds the
+`type="number"` inputs (`step="0.1"`, with `min` and `max`), one per
+field of `Measurements`, starting from `DEFAULT_MEASUREMENTS` in
+`App.tsx`. A field that is empty or out of range is marked and shows
+"Enter 120–230 cm" style text; see section 3. The right holds the
 avatar, a "What to look for" section (`DimensionAdvice`), and the
 "Try on a garment" section (`GarmentBalance`).
 
@@ -39,7 +42,7 @@ avatar, a "What to look for" section (`DimensionAdvice`), and the
 
 | Where | State | Starts as | Changed by |
 |---|---|---|---|
-| `App` | `measurements` | `DEFAULT_MEASUREMENTS` | the seven inputs' `onChange` |
+| `App` | `form` = `{ measurements, drafts }` | `initialFormState(DEFAULT_MEASUREMENTS)` | the seven inputs' `onChange`, through `applyInput` |
 | `App` | `techniqueAdvice` | `null` | the debounced `/technique-recommendations` call |
 | `App` | `techniqueAdviceError` | `null` | same call, on failure |
 | `GarmentBalance` | `garments` | `[]` | `GET /garments`, once on mount |
@@ -49,7 +52,7 @@ avatar, a "What to look for" section (`DimensionAdvice`), and the
 Two flows run from one keystroke in a measurement field:
 
 ```
-keystroke → setMeasurements → App re-renders
+keystroke → setForm(applyInput) → App re-renders (a new valid value changes form.measurements)
    ├─ Avatar redraws immediately (pure maths, no network)
    ├─ App effect: wait 500 ms → POST /technique-recommendations → DimensionAdvice
    └─ GarmentBalance effect: if a garment is selected,
@@ -64,8 +67,14 @@ With no garment selected, the second effect clears `advice` and `error`
 and sends nothing.
 
 `updateMeasurement(key)` in `App.tsx` returns the `onChange` handler for
-one field. It converts the input's text with `Number(...)` and replaces
-only that key: `setMeasurements((prev) => ({ ...prev, [key]: value }))`.
+one field. It passes the typed text to `applyInput` in
+`lib/measurements.ts`: `setForm((prev) => applyInput(prev, key, text))`.
+`form.measurements` is always the last valid set and is what everything
+else reads; `form.drafts` holds each field's text as typed, so a field
+can be empty or out of range without that value reaching the avatar or
+the API. `applyInput` returns the same `measurements` object when the
+text is invalid, so the advice effect does not re-run and no request is
+sent.
 
 ### 3. API client and types
 
@@ -88,6 +97,15 @@ because no component calls it.
 on). It is not generated from the Python models and not checked at
 runtime, so a change to a response model in `api/main.py` or
 `schemas.py` needs the matching edit here.
+
+`lib/measurements.ts` holds the input rules. `MEASUREMENT_RANGES` gives
+each field's inclusive range in cm (for example height 120 to 230),
+mirroring the `Field(ge=..., le=...)` bounds on `Measurements` in
+`schemas.py`, which answers 422 outside them. `parseMeasurement(key,
+text)` returns the number, or `null` for an empty field, non-numeric
+text or an out-of-range value; `rangeMessage(key)` builds the text shown
+under a marked field. The bounds are wide sanity limits chosen by the
+project owner, not survey data.
 
 ### 4. Components
 
@@ -127,8 +145,9 @@ rendered by any component.
 ### Testing / verification
 
 `vitest` covers the pure code only: `lib/avatarGeometry.test.ts`,
-`lib/garments.test.ts` and `components/BalancePointsChart.test.ts` (the
-badge text helper). There are no render tests for `App`, `GarmentBalance`
+`lib/garments.test.ts`, `lib/measurements.test.ts` (the range checks and
+`applyInput`) and `components/BalancePointsChart.test.ts` (the badge text
+helper). There are no render tests for `App`, `GarmentBalance`
 or `DimensionAdvice`. `./check.sh` runs `tsc --noEmit` and `vitest run`
 for `web/`. Manual verification: run the API and `npm run dev`, change a
 measurement, and confirm the avatar and advice update; pick a garment and
@@ -137,9 +156,10 @@ confirm the verdict appears. `npm run lint` (oxlint) is not part of
 
 ### Gotchas / open questions
 
-- **Cleared input becomes 0.** `Number("")` is `0`, so emptying a field
-  sends `0` to the API and to the avatar maths. A `0` height makes the
-  scale in `computeAvatarGeometry` infinite.
+- **Ranges are kept in two places.** `MEASUREMENT_RANGES` in
+  `lib/measurements.ts` and the bounds in `schemas.py` must match; the
+  API enforces its own, so a drift shows up as a 422 for a value the form
+  accepted.
 - **Debounce doesn't cancel an in-flight request.** The cleanup clears
   the timer only. A slow earlier response can arrive after a newer one
   and overwrite it, in both effects.
