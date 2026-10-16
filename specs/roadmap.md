@@ -2,9 +2,8 @@
 
 Full project history, renumbered as small, independently-shippable
 phases. `[x]` shipped, `[~]` partially shipped / in progress, `[ ]`
-not started. See `CURRENT_STATE.md`'s "Build order — status" and
-`docs/plans/README.md` for the pre-`specs/` record these are drawn
-from.
+not started. See `docs/plans/README.md` for the pre-`specs/` record
+these are drawn from.
 
 - [x] **Phase 1 — Balance-point calculator + worked-example tests.**
   Pure functions for the women's v0 formula set; the 5 CURRENT_STATE.md worked
@@ -45,4 +44,6 @@ from.
 AI-assisted features (photo-upload closet, grounded explanations, a
 personal RAG corpus, a tool-calling assistant) aren't committed
 phases yet — see `specs/architecture.md`'s "Future development"
-section for the early direction.
+section for the early direction. Also unscheduled: multi-garment
+outfit parsing, to "recreate this inspo look, adjusted for my
+proportions."

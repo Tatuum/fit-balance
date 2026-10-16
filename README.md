@@ -85,7 +85,7 @@ fit-balance/
 │                     garment_balance presentation layers
 ├── api/              FastAPI app exposing the engine over HTTP
 ├── web/              React + TS frontend (measurements, silhouette,
-│                     technique advice)
+│                     technique advice, single-garment verdicts)
 ├── tests/            pytest suite — includes the 5 worked examples as
 │                     regression tests
 ├── specs/            architecture, mission, stack, and roadmap docs,
