@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-16
+- Add web-app-overview.md and fix stale docs (#12)
+
 ## 2026-10-14
 - Remove unused outfit features and frontend leftovers (#11)
 
