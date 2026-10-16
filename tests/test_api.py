@@ -1,8 +1,10 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
 from fit_balance.balance_points import compute_womens_balance_points
 from fit_balance.garment_balance import suggest_balance
+from fit_balance.schemas import Measurements
 from tests.fixtures import (
     APPLE_LONG_TORSO,
     BROAD_SHOULDER_NARROW_HIP,
@@ -11,6 +13,63 @@ from tests.fixtures import (
 )
 
 client = TestClient(app)
+
+
+def _bounds(field: str) -> tuple[float, float]:
+    """The (min, max) a Measurements field declares, read off the model so
+    these tests follow the ranges instead of repeating them."""
+    low = high = None
+    for meta in Measurements.model_fields[field].metadata:
+        low = getattr(meta, "ge", low)
+        high = getattr(meta, "le", high)
+    assert low is not None and high is not None, f"{field} has no range"
+    return low, high
+
+
+MEASUREMENT_FIELDS = list(Measurements.model_fields)
+
+
+def _technique_status(**override: float) -> int:
+    measurements = {**HOURGLASS_BALANCED.model_dump(), **override}
+    return client.post(
+        "/technique-recommendations", json={"measurements": measurements}
+    ).status_code
+
+
+@pytest.mark.parametrize("field", MEASUREMENT_FIELDS)
+def test_measurement_just_below_min_is_rejected(field):
+    low, _ = _bounds(field)
+    assert _technique_status(**{field: low - 0.1}) == 422
+
+
+@pytest.mark.parametrize("field", MEASUREMENT_FIELDS)
+def test_measurement_just_above_max_is_rejected(field):
+    _, high = _bounds(field)
+    assert _technique_status(**{field: high + 0.1}) == 422
+
+
+@pytest.mark.parametrize("field", MEASUREMENT_FIELDS)
+def test_measurement_bounds_are_inclusive(field):
+    low, high = _bounds(field)
+    assert _technique_status(**{field: low}) == 200
+    assert _technique_status(**{field: high}) == 200
+
+
+def test_zero_height_is_a_422_not_a_server_error():
+    """height=0 used to reach compute_womens_balance_points and raise
+    ZeroDivisionError (a 500)."""
+    assert _technique_status(height=0) == 422
+
+
+def test_score_endpoint_rejects_out_of_range_measurements():
+    response = client.post(
+        "/score",
+        json={
+            "measurements": {**HOURGLASS_BALANCED.model_dump(), "waist": 1},
+            "garment": {"techniques": ["sheath_bodycon"]},
+        },
+    )
+    assert response.status_code == 422
 
 
 def test_score_endpoint_matches_engine_for_example_1():
