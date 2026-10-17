@@ -74,7 +74,7 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit -p .
+        run: npx tsc -b
 
       - name: Run vitest
         run: npx vitest run

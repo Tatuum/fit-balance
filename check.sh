@@ -14,7 +14,7 @@ echo "== mypy =="
 uv run mypy src api
 
 echo "== tsc (web) =="
-(cd web && npx tsc --noEmit -p .)
+(cd web && npx tsc -b)
 
 echo "== vitest (web) =="
 (cd web && npx vitest run)
