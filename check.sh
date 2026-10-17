@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Single gate for "did this actually work": Python tests + lint, frontend
-# typecheck + tests. Run before calling any change done.
+# typecheck + lint + tests. Run before calling any change done.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -14,7 +14,10 @@ echo "== mypy =="
 uv run mypy src api
 
 echo "== tsc (web) =="
-(cd web && npx tsc --noEmit -p .)
+(cd web && npx tsc -b)
+
+echo "== oxlint (web) =="
+(cd web && npm run lint)
 
 echo "== vitest (web) =="
 (cd web && npx vitest run)

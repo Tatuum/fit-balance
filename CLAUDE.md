@@ -24,9 +24,12 @@ balance points — never a black-box shape label.
 - `uv run pytest` — Python test suite.
 - `uv run ruff check .` — Python lint.
 - `uv run mypy src api` — Python type check.
-- `npx tsc --noEmit -p .` (from `web/`) — frontend typecheck.
+- `npx tsc -b` (from `web/`) — frontend typecheck. Not `tsc --noEmit
+  -p .`: the root `web/tsconfig.json` only references the real configs,
+  so that command checks nothing.
+- `npm run lint` (from `web/`) — frontend lint (`oxlint`, warnings fail).
 - `npx vitest run` (from `web/`) — frontend tests.
-- `./check.sh` — runs all five; the one gate before calling any change
+- `./check.sh` — runs all six; the one gate before calling any change
   done.
 
 **Automated gates**
