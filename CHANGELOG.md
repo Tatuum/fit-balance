@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026-10-16
+- Validate measurement inputs: 422 at the API, marked fields in the form (#14)
+- Update CHANGELOG.md for PR #12 (#13)
 - Add web-app-overview.md and fix stale docs (#12)
 
 ## 2026-10-14
