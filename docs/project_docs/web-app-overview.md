@@ -9,7 +9,7 @@ lives in `CURRENT_STATE.md`, not here.
 
 **Files:** `web/src/App.tsx`, `web/src/components/*.tsx`,
 `web/src/lib/api.ts`, `web/src/lib/types.ts`, `web/src/lib/garments.ts`,
-`web/src/lib/measurements.ts`
+`web/src/lib/measurements.ts`, `web/src/lib/debouncedRequest.ts`
 
 ### 1. Component tree
 
@@ -59,9 +59,12 @@ keystroke → setForm(applyInput) → App re-renders (a new valid value changes 
       wait 500 ms → POST /balance-garment → verdict, reasons, overlay avatar
 ```
 
-Both effects use the same pattern: `setTimeout(..., 500)` started by the
-effect and `clearTimeout` returned as its cleanup, so a burst of typing
-produces one request after the user stops. The effect re-runs whenever
+Both effects call `debouncedRequest` (`lib/debouncedRequest.ts`) and
+return its cancel function as the effect's cleanup. It waits 500 ms
+before sending, and cancelling also makes a request that is already in
+flight report nothing. So a burst of typing produces one request after
+the user stops, and a slow older answer can never overwrite a newer one.
+The effect re-runs whenever
 `measurements` changes (and, in `GarmentBalance`, `selectedItemId`).
 With no garment selected, the second effect clears `advice` and `error`
 and sends nothing.
@@ -146,8 +149,9 @@ rendered by any component.
 
 `vitest` covers the pure code only: `lib/avatarGeometry.test.ts`,
 `lib/garments.test.ts`, `lib/measurements.test.ts` (the range checks and
-`applyInput`) and `components/BalancePointsChart.test.ts` (the badge text
-helper). There are no render tests for `App`, `GarmentBalance`
+`applyInput`), `lib/debouncedRequest.test.ts` (timing and stale answers,
+with fake timers) and `components/BalancePointsChart.test.ts` (the badge
+text helper). There are no render tests for `App`, `GarmentBalance`
 or `DimensionAdvice`. `./check.sh` runs `tsc --noEmit` and `vitest run`
 for `web/`. Manual verification: run the API and `npm run dev`, change a
 measurement, and confirm the avatar and advice update; pick a garment and
@@ -160,9 +164,6 @@ confirm the verdict appears. `npm run lint` (oxlint) is not part of
   `lib/measurements.ts` and the bounds in `schemas.py` must match; the
   API enforces its own, so a drift shows up as a 422 for a value the form
   accepted.
-- **Debounce doesn't cancel an in-flight request.** The cleanup clears
-  the timer only. A slow earlier response can arrive after a newer one
-  and overwrite it, in both effects.
 - **Hand-kept copies of backend values.** `BalancePointsChart.tsx`
   mirrors `IMBALANCE_DEADZONE = 0.05` and the waist threshold `0.15`
   from the Python engine, and `GarmentBalance.tsx`'s `AXIS_LABELS`
