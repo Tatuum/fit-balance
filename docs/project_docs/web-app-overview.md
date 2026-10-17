@@ -169,9 +169,6 @@ confirm the verdict appears. `npm run lint` (oxlint) is not part of
   repeats the labels in `technique_advice.py`'s `DIMENSIONS` plus one for
   `shoulder_hip_balance`. Each carries a "keep in sync" comment, but
   nothing enforces it.
-- **Score formatting.** The verdict's `score` is an integer since decision
-  [0010](../adr/0010-discrete-severity-level-scoring.md), but the panel
-  prints it with `toFixed(3)`.
 - **Lint warnings.** oxlint reports `GarmentBalance` calling a setter
   synchronously inside an effect, and `BalancePointsChart` exporting a
   non-component alongside a component.

@@ -92,8 +92,7 @@ export function GarmentBalance({ measurements }: GarmentBalanceProps) {
         <div className="garment-balance-result">
           <Avatar measurements={measurements} effectTags={advice.verdict.reasons.map((r) => r.tag)} />
           <p className={`verdict verdict-${advice.verdict.recommendation}`}>
-            {RECOMMENDATION_LABEL[advice.verdict.recommendation]} (score:{' '}
-            {advice.verdict.score.toFixed(3)})
+            {RECOMMENDATION_LABEL[advice.verdict.recommendation]} (score: {advice.verdict.score})
           </p>
           <ul className="reasons">
             {advice.verdict.reasons.map((reason) => (
