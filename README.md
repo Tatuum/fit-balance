@@ -122,7 +122,7 @@ npm run test     # vitest
 **Everything, gated in one script:**
 
 ```bash
-./check.sh   # pytest + ruff + mypy + tsc -b + vitest — the bar for "done"
+./check.sh   # pytest + ruff + mypy + tsc -b + oxlint + vitest — the bar for "done"
 ```
 
 ## Status

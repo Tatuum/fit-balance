@@ -27,8 +27,9 @@ balance points — never a black-box shape label.
 - `npx tsc -b` (from `web/`) — frontend typecheck. Not `tsc --noEmit
   -p .`: the root `web/tsconfig.json` only references the real configs,
   so that command checks nothing.
+- `npm run lint` (from `web/`) — frontend lint (`oxlint`, warnings fail).
 - `npx vitest run` (from `web/`) — frontend tests.
-- `./check.sh` — runs all five; the one gate before calling any change
+- `./check.sh` — runs all six; the one gate before calling any change
   done.
 
 **Automated gates**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mainConcernBadgeText } from './BalancePointsChart'
+import { mainConcernBadgeText } from './balanceChart'
 
 describe('mainConcernBadgeText', () => {
   it('labels a favorable (balanced) waist_definition as a key asset, not a concern', () => {

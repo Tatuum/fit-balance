@@ -48,12 +48,19 @@ export function GarmentBalance({ measurements }: GarmentBalanceProps) {
       .catch((err) => setGarmentsError(err instanceof Error ? err.message : String(err)))
   }, [])
 
-  useEffect(() => {
-    if (!selectedItemId) {
+  // Clearing the selection drops the shown result right here, in the event
+  // that caused it, rather than in the effect below. Switching straight to
+  // another garment keeps the old result until the new one arrives.
+  const selectItem = (itemId: string) => {
+    setSelectedItemId(itemId)
+    if (!itemId) {
       setAdvice(null)
       setError(null)
-      return
     }
+  }
+
+  useEffect(() => {
+    if (!selectedItemId) return
     return debouncedRequest(
       () => balanceGarment(measurements, selectedItemId),
       (response) => {
@@ -73,7 +80,7 @@ export function GarmentBalance({ measurements }: GarmentBalanceProps) {
     <section className="garment-balance-section">
       <h2>Try on a garment</h2>
       {garmentsError && <p className="error">Couldn't load garment catalog: {garmentsError}</p>}
-      <select value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)}>
+      <select value={selectedItemId} onChange={(e) => selectItem(e.target.value)}>
         <option value="">Choose a garment…</option>
         {SLOTS.map((slot) => (
           <optgroup key={slot} label={SLOT_LABELS[slot]}>

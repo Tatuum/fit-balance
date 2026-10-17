@@ -150,15 +150,15 @@ rendered by any component.
 `vitest` covers the pure code only: `lib/avatarGeometry.test.ts`,
 `lib/garments.test.ts`, `lib/measurements.test.ts` (the range checks and
 `applyInput`), `lib/debouncedRequest.test.ts` (timing and stale answers,
-with fake timers) and `components/BalancePointsChart.test.ts` (the badge
-text helper). There are no render tests for `App`, `GarmentBalance`
-or `DimensionAdvice`. `./check.sh` and the `web` CI job run `tsc -b` (a
+with fake timers) and `lib/balanceChart.test.ts` (the chart's badge text
+helper). There are no render tests for `App`, `GarmentBalance` or
+`DimensionAdvice`. `./check.sh` and the `web` CI job run `tsc -b` (a
 real typecheck; `tsc --noEmit -p .` would check nothing, because the
-root `tsconfig.json` only references the other configs) and `vitest run`
-for `web/`. Manual verification: run the API and `npm run dev`, change a
-measurement, and confirm the avatar and advice update; pick a garment and
-confirm the verdict appears. `npm run lint` (oxlint) is not part of
-`check.sh` or CI.
+root `tsconfig.json` only references the other configs), `npm run lint`
+(`oxlint --deny-warnings`) and `vitest run` for `web/`. Manual
+verification: run the API and `npm run dev`, change a measurement, and
+confirm the avatar and advice update; pick a garment and confirm the
+verdict appears.
 
 ### Gotchas / open questions
 
@@ -172,6 +172,3 @@ confirm the verdict appears. `npm run lint` (oxlint) is not part of
   repeats the labels in `technique_advice.py`'s `DIMENSIONS` plus one for
   `shoulder_hip_balance`. Each carries a "keep in sync" comment, but
   nothing enforces it.
-- **Lint warnings.** oxlint reports `GarmentBalance` calling a setter
-  synchronously inside an effect, and `BalancePointsChart` exporting a
-  non-component alongside a component.

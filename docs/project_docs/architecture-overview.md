@@ -56,7 +56,7 @@ own.
 | API (phase 4) | `FastAPI` | Pairs directly with pydantic (already in use) and gets OpenAPI docs for free |
 | Frontend (phase 5) | `React` + `TypeScript` + `Vite` | SVG avatar is a natural fit for React's component model; Vite keeps tooling minimal |
 | Frontend tests | `vitest` | Unit tests for the pure frontend code (avatar geometry, garment grouping, chart badge text); run by `check.sh` and CI |
-| Frontend lint | `oxlint` | `npm run lint` in `web/`; run by hand, not part of `check.sh` or CI |
+| Frontend lint | `oxlint` | `npm run lint` in `web/`, with warnings treated as failures; run by `check.sh` and the `web` CI job |
 | Multimodal LLM API (future development, not yet a committed phase) | TBD — a vision-capable LLM, called directly, no orchestration framework | Garment-photo tag extraction, grounded explanation generation, tool-calling assistant |
 | Database (future development, not yet a committed phase) | `SQLite` (Postgres later if needed) | Persists closet items — tags + verdict only, no images, no vector store. Single user for now, no accounts; a file-based DB avoids running a server for that |
 
