@@ -4,6 +4,7 @@ import { DimensionAdvice } from './components/DimensionAdvice'
 import { GarmentBalance } from './components/GarmentBalance'
 import { MeasurementGuide } from './components/MeasurementGuide'
 import { getTechniqueRecommendations } from './lib/api'
+import { debouncedRequest } from './lib/debouncedRequest'
 import {
   applyInput,
   initialFormState,
@@ -52,20 +53,21 @@ function App() {
   )
   const [techniqueAdviceError, setTechniqueAdviceError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      getTechniqueRecommendations(measurements)
-        .then((response) => {
+  useEffect(
+    () =>
+      debouncedRequest(
+        () => getTechniqueRecommendations(measurements),
+        (response) => {
           setTechniqueAdvice(response)
           setTechniqueAdviceError(null)
-        })
-        .catch((err) => {
+        },
+        (err) => {
           setTechniqueAdviceError(err instanceof Error ? err.message : String(err))
           setTechniqueAdvice(null)
-        })
-    }, 500)
-    return () => clearTimeout(handle)
-  }, [measurements])
+        },
+      ),
+    [measurements],
+  )
 
   const updateMeasurement = (key: keyof Measurements) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { balanceGarment, getGarments } from '../lib/api'
+import { debouncedRequest } from '../lib/debouncedRequest'
 import { groupBySlot, SLOTS } from '../lib/garments'
 import type { BalanceGarmentResponse, GarmentSummary, Measurements, Slot } from '../lib/types'
 import { Avatar } from './Avatar'
@@ -53,18 +54,17 @@ export function GarmentBalance({ measurements }: GarmentBalanceProps) {
       setError(null)
       return
     }
-    const handle = setTimeout(() => {
-      balanceGarment(measurements, selectedItemId)
-        .then((response) => {
-          setAdvice(response)
-          setError(null)
-        })
-        .catch((err) => {
-          setError(err instanceof Error ? err.message : String(err))
-          setAdvice(null)
-        })
-    }, 500)
-    return () => clearTimeout(handle)
+    return debouncedRequest(
+      () => balanceGarment(measurements, selectedItemId),
+      (response) => {
+        setAdvice(response)
+        setError(null)
+      },
+      (err) => {
+        setError(err instanceof Error ? err.message : String(err))
+        setAdvice(null)
+      },
+    )
   }, [measurements, selectedItemId])
 
   const groupedGarments = groupBySlot(garments)
@@ -92,8 +92,7 @@ export function GarmentBalance({ measurements }: GarmentBalanceProps) {
         <div className="garment-balance-result">
           <Avatar measurements={measurements} effectTags={advice.verdict.reasons.map((r) => r.tag)} />
           <p className={`verdict verdict-${advice.verdict.recommendation}`}>
-            {RECOMMENDATION_LABEL[advice.verdict.recommendation]} (score:{' '}
-            {advice.verdict.score.toFixed(3)})
+            {RECOMMENDATION_LABEL[advice.verdict.recommendation]} (score: {advice.verdict.score})
           </p>
           <ul className="reasons">
             {advice.verdict.reasons.map((reason) => (
