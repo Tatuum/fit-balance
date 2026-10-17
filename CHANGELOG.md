@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-17
+- Make the web gate real: tsc -b, and gate oxlint (#17)
+- Show the score as a whole number; ignore stale answers (#16)
+- Update CHANGELOG.md for PR #14 (#15)
+
 ## 2026-10-16
 - Validate measurement inputs: 422 at the API, marked fields in the form (#14)
 - Update CHANGELOG.md for PR #12 (#13)
