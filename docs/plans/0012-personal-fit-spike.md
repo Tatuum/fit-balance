@@ -187,7 +187,7 @@ already planned in `specs/architecture.md`'s Stage 4.5 / the catalog-classificat
 - [x] Step 1 — Spike 0: self-tag 5–10 owned garments via the CLI, log
       techniques + reason + verdict + agreement.
 - [x] Step 2 — Commit this plan file (the only new doc this plan adds).
-- [ ] Step 3 — Spike 1: `scripts/spike_photo_tagging.py` + its
+- [x] Step 3 — Spike 1: `scripts/spike_photo_tagging.py` + its
       stubbed-response test, one commit.
 - [ ] Step 4 — If either spike surfaces a real rule/vocabulary gap: a
       separate, independent engine-change commit (ADR + `NOTES.md`
@@ -202,7 +202,7 @@ already planned in `specs/architecture.md`'s Stage 4.5 / the catalog-classificat
   stubbed LLM response (no network/key needed). `./check.sh` stays green
   throughout — the script and its test are additive, nothing existing
   changes behavior.
-- Manual: `ANTHROPIC_API_KEY=... uv run python scripts/spike_photo_tagging.py <path-to-photo>` prints proposed techniques for a real photo.
+- Manual: `uv run --env-file .env --group spike python scripts/spike_photo_tagging.py <path-to-photo>` prints proposed techniques for a real photo.
 
 ## Updates
 

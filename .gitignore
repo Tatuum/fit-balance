@@ -7,3 +7,5 @@ __pycache__/
 .claude/hooks/
 user.md
 docs/learning/
+data/personal_fit_spike.json
+.env
