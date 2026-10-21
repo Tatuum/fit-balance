@@ -7,3 +7,5 @@ __pycache__/
 .claude/hooks/
 user.md
 docs/learning/
+data/
+.env

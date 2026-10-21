@@ -1,12 +1,14 @@
 # 0012. Personal-fit spike: photo + self-reported tags, before Stage 4.5's closet feature
 
 Date: 2026-09-23
-Status: Active — Spike 0 done, Spike 1 next
+Status: Active — Spike 0 and Spike 1 done; follow-ups undecided
 
 **Spike 0 done** — 4 garments checked against the CLI across two
 bodies, all agreed with judgment (including one deliberate AVOID case).
 Narrow vocabulary coverage noted as an expected limitation, carried into
-Spike 1 below rather than addressed now. **Spike 1 next.**
+Spike 1 below rather than addressed now.
+
+**Spike 1 done** — results below under "Spike 1 results".
 
 ## Requirements
 
@@ -167,6 +169,29 @@ If Spike 1 shows photo-only extraction struggling, feed the one-sentence
 rationale into the same prompt so the LLM reconciles photo + words. Not
 scheduled — revisit only if Spike 1's results warrant it.
 
+## Spike 1 results
+
+The result is mixed. The model is useful as a first pass, but it isn't reliable enough to tag garments unattended. This is 8 garments and one person, so it's an indication and not proof.
+
+**Scorecard:** 1 `agree` (blue-jumper, where the model correctly returned nothing), 7 `partial_agree`, 0 `disagree`. No photo was fully right, and none was fully wrong.
+
+**What the model got right**
+- It read most specific features correctly: `v_neck` and `puff_sleeve` on the blue dress, `fit_and_flare` on the white dress, `off_shoulder` on the burgundy top, and `wide_leg` on the pants.
+- Its uncertainty notes were honest. It said it couldn't judge rise or length from flat photos, said the black dress was a back view, and said the jumper's crew neck wasn't in the vocabulary.
+
+**What went wrong**
+1. **`a_line` is over-applied.** The model suggested it on 4 garments, and it was confirmed on only 1 (the black dress). It seems to use it for anything with some flare.
+2. **Flat-lay photos hide rise and length.** `low_rise`, `maxi_length` and `midi_length` couldn't be settled from the photos, so that's a limit of the photo and not of the model.
+3. **The vocabulary has gaps.** Crew neck, ruffled hem, pleating, flowy fabric and thick straps had no tag. The `no_tag_for` notes and the model's notes point to the same gaps.
+4. **The self-picks were wrong too.** `scoop_neck` (twice) and `v_neck` (the black dress). The model also missed `halter_neck`, which was in its vocabulary.
+
+**Decisions this leaves open**
+- **Vocabulary:** adding crew neck is the clearest case, since it came up twice. That would be a separate engine change with an ADR, not part of this spike.
+- **`a_line` prompt:** a tighter definition in the prompt might fix the over-tagging. That's cheap to try.
+- **Spike 2:** feeding the person's sentence into the prompt could fix the rise and length misses.
+
+Raw log: `data/personal_fit_spike.json` (gitignored).
+
 ## Caveat to keep in mind (not a blocker)
 
 In both spikes, the same person picks the tags and judges whether the
@@ -187,7 +212,7 @@ already planned in `specs/architecture.md`'s Stage 4.5 / the catalog-classificat
 - [x] Step 1 — Spike 0: self-tag 5–10 owned garments via the CLI, log
       techniques + reason + verdict + agreement.
 - [x] Step 2 — Commit this plan file (the only new doc this plan adds).
-- [ ] Step 3 — Spike 1: `scripts/spike_photo_tagging.py` + its
+- [x] Step 3 — Spike 1: `scripts/spike_photo_tagging.py` + its
       stubbed-response test, one commit.
 - [ ] Step 4 — If either spike surfaces a real rule/vocabulary gap: a
       separate, independent engine-change commit (ADR + `NOTES.md`
@@ -202,7 +227,7 @@ already planned in `specs/architecture.md`'s Stage 4.5 / the catalog-classificat
   stubbed LLM response (no network/key needed). `./check.sh` stays green
   throughout — the script and its test are additive, nothing existing
   changes behavior.
-- Manual: `ANTHROPIC_API_KEY=... uv run python scripts/spike_photo_tagging.py <path-to-photo>` prints proposed techniques for a real photo.
+- Manual: `uv run --env-file .env --group spike python scripts/spike_photo_tagging.py <path-to-photo>` prints proposed techniques for a real photo.
 
 ## Updates
 
