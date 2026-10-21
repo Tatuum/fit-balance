@@ -38,8 +38,11 @@ these are drawn from.
 - [ ] **Phase 12 — Real, LLM-classified garment catalog**, replacing
   the hand-authored `garments.yaml`. Deferred. (docs/plans/0003)
 - [~] **Phase 13 — Personal-fit spike:** photo + self-reported tags,
-  ahead of the private-closet idea below. Spike 0 done, Spike 1 next.
-  (docs/plans/0012)
+  ahead of the private-closet idea below. Spikes 0 and 1 done; results
+  and open follow-ups (`a_line` prompt, `crew_neck`, Spike 2) are in
+  docs/plans/0012.
+- [ ] **Phase 14 — Deploy v1.** Public API + web app, with the live link
+  and a screenshot in the README. No photo upload, auth, or database.
 
 AI-assisted features (photo-upload closet, grounded explanations, a
 personal RAG corpus, a tool-calling assistant) aren't committed
