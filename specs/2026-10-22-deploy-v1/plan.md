@@ -18,24 +18,34 @@ configurable CORS, so prove it before touching AWS.
 4. Run it locally with Docker and point the local web dev server at it.
    Load the page, get advice and a verdict, hit the health endpoint, and
    check that a request from a different origin is refused.
-5. Build for the Lambda CPU architecture and note the platform flag needed
-   on Apple Silicon.
+5. Build for the Lambda CPU architecture: `--platform linux/amd64
+   --provenance=false`. Without them an Apple Silicon build fails on
+   Lambda with "exec format error".
 
 Done when: the container behaves like the local API.
 
 ## 2. API live on Lambda (manual)
 
 The second-riskiest assumption is that the adapter and a Function URL work
-for this app.
+for this app. Do this slice and slice 3 from the AWS CLI; use the web
+console only to view what the commands created. Save each command as you
+go, so slice 4 can reuse them.
 
 1. AWS account: root MFA, billing budget alerts, a daily-use admin user or
    role, and a chosen region.
 2. Create an ECR repository. Push the image from the local machine.
 3. Create the Lambda function from the image. Set memory and timeout
-   sensibly for a small app. Cap concurrent executions at a small number.
+   sensibly for a small app. Set reserved concurrency to a small number
+   (not provisioned concurrency, which costs money while idle). Requests
+   over the cap are throttled with HTTP 429; setting it to 0 is the
+   emergency stop.
 4. Create a Function URL with no AWS auth (the app is public) and normal
    buffered responses.
 5. Call the health endpoint and one scoring endpoint at the live address.
+   A 502 or 500 means look in CloudWatch logs first
+   (`/aws/lambda/<function-name>`) for the traceback. Pushing a new image
+   to the same tag does not update the function; run `aws lambda
+   update-function-code` to point it at the new image.
 6. Record the real cold-start time and the region for the README.
 
 Done when: the live API answers, and a budget alert is in place.
