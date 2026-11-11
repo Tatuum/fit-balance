@@ -1,23 +1,8 @@
-# Deploy guide — API on AWS Lambda (slices 1 and 2)
+# Deploy guide — API on AWS Lambda
 
-Step-by-step runbook for Phase 14 (`specs/2026-10-22-deploy-v1/plan.md`).
-Covers slice 1 (API container runs locally) and slice 2 (API live on
-Lambda). Slices 3 (web) and 4 (automation) get added after these work.
 
-Every AWS step is a CLI command. Each one says what the thing is, the
-command, what you should see, and what to check if it fails. The web
-console is only for looking at what the commands created.
 
-**Terms used in the plan.** A *slice* is one piece of the plan that ends
-with something working on its own, so you can stop after any slice.
-*Docker image*: the API and everything it needs, packed into one file.
-*Container*: a running copy of an image.
-
-**Not yet verified.** The Dockerfile and commands below were written from
-the AWS docs and a reference guide, not run. Fix this file as you hit
-real output.
-
-## Slice 1 — the API runs from a container, locally
+## 1 — the API runs from a container, locally
 
 ### 1.0 Code changes first
 
