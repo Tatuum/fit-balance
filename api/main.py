@@ -23,6 +23,11 @@ app.add_middleware(
 )
 
 
+@app.get("/health")
+def health_endpoint() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 class ScoreRequest(BaseModel):
     measurements: Measurements
     garment: GarmentAttributes

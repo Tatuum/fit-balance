@@ -187,3 +187,9 @@ def test_balance_garment_endpoint_rejects_unknown_item_id():
         json={"measurements": HOURGLASS_BALANCED.model_dump(), "item_id": "not_a_real_item"},
     )
     assert response.status_code == 422
+
+
+def test_health_returns_ok():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
