@@ -9,7 +9,10 @@ The riskiest assumption is that the API runs correctly from an image, with
 configurable CORS, so prove it before touching AWS.
 
 1. API: add a health endpoint. Make the allowed origins configurable by an
-   environment variable, defaulting to the local dev origins.
+   environment variable (comma-separated, defaulting to the local dev
+   origins), read through a `Settings` class (`pydantic-settings`). The app
+   is built by `create_app(settings)`; `app = create_app()` stays at module
+   level, so the run command is unchanged.
 2. Image: install the library and API on the same Python version as CI.
    Add the Lambda Web Adapter as a Lambda extension (inert outside
    Lambda). The API does not stream, so leave the default response mode.
@@ -102,9 +105,9 @@ Done when: a merge to `main` updates the live app with no manual step.
   The library stays free of UI and network code.
 - **Outside the stack list:** yes, and it needs approval. The stack in
   `specs/architecture.md` has no container, cloud or deployment entry.
-  New items: Docker, AWS (ECR, Lambda, S3, CloudFront, IAM/OIDC,
-  CloudWatch), the Lambda Web Adapter, and a GitHub Actions deploy
-  workflow. The document is updated in slice 5.
+  New items: `pydantic-settings`, Docker, AWS (ECR, Lambda, S3,
+  CloudFront, IAM/OIDC, CloudWatch), the Lambda Web Adapter, and a GitHub
+  Actions deploy workflow. The document is updated in slice 5.
 - **Build order:** does not skip ahead. The AI-assisted features in
   "Future development" are untouched, and the photo-tagging script is not
   packaged. Their later need for a database and API keys would revisit the

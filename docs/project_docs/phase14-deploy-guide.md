@@ -10,8 +10,9 @@ Two small changes in `api/main.py`, done as a normal PR with tests in
 `tests/test_api.py` (see `validation.md`):
 
 1. A `GET /health` route returning a small fixed body.
-2. Allowed CORS origins read from an environment variable, defaulting to
-   the two localhost origins that are hard-coded today.
+2. Allowed CORS origins read from the `ALLOWED_ORIGINS` environment
+   variable (comma-separated) through a `Settings` class, defaulting to the
+   two localhost origins that are hard-coded today.
 
 CORS (cross-origin resource sharing) is the browser rule that a page from
 address A may only call an API at address B if B says A is allowed. The
@@ -300,8 +301,8 @@ aws lambda create-function \
   --environment "Variables={ALLOWED_ORIGINS=http://localhost:5173}"
 ```
 
-`ALLOWED_ORIGINS` is a placeholder name; use whatever name step 1.0
-chose. It gets the CloudFront address in slice 3. Memory 512 MB and
+`ALLOWED_ORIGINS` is the variable from step 1.0. It gets the CloudFront
+address in slice 3. Memory 512 MB and
 timeout 30 s are generous for a small app; change them if CloudWatch shows
 otherwise.
 

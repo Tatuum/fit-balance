@@ -7,11 +7,13 @@
    and green.
 2. **API tests** in `tests/test_api.py`:
    - the health endpoint returns 200 and a small fixed body;
-   - with the allowed-origins variable set, a request from a listed origin
-     gets the matching CORS header and a request from an unlisted origin
-     does not;
-   - with the variable unset, the local dev origins are allowed and all
-     existing routes behave as before.
+   - with the allowed origins passed to `create_app(Settings(...))`, a
+     request from a listed origin gets the matching CORS header and a
+     request from an unlisted origin does not;
+   - a comma-separated `ALLOWED_ORIGINS` environment variable is parsed
+     into the list;
+   - with it unset, the local dev origins are allowed and all existing
+     routes behave as before.
 3. **CI deploy jobs:** after a merge, the API job's health check passes
    against the live function and the web job's page check passes against
    the live address. Each job fails if its check does not.
