@@ -19,6 +19,7 @@ dev = [
 ]
 api = [
     "fastapi>=0.115",
+    "pydantic-settings>=2.16.2",
     "uvicorn[standard]>=0.32",
 ]
 spike = [

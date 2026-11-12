@@ -1,10 +1,11 @@
 from dataclasses import asdict
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from api.settings import Settings
 from fit_balance.balance_points import compute_womens_balance_points
 from fit_balance.garment_balance import suggest_balance
 from fit_balance.garments import UnknownGarmentItemError, list_items
@@ -12,18 +13,10 @@ from fit_balance.schemas import GarmentAttributes, Measurements, Verdict
 from fit_balance.scoring import score as score_garment
 from fit_balance.technique_advice import DimensionAdvice, recommend_techniques
 
-app = FastAPI(title="fit-balance API")
-
-# Vite's default dev-server ports.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 
-@app.get("/health")
+@router.get("/health")
 def health_endpoint() -> dict[str, str]:
     return {"status": "ok"}
 
@@ -39,7 +32,7 @@ class ScoreResponse(BaseModel):
     verdict: Verdict
 
 
-@app.post("/score", response_model=ScoreResponse)
+@router.post("/score", response_model=ScoreResponse)
 def score_endpoint(request: ScoreRequest) -> ScoreResponse:
     balance_points = compute_womens_balance_points(request.measurements)
     verdict = score_garment(balance_points, request.garment)
@@ -60,7 +53,7 @@ class GarmentSummary(BaseModel):
     slot: str
 
 
-@app.get("/garments", response_model=list[GarmentSummary])
+@router.get("/garments", response_model=list[GarmentSummary])
 def list_garments_endpoint() -> list[GarmentSummary]:
     return [GarmentSummary(id=item.id, label=item.label, slot=item.slot) for item in list_items()]
 
@@ -118,7 +111,7 @@ def _dimension_advice_response(dimension: DimensionAdvice) -> DimensionAdviceRes
     )
 
 
-@app.post("/technique-recommendations", response_model=TechniqueRecommendationsResponse)
+@router.post("/technique-recommendations", response_model=TechniqueRecommendationsResponse)
 def technique_recommendations_endpoint(
     request: TechniqueRecommendationsRequest,
 ) -> TechniqueRecommendationsResponse:
@@ -147,7 +140,7 @@ class BalanceGarmentResponse(BaseModel):
     suggestions: list[DimensionAdviceResponse]
 
 
-@app.post("/balance-garment", response_model=BalanceGarmentResponse)
+@router.post("/balance-garment", response_model=BalanceGarmentResponse)
 def balance_garment_endpoint(request: BalanceGarmentRequest) -> BalanceGarmentResponse:
     balance_points = compute_womens_balance_points(request.measurements)
     try:
@@ -161,3 +154,19 @@ def balance_garment_endpoint(request: BalanceGarmentRequest) -> BalanceGarmentRe
         verdict=advice.verdict,
         suggestions=[_dimension_advice_response(d) for d in advice.suggestions],
     )
+
+
+def create_app(settings: Settings | None = None) -> FastAPI:
+    settings = settings or Settings()
+    app = FastAPI(title="fit-balance API")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.allowed_origins,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
+    app.include_router(router)
+    return app
+
+
+app = create_app()

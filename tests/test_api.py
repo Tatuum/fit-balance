@@ -1,7 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import app, create_app
+from api.settings import Settings
 from fit_balance.balance_points import compute_womens_balance_points
 from fit_balance.garment_balance import suggest_balance
 from fit_balance.schemas import Measurements
@@ -193,3 +194,24 @@ def test_health_returns_ok():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def _origin_header(test_client: TestClient, origin: str) -> str | None:
+    response = test_client.get("/health", headers={"Origin": origin})
+    return response.headers.get("access-control-allow-origin")
+
+
+def test_cors_defaults_allow_local_dev_origin_only():
+    assert _origin_header(client, "http://localhost:5173") == "http://localhost:5173"
+    assert _origin_header(client, "https://evil.example") is None
+
+
+def test_cors_allows_only_configured_origins():
+    configured = TestClient(create_app(Settings(allowed_origins=["https://a.example"])))
+    assert _origin_header(configured, "https://a.example") == "https://a.example"
+    assert _origin_header(configured, "http://localhost:5173") is None
+
+
+def test_allowed_origins_env_var_is_comma_separated(monkeypatch):
+    monkeypatch.setenv("ALLOWED_ORIGINS", "https://a.example, https://b.example")
+    assert Settings().allowed_origins == ["https://a.example", "https://b.example"]
