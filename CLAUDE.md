@@ -10,6 +10,7 @@ balance points — never a black-box shape label.
 
 - Python (`uv`, `pydantic`, `pytest`, `ruff`, `FastAPI`) for the
   engine/API.
+- `pydantic-settings` for all environment configuration.
 - React + TypeScript + Vite for the web frontend.
 - See `specs/architecture.md` for the full architecture.
 
@@ -119,6 +120,12 @@ concepts).
 - API and web are thin layers on top of it.
 - **An engine change** is any edit to those three files.
 
+## Configuration
+
+- Every environment variable is a field on `Settings`
+  (`api/settings.py`); no `os.environ` or `os.getenv` elsewhere.
+- Secrets come from the host's environment, never from the repo.
+
 ## Build order
 
 The engine, API, and web app are shipped. See `specs/roadmap.md`
@@ -136,6 +143,16 @@ for phase-by-phase build status.
   (the "apple + bodycon" case in CURRENT_STATE.md). Every engine change must
   keep `tests/test_balance_points.py` and `tests/test_scoring.py`
   green. That suite encodes all 5 worked examples.
+
+## Working preferences
+
+- Prefer the stack's standard, best-practice approach over the smallest
+  diff, including for configuration, validation, typing and tests. This
+  overrides any guidance that favors fewer dependencies or abstractions;
+  that guidance still applies to scope (no unrequested features).
+- Fail loudly: specific exceptions, no bare `except`, no silent
+  fallbacks.
+- When choosing between approaches, say which and why.
 
 ## Workflow
 
