@@ -8,19 +8,72 @@ own, and the plan can stop after any of them.
 The riskiest assumption is that the API runs correctly from an image, with
 configurable CORS, so prove it before touching AWS.
 
-1. API: add a health endpoint. Make the allowed origins configurable by an
-   environment variable, defaulting to the local dev origins.
-2. Image: install the library and API on the same Python version as CI.
+- [x] 1. API: add a health endpoint. Make the allowed origins configurable by an
+   environment variable (comma-separated, defaulting to the local dev
+   origins), read through a `Settings` class (`pydantic-settings`). The app
+   is built by `create_app(settings)`; `app = create_app()` stays at module
+   level, so the run command is unchanged.
+- [ ] 2. Image: install the library and API on the same Python version as CI.
    Add the Lambda Web Adapter as a Lambda extension (inert outside
    Lambda). The API does not stream, so leave the default response mode.
-3. Add an ignore file so the build context excludes dependencies, caches,
-   secrets, the data folder, the web app and git history.
-4. Run it locally with Docker and point the local web dev server at it.
-   Load the page, get advice and a verdict, hit the health endpoint, and
-   check that a request from a different origin is refused.
-5. Build for the Lambda CPU architecture: `--platform linux/amd64
+   `Dockerfile` in the repo root:
+   ```dockerfile
+   FROM python:3.11-slim
+
+   COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.0.0 \
+        /lambda-adapter /opt/extensions/lambda-adapter
+
+   COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+   WORKDIR /app
+   COPY pyproject.toml uv.lock README.md ./
+   COPY src ./src
+   COPY api ./api
+   RUN uv sync --frozen --no-dev --group api
+
+   ENV PORT=8000
+   CMD [".venv/bin/uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+   ```
+   If the build names a missing file, remove it from the `COPY` line or add it.
+- [ ] 3. Add an ignore file so the build context excludes dependencies, caches,
+   secrets, the data folder, the web app and git history. `.dockerignore`
+   in the repo root:
+   ```
+   .git
+   .venv
+   .env
+   .claude
+   data
+   web
+   docs
+   specs
+   tests
+   scripts
+   **/__pycache__
+   .pytest_cache
+   .mypy_cache
+   .ruff_cache
+   ```
+- [ ] 4. Build for the Lambda CPU architecture: `--platform linux/amd64
    --provenance=false`. Without them an Apple Silicon build fails on
    Lambda with "exec format error".
+   ```sh
+   docker build --platform linux/amd64 --provenance=false -t fit-balance-api .
+   ```
+- [ ] 5. Run it locally with Docker and point the local web dev server at it.
+   Load the page, get advice and a verdict, hit the health endpoint, and
+   check that a request from a different origin is refused.
+   ```sh
+   docker run --rm -p 8000:8000 fit-balance-api
+   curl -s localhost:8000/health
+   curl -s localhost:8000/garments | head -c 200
+   # no output expected (origin refused):
+   curl -s -i -H "Origin: https://evil.example" localhost:8000/garments | grep -i access-control
+   # prints the header (origin allowed):
+   curl -s -i -H "Origin: http://localhost:5173" localhost:8000/garments | grep -i access-control
+   ```
+   Then `npm run dev` from `web/` and walk through measurements, advice and
+   a verdict (the dev server talks to `localhost:8000`, now the container).
 
 Done when: the container behaves like the local API.
 
@@ -31,22 +84,123 @@ for this app. Do this slice and slice 3 from the AWS CLI; use the web
 console only to view what the commands created. Save each command as you
 go, so slice 4 can reuse them.
 
-1. AWS account: root MFA, billing budget alerts, a daily-use admin user or
+- [ ] 1. AWS account: root MFA, billing budget alerts, a daily-use admin user or
    role, and a chosen region.
-2. Create an ECR repository. Push the image from the local machine.
-3. Create the Lambda function from the image. Set memory and timeout
+   - Console, once: sign up (Personal account); turn on MFA for root; create
+     an IAM admin user (`AdministratorAccess`, console access, MFA, one
+     access key for the CLI); sign out of root and use that user.
+   - If billing is hidden from the admin user, enable "IAM user and role
+     access to Billing information" as root.
+   - CLI, with one region used for everything (example `eu-west-1`):
+     ```sh
+     brew install awscli
+     aws configure
+     aws sts get-caller-identity   # shows the 12-digit account id
+     export AWS_REGION=eu-west-1
+     export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+     ```
+   - Budget (keep `budget.json` and `notifications.json` out of the repo, e.g.
+     in `~/aws-setup/`; they hold your email):
+     ```json
+     { "BudgetName": "monthly-5-usd",
+       "BudgetLimit": { "Amount": "5", "Unit": "USD" },
+       "TimeUnit": "MONTHLY", "BudgetType": "COST" }
+     ```
+     `notifications.json` is one entry per threshold, 20 and 100 (percent),
+     each with `NotificationType` `ACTUAL`, `ComparisonOperator`
+     `GREATER_THAN`, `ThresholdType` `PERCENTAGE`, and an `EMAIL` subscriber:
+     ```json
+     [{ "Notification": { "NotificationType": "ACTUAL",
+          "ComparisonOperator": "GREATER_THAN", "Threshold": 20,
+          "ThresholdType": "PERCENTAGE" },
+        "Subscribers": [{ "SubscriptionType": "EMAIL", "Address": "you@example.com" }] }]
+     ```
+     ```sh
+     aws budgets create-budget --account-id $ACCOUNT_ID \
+       --budget file://budget.json \
+       --notifications-with-subscribers file://notifications.json
+     aws budgets describe-budgets --account-id $ACCOUNT_ID
+     ```
+- [ ] 2. Create an ECR repository. Push the image from the local machine.
+   ```sh
+   aws ecr create-repository --repository-name fit-balance-api --region $AWS_REGION
+   aws ecr get-login-password --region $AWS_REGION \
+     | docker login --username AWS --password-stdin \
+       $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+   docker build --platform linux/amd64 --provenance=false -t fit-balance-api .
+   docker tag fit-balance-api:latest \
+     $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/fit-balance-api:v1
+   docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/fit-balance-api:v1
+   aws ecr list-images --repository-name fit-balance-api
+   ```
+   Tag each push with a version (`v1`, `v2`), not `latest`.
+- [ ] 3. Create the Lambda function from the image. Set memory and timeout
    sensibly for a small app. Set reserved concurrency to a small number
    (not provisioned concurrency, which costs money while idle). Requests
    over the cap are throttled with HTTP 429; setting it to 0 is the
    emergency stop.
-4. Create a Function URL with no AWS auth (the app is public) and normal
-   buffered responses.
-5. Call the health endpoint and one scoring endpoint at the live address.
+   ```sh
+   # execution role
+   cat > trust.json <<'EOF'
+   { "Version": "2012-10-17",
+     "Statement": [{ "Effect": "Allow",
+       "Principal": { "Service": "lambda.amazonaws.com" },
+       "Action": "sts:AssumeRole" }] }
+   EOF
+   aws iam create-role --role-name fit-balance-api-role \
+     --assume-role-policy-document file://trust.json
+   aws iam attach-role-policy --role-name fit-balance-api-role \
+     --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+   # wait ~10 s for the role, then:
+   aws lambda create-function --function-name fit-balance-api \
+     --package-type Image \
+     --code ImageUri=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/fit-balance-api:v1 \
+     --role arn:aws:iam::$ACCOUNT_ID:role/fit-balance-api-role \
+     --memory-size 512 --timeout 30 \
+     --environment "Variables={ALLOWED_ORIGINS=http://localhost:5173}"
+   aws lambda put-function-concurrency --function-name fit-balance-api \
+     --reserved-concurrent-executions 4
+   ```
+   "Role cannot be assumed": wait and retry. If AWS refuses the cap ("below
+   its minimum value"), check `aws lambda get-account-settings`, rely on the
+   budget alert, and note what you saw here.
+- [ ] 4. Create a Function URL with no AWS auth (the app is public) and normal
+   buffered responses. Do not turn on the URL's own CORS option; the API
+   handles CORS.
+   ```sh
+   aws lambda create-function-url-config --function-name fit-balance-api \
+     --auth-type NONE
+   aws lambda add-permission --function-name fit-balance-api \
+     --statement-id public-url-invoke-url \
+     --action lambda:InvokeFunctionUrl \
+     --principal "*" --function-url-auth-type NONE
+   aws lambda add-permission --function-name fit-balance-api \
+     --statement-id public-url-invoke \
+     --action lambda:InvokeFunction \
+     --principal "*" --invoked-via-function-url
+   ```
+   Without both permissions the URL answers 403 even with auth `NONE`.
+- [ ] 5. Call the health endpoint and one scoring endpoint at the live address.
    A 502 or 500 means look in CloudWatch logs first
    (`/aws/lambda/<function-name>`) for the traceback. Pushing a new image
    to the same tag does not update the function; run `aws lambda
    update-function-code` to point it at the new image.
-6. Record the real cold-start time and the region for the README.
+   ```sh
+   URL=$(aws lambda get-function-url-config --function-name fit-balance-api \
+     --query FunctionUrl --output text)
+   time curl -s ${URL}health
+   curl -s ${URL}garments | head -c 200
+   aws logs tail /aws/lambda/fit-balance-api --since 10m
+   # shipping a new image:
+   docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/fit-balance-api:v2
+   aws lambda update-function-code --function-name fit-balance-api \
+     --image-uri $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/fit-balance-api:v2
+   ```
+   403: missing permission (step 4). 429: cap hit or set to 0. "exec format
+   error": built without `--platform linux/amd64`. Timeout: raise
+   `--timeout`. `update-function-configuration --environment` replaces all
+   variables, so list every one.
+- [ ] 6. Record the real cold-start time and the region for the README.
 
 Done when: the live API answers, and a budget alert is in place.
 
@@ -102,9 +256,9 @@ Done when: a merge to `main` updates the live app with no manual step.
   The library stays free of UI and network code.
 - **Outside the stack list:** yes, and it needs approval. The stack in
   `specs/architecture.md` has no container, cloud or deployment entry.
-  New items: Docker, AWS (ECR, Lambda, S3, CloudFront, IAM/OIDC,
-  CloudWatch), the Lambda Web Adapter, and a GitHub Actions deploy
-  workflow. The document is updated in slice 5.
+  New items: `pydantic-settings`, Docker, AWS (ECR, Lambda, S3,
+  CloudFront, IAM/OIDC, CloudWatch), the Lambda Web Adapter, and a GitHub
+  Actions deploy workflow. The document is updated in slice 5.
 - **Build order:** does not skip ahead. The AI-assisted features in
   "Future development" are untouched, and the photo-tagging script is not
   packaged. Their later need for a database and API keys would revisit the
